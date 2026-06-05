@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
@@ -240,6 +241,7 @@ const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'https://narota.norum.app')
 
 const app = express();
 app.use(helmet());
+app.use(compression());
 app.use(cors({
   origin: (origin, callback) => {
     // Apps mobile não enviam Origin — sempre permitir
@@ -264,9 +266,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: process.env.DB_SSL === 'true',
-  max: parseInt(process.env.DB_POOL_MAX || '30'),
+  max: parseInt(process.env.DB_POOL_MAX || '20'),
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
+  connectionTimeoutMillis: 3000,
 });
 
 // Cadastro de empresa
@@ -323,14 +325,20 @@ app.post('/api/cadastro', async (req, res) => {
   }
 });
 
-// Login unificado (tenta empresa, despachante e cliente em sequencia rapida)
+// Login unificado \u2014 todas as queries em paralelo, bcrypt s\u00f3 no match
 app.post('/api/login-unificado', loginRateLimit, async (req, res) => {
   try {
     const {doc, senha} = req.body;
     if (!doc || !senha) return res.status(400).json({error: 'Documento e senha obrigat\u00f3rios.'});
 
-    // Tenta empresa
-    const empRes = await pool.query('SELECT * FROM empresas WHERE cnpj = $1 AND ativa = true', [doc]);
+    // CNPJ (14 d\u00edgitos) s\u00f3 bate em empresas; CPF (11 d\u00edgitos) s\u00f3 bate em despachantes/clientes.
+    // Rodamos as 3 queries em paralelo \u2014 na pr\u00e1tica, no m\u00e1ximo uma retorna resultado.
+    const [empRes, despRes, cliRes] = await Promise.all([
+      pool.query('SELECT * FROM empresas WHERE cnpj = $1 AND ativa = true', [doc]),
+      pool.query('SELECT * FROM despachantes WHERE cpf=$1', [doc]),
+      pool.query('SELECT * FROM clientes WHERE cpf = $1 AND ativo = true', [doc]),
+    ]);
+
     if (empRes.rows.length > 0) {
       const empresa = empRes.rows[0];
       if (await bcrypt.compare(senha, empresa.senha_hash)) {
@@ -349,8 +357,6 @@ app.post('/api/login-unificado', loginRateLimit, async (req, res) => {
       }
     }
 
-    // Tenta despachante
-    const despRes = await pool.query('SELECT * FROM despachantes WHERE cpf=$1', [doc]);
     if (despRes.rows.length > 0) {
       const desp = despRes.rows[0];
       if (await bcrypt.compare(senha, desp.senha_hash)) {
@@ -369,8 +375,6 @@ app.post('/api/login-unificado', loginRateLimit, async (req, res) => {
       }
     }
 
-    // Tenta cliente
-    const cliRes = await pool.query('SELECT * FROM clientes WHERE cpf = $1 AND ativo = true', [doc]);
     if (cliRes.rows.length > 0) {
       const cliente = cliRes.rows[0];
       if (await bcrypt.compare(senha, cliente.senha_hash)) {
@@ -1071,6 +1075,38 @@ app.get('/api/empresa/:empresaId/pedidos', auth, async (req, res) => {
     res.json({success: true, pedidos: result.rows});
   } catch (err: any) {
     console.error('Erro ao listar pedidos:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Dashboard da empresa — pedidos + counts em uma única chamada
+app.get('/api/empresa/:id/dashboard', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+
+    const [pedidosRes, statsRes] = await Promise.all([
+      pool.query(
+        `SELECT p.*,
+          (SELECT json_agg(e ORDER BY e.ordem) FROM pedido_etapas e WHERE e.pedido_id = p.id) as etapas,
+          (SELECT json_agg(f ORDER BY f.criado_em) FROM pedido_fotos f WHERE f.pedido_id = p.id) as fotos
+         FROM pedidos p WHERE p.empresa_id=$1 ORDER BY p.criado_em DESC LIMIT 50`,
+        [id]
+      ),
+      pool.query(
+        `SELECT
+          (SELECT COUNT(*)::int FROM notificacoes WHERE empresa_id=$1 AND lida=false) as notificacoes_nao_lidas,
+          (SELECT COUNT(*)::int FROM cliente_empresa WHERE empresa_id=$1 AND status!='bloqueado') as total_clientes,
+          (SELECT COUNT(*)::int FROM despachante_empresa WHERE empresa_id=$1 AND ativo=true) as total_despachantes,
+          (SELECT COUNT(*)::int FROM excursoes WHERE empresa_id=$1) as total_excursoes`,
+        [id]
+      ),
+    ]);
+
+    res.json({success: true, pedidos: pedidosRes.rows, stats: statsRes.rows[0]});
+  } catch (err: any) {
+    console.error('Erro ao buscar dashboard:', err.message);
     res.status(500).json({error: 'Erro interno do servidor.'});
   }
 });

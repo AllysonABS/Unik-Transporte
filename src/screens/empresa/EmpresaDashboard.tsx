@@ -5,7 +5,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../navigation/AppNavigator';
 import {Colors} from '../../theme/colors';
 import {useAuth} from '../../context/AuthContext';
-import {contarNotificacoesNaoLidas, listarPedidosEmpresa, listarClientesEmpresa, listarDespachantes, listarExcursoes, PedidoData} from '../../services/api';
+import {contarNotificacoesNaoLidas, buscarDashboardEmpresa, PedidoData} from '../../services/api';
 import {requestNotificationPermission, getFCMToken, registrarTokenEmpresa, onForegroundMessage} from '../../services/notifications';
 import {formatHora} from '../../utils/date';
 import Icon from '../../components/Icon';
@@ -47,13 +47,18 @@ export default function EmpresaDashboard() {
 
   useFocusEffect(useCallback(() => {
     if (!empresa?.id) return;
-    const carregar = () => Promise.all([
-      contarNotificacoesNaoLidas(empresa.id).then(r => { if (r.success) setNaoLidas(r.total || 0); }),
-      listarPedidosEmpresa(empresa.id).then(r => { if (r.success && r.pedidos) setPedidos(r.pedidos); }),
-      listarClientesEmpresa(empresa.id).then(r => { if (r.success && r.clientes) setTotalClientes(r.clientes.length); }),
-      listarDespachantes(empresa.id).then(r => { if (r.success && r.despachantes) setTotalDespachantes(r.despachantes.length); }),
-      listarExcursoes(empresa.id).then(r => { if (r.success && r.excursoes) setTotalExcursoes(r.excursoes.length); }),
-    ]);
+    const carregar = async () => {
+      const r = await buscarDashboardEmpresa(empresa.id);
+      if (r.success) {
+        if (r.pedidos) setPedidos(r.pedidos);
+        if (r.stats) {
+          setNaoLidas(r.stats.notificacoes_nao_lidas);
+          setTotalClientes(r.stats.total_clientes);
+          setTotalDespachantes(r.stats.total_despachantes);
+          setTotalExcursoes(r.stats.total_excursoes);
+        }
+      }
+    };
     if (!jaCarregou.current) {
       setLoading(true);
       carregar().finally(() => { setLoading(false); jaCarregou.current = true; });
@@ -66,7 +71,7 @@ export default function EmpresaDashboard() {
     if (!empresa?.id) return;
     const interval = setInterval(() => {
       contarNotificacoesNaoLidas(empresa.id).then(r => { if (r.success) setNaoLidas(r.total || 0); });
-    }, 15000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [empresa?.id]));
 

@@ -342,6 +342,28 @@ export function invalidarCachePedidosEmpresa() {
   _pedidosEmpresaCache = null;
 }
 
+export type DashboardStats = {
+  notificacoes_nao_lidas: number;
+  total_clientes: number;
+  total_despachantes: number;
+  total_excursoes: number;
+};
+
+export async function buscarDashboardEmpresa(empresaId: string): Promise<{
+  success: boolean; pedidos?: PedidoData[]; stats?: DashboardStats; error?: string;
+}> {
+  try {
+    const res = await fetch(`${API_URL}/api/empresa/${empresaId}/dashboard`, { headers: authHeaders() });
+    const data = await res.json();
+    if (data.success && data.pedidos) {
+      _pedidosEmpresaCache = {empresaId, pedidos: data.pedidos, fetchedAt: Date.now()};
+    }
+    return data;
+  } catch {
+    return {success: false, error: 'Erro de conexão com o servidor.'};
+  }
+}
+
 export async function listarPedidosEmpresa(empresaId: string): Promise<{success: boolean; pedidos?: PedidoData[]; error?: string}> {
   try {
     const res = await fetch(`${API_URL}/api/empresa/${empresaId}/pedidos`, { headers: authHeaders() });
