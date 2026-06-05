@@ -9,7 +9,7 @@
     "build:server": "tsc -p tsconfig.server.json",
     "preview": "vite preview",
     "server": "tsx server/index.ts",
-    "start": "node dist-server/server/index.js"
+    "start": "node dist-server/index.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1061.0",

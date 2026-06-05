@@ -451,7 +451,7 @@ const PORT = parseInt(process.env.PORT || '3001');
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')));
+  app.use(express.static(path.join(process.cwd(), 'dist')));
 }
 
 // Buscar dados da empresa
@@ -1778,7 +1778,7 @@ app.post('/api/exclusao-dados', async (req, res) => {
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(__dirname, '../dist/index.html'));
+      res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
     }
   });
 }
