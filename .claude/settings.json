@@ -74,7 +74,12 @@
       "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('lucide-react/package.json'\\), null, 2\\)\\)\")",
       "Bash(node qa-login-layout.mjs)",
       "Bash(pkill -f \"npm run dev\")",
-      "Bash(pkill -f \"vite$\")"
+      "Bash(pkill -f \"vite$\")",
+      "Bash(npx shadcn@latest add tooltip --yes)",
+      "Bash(node qa-sidebar.mjs)",
+      "Bash(node qa-sidebar-debug.mjs)",
+      "Bash(rm -rf /tmp/qa-empresa /tmp/qa-*.png /tmp/qa-page-content.html /tmp/vite-dev.log)",
+      "Bash(node qa-sidebar-v2.mjs)"
     ],
     "additionalDirectories": [
       "/tmp",
