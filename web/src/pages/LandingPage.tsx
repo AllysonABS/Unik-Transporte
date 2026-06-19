@@ -14,12 +14,20 @@ export default function LandingPage() {
             </div>
             <span className="text-xl font-bold tracking-tight">Na Rota</span>
           </div>
-          <button
-            onClick={() => navigate('/cadastro')}
-            className="bg-white/10 border border-white/10 text-clareza font-semibold px-5 py-2.5 rounded-full hover:bg-pulso hover:text-matriz hover:border-pulso transition-all duration-300 text-sm"
-          >
-            Começar agora
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/empresa/login')}
+              className="text-clareza/80 font-semibold px-4 py-2.5 text-sm hover:text-pulso transition-colors duration-300"
+            >
+              Já é cliente? Entrar
+            </button>
+            <button
+              onClick={() => navigate('/cadastro')}
+              className="bg-white/10 border border-white/10 text-clareza font-semibold px-5 py-2.5 rounded-full hover:bg-pulso hover:text-matriz hover:border-pulso transition-all duration-300 text-sm"
+            >
+              Começar agora
+            </button>
+          </div>
         </div>
       </header>
 
