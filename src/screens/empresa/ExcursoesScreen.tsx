@@ -165,7 +165,12 @@ export default function ExcursoesScreen() {
       <Modal visible={!!detalhe} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => setDetalhe(null)}>
           <Pressable style={s.sheet} onPress={() => {}}>
-            <Text style={s.sheetTitle}>{detalhe?.nome}</Text>
+            <View style={s.sheetHeader}>
+              <Text style={s.sheetTitle}>{detalhe?.nome}</Text>
+              <TouchableOpacity onPress={() => setDetalhe(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
+                <Icon name="x" size={18} color={Colors.gray} />
+              </TouchableOpacity>
+            </View>
             {[
               {label: 'Setor',        value: detalhe?.setor},
               {label: 'Vaga',         value: detalhe?.vaga},
@@ -177,9 +182,6 @@ export default function ExcursoesScreen() {
                 <Text style={s.detValue}>{row.value}</Text>
               </View>
             ))}
-            <TouchableOpacity style={s.closeBtn} onPress={() => setDetalhe(null)}>
-              <Text style={s.closeBtnText}>Fechar</Text>
-            </TouchableOpacity>
           </Pressable>
         </Pressable>
       </Modal>
@@ -252,12 +254,12 @@ const s = StyleSheet.create({
   responsavelText:{fontSize: 13, color: Colors.gray},
   overlay:      {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
   sheet:        {backgroundColor: '#0F1F2E', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40},
-  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza, marginBottom: 20},
+  sheetHeader:  {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20},
+  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza},
+  closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
   detLabel:     {fontSize: 14, color: Colors.gray},
   detValue:     {fontSize: 14, fontWeight: '600', color: Colors.clareza},
-  closeBtn:     {height: 52, backgroundColor: '#162433', borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 20, borderWidth: 1, borderColor: '#1E3448'},
-  closeBtnText: {color: Colors.clareza, fontWeight: '600', fontSize: 15},
   row2:         {flexDirection: 'row', gap: 12},
   label:        {fontSize: 13, fontWeight: '600', color: Colors.gray, marginBottom: 6, marginTop: 12},
   input:        {height: 50, backgroundColor: '#162433', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 16, color: Colors.clareza, fontSize: 15},

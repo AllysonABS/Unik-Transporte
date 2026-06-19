@@ -170,15 +170,20 @@ export default function EmpresaDetailScreen({route, navigation}: any) {
                 <Text style={s.sheetId}>#{selecionado?.numero}</Text>
                 <Text style={s.sheetSub}>{nome} · {selecionado?.excursao_nome}</Text>
               </View>
-              {selecionado && <StatusBadge status={selecionado.status} />}
+              <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+                {selecionado && <StatusBadge status={selecionado.status} />}
+                <TouchableOpacity onPress={() => setSelecionado(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
+                  <Icon name="x" size={18} color={Colors.gray} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <Text style={s.timelineTitle}>Histórico</Text>
-            {selecionado?.etapas?.map((t, i) => (
+            {selecionado?.etapas?.slice().reverse().map((t, i, arr) => (
               <View key={t.id} style={s.timelineItem}>
                 <View style={s.timelineLine}>
                   <View style={[s.timelineDot, t.concluida && {backgroundColor: Colors.pulso}]} />
-                  {i < (selecionado.etapas?.length ?? 0) - 1 && <View style={s.timelineBar} />}
+                  {i < arr.length - 1 && <View style={s.timelineBar} />}
                 </View>
                 <View style={s.timelineText}>
                   <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
@@ -196,9 +201,6 @@ export default function EmpresaDetailScreen({route, navigation}: any) {
               </>
             )}
 
-            <TouchableOpacity style={s.closeBtn} onPress={() => setSelecionado(null)}>
-              <Text style={s.closeBtnText}>Fechar</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -252,8 +254,7 @@ const s = StyleSheet.create({
   timelineText: {flex: 1, paddingBottom: 16},
   timelineHora: {fontSize: 12, color: Colors.gray, minWidth: 45},
   timelineEvento: {fontSize: 14, color: Colors.clareza, fontWeight: '500'},
-  closeBtn: {height: 52, backgroundColor: '#162433', borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 12, borderWidth: 1, borderColor: '#1E3448'},
-  closeBtnText: {color: Colors.clareza, fontWeight: '600', fontSize: 15},
+  closeX: {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   fotosRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10},
   foto: {width: 100, height: 100, borderRadius: 10},
   desvincularBtn: {height: 52, backgroundColor: '#162433', borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#EF4444'},

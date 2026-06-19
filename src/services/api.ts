@@ -27,6 +27,8 @@ export type EmpresaData = {
   email: string;
   telefone: string;
   endereco: string;
+  numero: string;
+  bairro: string;
   cidade: string;
   estado: string;
   cep: string;
@@ -115,7 +117,7 @@ export type ClienteData = {
 
 export async function cadastrarCliente(dados: {
   nome: string; cpf: string; cnpj?: string; email: string; telefone: string;
-  data_nascimento?: string; endereco?: string; cidade?: string; estado?: string; cep?: string; senha: string;
+  data_nascimento?: string; endereco?: string; numero?: string; bairro?: string; cidade?: string; estado?: string; cep?: string; senha: string;
 }): Promise<{success: boolean; cliente_id?: string; error?: string}> {
   try {
     const res = await fetch(`${API_URL}/api/cadastro-cliente`, {
@@ -269,7 +271,7 @@ export async function excluirVinculoCliente(vinculoId: string): Promise<{success
 
 export async function cadastrarClienteManual(empresaId: string, dados: {
   nome: string; cpf?: string; cnpj?: string; rg?: string; telefone?: string; email?: string;
-  data_nascimento?: string; cep?: string; endereco?: string; cidade?: string; estado?: string; observacoes?: string;
+  data_nascimento?: string; cep?: string; endereco?: string; numero?: string; bairro?: string; cidade?: string; estado?: string; observacoes?: string;
 }): Promise<{success: boolean; error?: string}> {
   try {
     const res = await fetch(`${API_URL}/api/empresa/${empresaId}/cadastrar-cliente`, {

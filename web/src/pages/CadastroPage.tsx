@@ -30,9 +30,11 @@ export default function CadastroPage() {
     senha: '',
     confirmar_senha: '',
     endereco: '',
+    numero: '',
+    bairro: '',
     cidade: '',
     estado: '',
-    cep: '',
+    cep: ''
   });
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
@@ -198,7 +200,7 @@ export default function CadastroPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
-              <label className="text-gray-400 text-xs font-medium block mb-1.5">Endereço completo</label>
+              <label className="text-gray-400 text-xs font-medium block mb-1.5">Rua / Avenida</label>
               <input
                 type="text"
                 value={form.endereco}
@@ -214,6 +216,29 @@ export default function CadastroPage() {
                 value={form.cep}
                 onChange={e => update('cep', maskCEP(e.target.value))}
                 placeholder="00000-000"
+                className={inputClass}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-gray-400 text-xs font-medium block mb-1.5">Número</label>
+              <input
+                type="text"
+                value={form.numero}
+                onChange={e => update('numero', e.target.value)}
+                maxLength={10}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="text-gray-400 text-xs font-medium block mb-1.5">Bairro</label>
+              <input
+                type="text"
+                value={form.bairro}
+                onChange={e => update('bairro', e.target.value)}
+                maxLength={80}
                 className={inputClass}
               />
             </div>

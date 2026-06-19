@@ -280,11 +280,17 @@ export default function PedidosScreen() {
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
                 <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
-                {detalhe && (
-                  <View style={[s.badge, {backgroundColor: statusConfig[detalhe.status].cor + '20'}]}>
-                    <Text style={[s.badgeText, {color: statusConfig[detalhe.status].cor}]}>{statusConfig[detalhe.status].label}</Text>
-                  </View>
-                )}
+                <View style={s.sheetHeaderRight}>
+                  {detalhe && (
+                    <View style={[s.badge, {backgroundColor: statusConfig[detalhe.status].cor + '20'}]}>
+                      <Icon name={statusConfig[detalhe.status].icon} size={12} color={statusConfig[detalhe.status].cor} />
+                      <Text style={[s.badgeText, {color: statusConfig[detalhe.status].cor}]}>{statusConfig[detalhe.status].label}</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity onPress={() => setDetalhe(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
+                    <Icon name="x" size={18} color={Colors.gray} />
+                  </TouchableOpacity>
+                </View>
               </View>
               <View style={s.detRow}><Text style={s.detLabel}>Cliente</Text><Text style={s.detValue}>{detalhe?.cliente_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Despachante</Text><Text style={s.detValue}>{detalhe?.despachante_nome}</Text></View>
@@ -293,10 +299,10 @@ export default function PedidosScreen() {
               <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{detalhe?.descricao || '—'}</Text></View>
 
               <Text style={s.sectionTitle}>Progresso</Text>
-              {detalhe?.etapas?.map((etapa, i) => (
+              {detalhe?.etapas?.slice().reverse().map((etapa, i, arr) => (
                 <View key={etapa.id} style={s.etapaRow}>
                   <View style={[s.etapaDot, etapa.concluida && s.etapaDotDone]} />
-                  {i < (detalhe.etapas?.length ?? 0) - 1 && <View style={[s.etapaLine, etapa.concluida && s.etapaLineDone]} />}
+                  {i < arr.length - 1 && <View style={[s.etapaLine, etapa.concluida && s.etapaLineDone]} />}
                   {etapa.hora && <Text style={s.etapaHora}>{formatHora(etapa.hora)}</Text>}
                   <Text style={[s.etapaNome, etapa.concluida && s.etapaNomeDone]}>{etapa.nome}</Text>
                 </View>
@@ -316,13 +322,6 @@ export default function PedidosScreen() {
                 </>
               ) : null}
 
-              <TouchableOpacity
-                style={s.closeBtn}
-                onPress={() => setDetalhe(null)}
-                accessibilityRole="button"
-                accessibilityLabel="Fechar detalhes">
-                <Text style={s.closeBtnText}>Fechar</Text>
-              </TouchableOpacity>
             </ScrollView>
           </Pressable>
         </Pressable>
@@ -429,7 +428,9 @@ const s = StyleSheet.create({
   overlay:      {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
   sheet:        {backgroundColor: '#0F1F2E', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '90%'},
   sheetHeader:  {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20},
+  sheetHeaderRight: {flexDirection: 'row', alignItems: 'center', gap: 10},
   sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza},
+  closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
   detLabel:     {fontSize: 13, color: Colors.gray},
   detValue:     {fontSize: 13, fontWeight: '600', color: Colors.clareza, flex: 1, textAlign: 'right'},
@@ -442,8 +443,6 @@ const s = StyleSheet.create({
   etapaNome:    {fontSize: 14, color: Colors.gray},
   etapaNomeDone:{color: Colors.clareza, fontWeight: '600'},
   etapaHora:    {fontSize: 12, color: Colors.gray, marginRight: 10, minWidth: 45},
-  closeBtn:     {height: 52, backgroundColor: '#162433', borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 24, borderWidth: 1, borderColor: '#1E3448'},
-  closeBtnText: {color: Colors.clareza, fontWeight: '600', fontSize: 15},
   obsText:      {fontSize: 14, color: Colors.clareza, lineHeight: 20},
   label:        {fontSize: 13, fontWeight: '600', color: Colors.gray, marginBottom: 6, marginTop: 12},
   input:        {height: 50, backgroundColor: '#162433', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 16, color: Colors.clareza, fontSize: 15},

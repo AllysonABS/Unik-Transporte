@@ -6,6 +6,7 @@ import Toast, {useToast} from '../../components/Toast';
 import {useAuth} from '../../context/AuthContext';
 import {buscarEmpresa, atualizarEmpresa} from '../../services/api';
 import {useAlert} from '../../components/CustomAlert';
+import {buscarCep as fetchCep} from '../../utils/cep';
 import Icon from '../../components/Icon';
 import {hapticSuccess} from '../../utils/haptics';
 
@@ -16,6 +17,19 @@ function maskCnpj(value: string): string {
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1/$2')
     .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+}
+
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 10) {
+    return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
+  }
+  return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function maskCep(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  return digits.replace(/(\d{5})(\d)/, '$1-$2');
 }
 
 export default function ConfiguracoesScreen() {
@@ -32,6 +46,8 @@ export default function ConfiguracoesScreen() {
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
   const [endereco, setEndereco] = useState('');
+  const [numero, setNumero] = useState('');
+  const [bairro, setBairro] = useState('');
   const [cidade, setCidade] = useState('');
   const [estado, setEstado] = useState('');
   const [cep, setCep] = useState('');
@@ -53,6 +69,8 @@ export default function ConfiguracoesScreen() {
       setTelefone(e.telefone || '');
       setEmail(e.email || '');
       setEndereco(e.endereco || '');
+      setNumero(e.numero || '');
+      setBairro(e.bairro || '');
       setCidade(e.cidade || '');
       setEstado(e.estado || '');
       setCep(e.cep || '');
@@ -67,13 +85,13 @@ export default function ConfiguracoesScreen() {
 
     setSalvando(true);
     const res = await atualizarEmpresa(empresa.id, {
-      nome_empresa: nomeEmpresa, telefone, email, endereco, cidade, estado, cep, horario_funcionamento: horario,
+      nome_empresa: nomeEmpresa, telefone, email, endereco, numero, bairro, cidade, estado, cep, horario_funcionamento: horario,
     });
     setSalvando(false);
 
     if (res.success) {
       hapticSuccess();
-      setEmpresa({...empresa, nome_empresa: nomeEmpresa, telefone, email, endereco, cidade, estado, cep, horario_funcionamento: horario});
+      setEmpresa({...empresa, nome_empresa: nomeEmpresa, telefone, email, endereco, numero, bairro, cidade, estado, cep, horario_funcionamento: horario});
       showToast('Configurações salvas!', 'success');
     } else {
       show({title: 'Erro', message: res.error || 'Não foi possível salvar.', type: 'error'});
@@ -107,7 +125,7 @@ export default function ConfiguracoesScreen() {
           <Text style={s.label}>Responsável</Text>
           <TextInput style={[s.input, s.inputDisabled]} value={nomeResponsavel} editable={false} />
           <Text style={s.label}>Telefone</Text>
-          <TextInput style={s.input} value={telefone} onChangeText={setTelefone} placeholderTextColor={Colors.gray} keyboardType="phone-pad" />
+          <TextInput style={s.input} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} placeholderTextColor={Colors.gray} keyboardType="phone-pad" />
           <Text style={s.label}>E-mail</Text>
           <TextInput style={s.input} value={email} onChangeText={setEmail} placeholderTextColor={Colors.gray} keyboardType="email-address" autoCapitalize="none" />
         </View>
@@ -115,9 +133,19 @@ export default function ConfiguracoesScreen() {
         <View style={s.section}>
           <Text style={s.sectionTitle}>Endereço</Text>
           <Text style={s.label}>CEP</Text>
-          <TextInput style={s.input} value={cep} onChangeText={setCep} placeholderTextColor={Colors.gray} keyboardType="numeric" placeholder="00000-000" />
+          <TextInput style={s.input} value={cep} onChangeText={async v => { const masked = maskCep(v); setCep(masked); const d = await fetchCep(masked); if (d) { setEndereco(d.logradouro); setBairro(d.bairro); setCidade(d.cidade); setEstado(d.estado); } }} placeholderTextColor={Colors.gray} keyboardType="numeric" placeholder="00000-000" />
           <Text style={s.label}>Endereço</Text>
-          <TextInput style={s.input} value={endereco} onChangeText={setEndereco} placeholderTextColor={Colors.gray} placeholder="Rua, número" />
+          <TextInput style={s.input} value={endereco} onChangeText={setEndereco} placeholderTextColor={Colors.gray} placeholder="Rua / Avenida" />
+          <View style={s.row}>
+            <View style={{flex: 1}}>
+              <Text style={s.label}>Número</Text>
+              <TextInput style={s.input} value={numero} onChangeText={setNumero} placeholderTextColor={Colors.gray} keyboardType="number-pad" />
+            </View>
+            <View style={{flex: 2, marginLeft: 12}}>
+              <Text style={s.label}>Bairro</Text>
+              <TextInput style={s.input} value={bairro} onChangeText={setBairro} placeholderTextColor={Colors.gray} />
+            </View>
+          </View>
           <View style={s.row}>
             <View style={{flex: 2}}>
               <Text style={s.label}>Cidade</Text>

@@ -107,14 +107,19 @@ export default function HistoricoScreen() {
         <Pressable style={s.overlay} onPress={() => setDetalhe(null)}>
           <Pressable style={s.sheet} onPress={() => {}}>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
+              <View style={s.sheetHeader}>
+                <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
+                <TouchableOpacity onPress={() => setDetalhe(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
+                  <Icon name="x" size={18} color={Colors.gray} />
+                </TouchableOpacity>
+              </View>
               <View style={s.detRow}><Text style={s.detLabel}>Cliente</Text><Text style={s.detValue}>{detalhe?.cliente_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Destino</Text><Text style={s.detValue}>{detalhe?.excursao_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Volumes</Text><Text style={s.detValue}>{detalhe?.volumes}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{detalhe?.descricao || '—'}</Text></View>
 
               <Text style={s.sectionTitle}>Etapas</Text>
-              {detalhe?.etapas?.map((etapa) => (
+              {detalhe?.etapas?.slice().reverse().map((etapa) => (
                 <View key={etapa.id} style={s.etapaRow}>
                   <View style={[s.etapaDot, etapa.concluida && s.etapaDotDone]} />
                   <Text style={[s.etapaNome, etapa.concluida && s.etapaNomeDone]}>{etapa.nome}</Text>
@@ -122,9 +127,6 @@ export default function HistoricoScreen() {
                 </View>
               ))}
 
-              <TouchableOpacity style={s.closeBtn} onPress={() => setDetalhe(null)}>
-                <Text style={s.closeBtnText}>Fechar</Text>
-              </TouchableOpacity>
             </ScrollView>
           </Pressable>
         </Pressable>
@@ -158,7 +160,9 @@ const s = StyleSheet.create({
   empty:        {textAlign: 'center', color: Colors.gray, marginTop: 40, fontSize: 15},
   overlay:      {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
   sheet:        {backgroundColor: '#0F1F2E', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '85%'},
-  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza, marginBottom: 16},
+  sheetHeader:  {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16},
+  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza},
+  closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
   detLabel:     {fontSize: 13, color: Colors.gray},
   detValue:     {fontSize: 13, fontWeight: '600', color: Colors.clareza},
@@ -169,6 +173,4 @@ const s = StyleSheet.create({
   etapaNome:    {flex: 1, fontSize: 14, color: Colors.gray},
   etapaNomeDone:{color: Colors.clareza, fontWeight: '600'},
   etapaHora:    {fontSize: 12, color: Colors.gray},
-  closeBtn:     {height: 52, backgroundColor: '#162433', borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 24, borderWidth: 1, borderColor: '#1E3448'},
-  closeBtnText: {color: Colors.clareza, fontWeight: '600', fontSize: 15},
 });

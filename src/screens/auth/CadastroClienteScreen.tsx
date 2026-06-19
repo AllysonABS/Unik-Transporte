@@ -6,6 +6,7 @@ import {RootStackParamList} from '../../navigation/AppNavigator';
 import {Colors} from '../../theme/colors';
 import {cadastrarCliente} from '../../services/api';
 import {useAlert} from '../../components/CustomAlert';
+import {buscarCep} from '../../utils/cep';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CadastroCliente'>;
@@ -56,6 +57,8 @@ export default function CadastroClienteScreen({navigation}: Props) {
   const [telefone, setTelefone] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
   const [endereco, setEndereco] = useState('');
+  const [numero, setNumero] = useState('');
+  const [bairro, setBairro] = useState('');
   const [cidade, setCidade] = useState('');
   const [estado, setEstado] = useState('');
   const [cep, setCep] = useState('');
@@ -63,18 +66,14 @@ export default function CadastroClienteScreen({navigation}: Props) {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const buscarCep = async (cepValue: string) => {
-    const digits = cepValue.replace(/\D/g, '');
-    if (digits.length !== 8) return;
-    try {
-      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-      const data = await res.json();
-      if (!data.erro) {
-        setEndereco(data.logradouro || '');
-        setCidade(data.localidade || '');
-        setEstado(data.uf || '');
-      }
-    } catch {}
+  const handleCep = async (cepValue: string) => {
+    const dados = await buscarCep(cepValue);
+    if (dados) {
+      setEndereco(dados.logradouro);
+      setBairro(dados.bairro);
+      setCidade(dados.cidade);
+      setEstado(dados.estado);
+    }
   };
 
   const handleCadastro = async () => {
@@ -100,6 +99,8 @@ export default function CadastroClienteScreen({navigation}: Props) {
       telefone: telefone.replace(/\D/g, ''),
       data_nascimento: dataNascimento || undefined,
       endereco: endereco || undefined,
+      numero: numero || undefined,
+      bairro: bairro || undefined,
       cidade: cidade || undefined,
       estado: estado || undefined,
       cep: cep.replace(/\D/g, '') || undefined,
@@ -153,10 +154,21 @@ export default function CadastroClienteScreen({navigation}: Props) {
           <Text style={s.sectionTitle}>Endereço</Text>
 
           <Text style={s.label}>CEP</Text>
-          <TextInput style={s.input} value={cep} onChangeText={v => { const masked = maskCep(v); setCep(masked); buscarCep(masked); }} placeholder="00000-000" placeholderTextColor={Colors.gray} keyboardType="numeric" />
+          <TextInput style={s.input} value={cep} onChangeText={v => { const masked = maskCep(v); setCep(masked); handleCep(masked); }} placeholder="00000-000" placeholderTextColor={Colors.gray} keyboardType="numeric" />
 
           <Text style={s.label}>Endereço</Text>
-          <TextInput style={s.input} value={endereco} onChangeText={setEndereco} placeholder="Rua, número" placeholderTextColor={Colors.gray} />
+          <TextInput style={s.input} value={endereco} onChangeText={setEndereco} placeholder="Rua / Avenida" placeholderTextColor={Colors.gray} />
+
+          <View style={s.row}>
+            <View style={{flex: 1}}>
+              <Text style={s.label}>Número</Text>
+              <TextInput style={s.input} value={numero} onChangeText={setNumero} placeholder="Nº" placeholderTextColor={Colors.gray} keyboardType="number-pad" />
+            </View>
+            <View style={{flex: 2, marginLeft: 12}}>
+              <Text style={s.label}>Bairro</Text>
+              <TextInput style={s.input} value={bairro} onChangeText={setBairro} placeholder="Bairro" placeholderTextColor={Colors.gray} />
+            </View>
+          </View>
 
           <View style={s.row}>
             <View style={{flex: 2}}>

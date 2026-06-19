@@ -146,18 +146,23 @@ export default function PedidosScreen() {
                   <Text style={s.sheetId}>#{selecionado?.numero}</Text>
                   <Text style={s.sheetEmpresa}>{selecionado?.nome_empresa} · {selecionado?.excursao_nome}</Text>
                 </View>
-                {selecionado && <StatusBadge status={selecionado.status} />}
+                <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+                  {selecionado && <StatusBadge status={selecionado.status} />}
+                  <TouchableOpacity onPress={() => setSelecionado(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
+                    <Icon name="x" size={18} color={Colors.gray} />
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <View style={s.detRow}><Text style={s.detLabel}>Volumes</Text><Text style={s.detValue}>{selecionado?.volumes}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{selecionado?.descricao || '—'}</Text></View>
 
               <Text style={s.sectionTitle}>Histórico</Text>
-              {selecionado?.etapas?.map((t, i) => (
+              {selecionado?.etapas?.slice().reverse().map((t, i, arr) => (
                 <View key={t.id} style={s.timelineItem}>
                   <View style={s.timelineLine}>
                     <View style={[s.timelineDot, t.concluida && {backgroundColor: Colors.pulso}]} />
-                    {i < (selecionado.etapas?.length ?? 0) - 1 && <View style={s.timelineBar} />}
+                    {i < arr.length - 1 && <View style={s.timelineBar} />}
                   </View>
                   <View style={s.timelineText}>
                     <View style={s.timelineRow}>
@@ -175,9 +180,6 @@ export default function PedidosScreen() {
                 </>
               )}
 
-              <TouchableOpacity style={s.closeBtn} onPress={() => setSelecionado(null)}>
-                <Text style={s.closeBtnText}>Fechar</Text>
-              </TouchableOpacity>
             </ScrollView>
           </Pressable>
         </Pressable>
@@ -224,8 +226,7 @@ const s = StyleSheet.create({
   timelineRow:    {flexDirection: 'row', alignItems: 'center', gap: 8},
   timelineHora:   {fontSize: 12, color: Colors.gray, minWidth: 45},
   timelineEvento: {fontSize: 14, color: Colors.clareza, fontWeight: '500'},
-  closeBtn:       {height: 52, backgroundColor: '#162433', borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 20, borderWidth: 1, borderColor: '#1E3448'},
-  closeBtnText:   {color: Colors.clareza, fontWeight: '600', fontSize: 15},
+  closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   fotosRow:       {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
   foto:           {width: 100, height: 100, borderRadius: 10},
 });

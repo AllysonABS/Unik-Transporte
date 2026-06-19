@@ -17,6 +17,14 @@ function maskCpf(value: string): string {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 10) {
+    return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
+  }
+  return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+}
+
 export default function DespachantesScreen() {
   const navigation = useNavigation();
   const {empresa} = useAuth();
@@ -180,7 +188,7 @@ export default function DespachantesScreen() {
             <Text style={s.label}>CPF *</Text>
             <TextInput style={s.input} placeholder="000.000.000-00" placeholderTextColor={Colors.gray} value={cpf} onChangeText={v => setCpf(maskCpf(v))} keyboardType="numeric" />
             <Text style={s.label}>Telefone</Text>
-            <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
+            <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} keyboardType="phone-pad" />
             <Text style={s.label}>{editandoId ? 'Nova senha (deixe vazio para manter)' : 'Senha de acesso *'}</Text>
             <TextInput style={s.input} placeholder="Min 8 chars, 1 maiúscula, 1 número" placeholderTextColor={Colors.gray} value={senha} onChangeText={setSenha} secureTextEntry />
             <View style={s.btnRow}>

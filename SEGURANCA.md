@@ -210,6 +210,9 @@ Ao configurar banco novo, execute em ordem:
 ```bash
 psql <connection_string> -f web/server/migrations/001_notificacoes.sql
 psql <connection_string> -f web/server/migrations/002_recuperacao_senha.sql
+psql <connection_string> -f web/server/migrations/003_solicitacoes_exclusao.sql
+psql <connection_string> -f web/server/migrations/004_indexes_performance.sql
+psql <connection_string> -f web/server/migrations/005_numero_bairro.sql
 ```
 
 ---

@@ -6,6 +6,7 @@ import Toast, {useToast} from '../../components/Toast';
 import {useAuth} from '../../context/AuthContext';
 import {listarClientesEmpresa, atualizarVinculoCliente, bloquearVinculoCliente, excluirVinculoCliente, cadastrarClienteManual} from '../../services/api';
 import {useAlert} from '../../components/CustomAlert';
+import {buscarCep as fetchCep} from '../../utils/cep';
 import Icon from '../../components/Icon';
 function maskCpf(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -24,11 +25,21 @@ function maskCnpj(value: string): string {
     .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
 }
 
+function maskData(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  return digits.replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})(\d)/, '$1/$2');
+}
+
+function maskCep(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  return digits.replace(/(\d{5})(\d)/, '$1-$2');
+}
+
 type ClienteVinculo = {
   vinculo_id: string; cliente_id: string; status: string;
   nome: string; cpf: string; cnpj: string; rg: string;
   telefone: string; email: string; data_nascimento: string;
-  cep: string; endereco: string; cidade: string; estado: string;
+  cep: string; endereco: string; numero: string; bairro: string; cidade: string; estado: string;
   observacoes: string; data_vinculo: string;
 };
 
@@ -55,9 +66,18 @@ export default function ClientesScreen() {
   const [dataNascimento, setDataNascimento] = useState('');
   const [cep, setCep] = useState('');
   const [endereco, setEndereco] = useState('');
+  const [numero, setNumero] = useState('');
+  const [bairro, setBairro] = useState('');
   const [cidade, setCidade] = useState('');
   const [estado, setEstado] = useState('');
   const [observacoes, setObservacoes] = useState('');
+
+  const handleCep = async (value: string) => {
+    const masked = maskCep(value);
+    setCep(masked);
+    const d = await fetchCep(masked);
+    if (d) { setEndereco(d.logradouro); setBairro(d.bairro); setCidade(d.cidade); setEstado(d.estado); }
+  };
 
   const jaCarregou = useRef(false);
 
@@ -85,8 +105,8 @@ export default function ClientesScreen() {
     setEditando(c);
     setNome(c.nome); setCpf(c.cpf); setCnpj(c.cnpj); setRg(c.rg);
     setTelefone(c.telefone); setEmail(c.email); setDataNascimento(c.data_nascimento);
-    setCep(c.cep); setEndereco(c.endereco); setCidade(c.cidade);
-    setEstado(c.estado); setObservacoes(c.observacoes);
+    setCep(c.cep); setEndereco(c.endereco); setNumero(c.numero); setBairro(c.bairro);
+    setCidade(c.cidade); setEstado(c.estado); setObservacoes(c.observacoes);
     setModal(true);
   };
 
@@ -94,7 +114,7 @@ export default function ClientesScreen() {
 
   const abrirNovo = () => {
     setNome(''); setCpf(''); setCnpj(''); setRg(''); setTelefone(''); setEmail('');
-    setDataNascimento(''); setCep(''); setEndereco(''); setCidade(''); setEstado(''); setObservacoes('');
+    setDataNascimento(''); setCep(''); setEndereco(''); setNumero(''); setBairro(''); setCidade(''); setEstado(''); setObservacoes('');
     setModalNovo(true);
   };
 
@@ -105,8 +125,8 @@ export default function ClientesScreen() {
       nome, cpf: cpf || undefined, cnpj: cnpj || undefined, rg: rg || undefined,
       telefone: telefone || undefined, email: email || undefined,
       data_nascimento: dataNascimento || undefined, cep: cep || undefined,
-      endereco: endereco || undefined, cidade: cidade || undefined,
-      estado: estado || undefined, observacoes: observacoes || undefined,
+      endereco: endereco || undefined, numero: numero || undefined, bairro: bairro || undefined,
+      cidade: cidade || undefined, estado: estado || undefined, observacoes: observacoes || undefined,
     });
     if (res.success) {
       showToast('Cliente cadastrado!', 'success');
@@ -122,7 +142,7 @@ export default function ClientesScreen() {
     if (!editando) return;
     const res = await atualizarVinculoCliente(editando.vinculo_id, {
       nome, cpf, cnpj, rg, telefone, email, data_nascimento: dataNascimento,
-      cep, endereco, cidade, estado, observacoes,
+      cep, endereco, numero, bairro, cidade, estado, observacoes,
     });
     if (res.success) {
       showToast('Cliente atualizado!', 'success');
@@ -239,7 +259,7 @@ export default function ClientesScreen() {
               <Text style={s.label}>RG</Text>
               <TextInput style={s.input} value={rg} onChangeText={setRg} placeholderTextColor={Colors.gray} />
               <Text style={s.label}>Data de Nascimento</Text>
-              <TextInput style={s.input} value={dataNascimento} onChangeText={setDataNascimento} placeholderTextColor={Colors.gray} keyboardType="numeric" />
+              <TextInput style={s.input} value={dataNascimento} onChangeText={v => setDataNascimento(maskData(v))} placeholderTextColor={Colors.gray} keyboardType="numeric" />
 
               <Text style={s.sectionTitle}>Contato</Text>
               <Text style={s.label}>Telefone / WhatsApp *</Text>
@@ -249,9 +269,19 @@ export default function ClientesScreen() {
 
               <Text style={s.sectionTitle}>Endereço</Text>
               <Text style={s.label}>CEP</Text>
-              <TextInput style={s.input} value={cep} onChangeText={setCep} placeholderTextColor={Colors.gray} keyboardType="numeric" />
+              <TextInput style={s.input} value={cep} onChangeText={handleCep} placeholderTextColor={Colors.gray} keyboardType="numeric" placeholder="00000-000" />
               <Text style={s.label}>Endereço</Text>
               <TextInput style={s.input} value={endereco} onChangeText={setEndereco} placeholderTextColor={Colors.gray} />
+              <View style={s.row}>
+                <View style={{flex: 1}}>
+                  <Text style={s.label}>Número</Text>
+                  <TextInput style={s.input} value={numero} onChangeText={setNumero} placeholderTextColor={Colors.gray} keyboardType="numeric" />
+                </View>
+                <View style={{flex: 2, marginLeft: 12}}>
+                  <Text style={s.label}>Bairro</Text>
+                  <TextInput style={s.input} value={bairro} onChangeText={setBairro} placeholderTextColor={Colors.gray} />
+                </View>
+              </View>
               <View style={s.row}>
                 <View style={{flex: 2}}>
                   <Text style={s.label}>Cidade</Text>
@@ -294,7 +324,7 @@ export default function ClientesScreen() {
               <Text style={s.label}>RG</Text>
               <TextInput style={s.input} value={rg} onChangeText={setRg} placeholderTextColor={Colors.gray} />
               <Text style={s.label}>Data de Nascimento</Text>
-              <TextInput style={s.input} value={dataNascimento} onChangeText={setDataNascimento} placeholderTextColor={Colors.gray} placeholder="DD/MM/AAAA" keyboardType="numeric" />
+              <TextInput style={s.input} value={dataNascimento} onChangeText={v => setDataNascimento(maskData(v))} placeholderTextColor={Colors.gray} placeholder="DD/MM/AAAA" keyboardType="numeric" />
 
               <Text style={s.sectionTitle}>Contato</Text>
               <Text style={s.label}>Telefone / WhatsApp</Text>
@@ -304,9 +334,19 @@ export default function ClientesScreen() {
 
               <Text style={s.sectionTitle}>Endereço</Text>
               <Text style={s.label}>CEP</Text>
-              <TextInput style={s.input} value={cep} onChangeText={setCep} placeholderTextColor={Colors.gray} placeholder="00000-000" keyboardType="numeric" />
+              <TextInput style={s.input} value={cep} onChangeText={handleCep} placeholderTextColor={Colors.gray} placeholder="00000-000" keyboardType="numeric" />
               <Text style={s.label}>Endereço</Text>
-              <TextInput style={s.input} value={endereco} onChangeText={setEndereco} placeholderTextColor={Colors.gray} placeholder="Rua, número" />
+              <TextInput style={s.input} value={endereco} onChangeText={setEndereco} placeholderTextColor={Colors.gray} placeholder="Rua / Avenida" />
+              <View style={s.row}>
+                <View style={{flex: 1}}>
+                  <Text style={s.label}>Número</Text>
+                  <TextInput style={s.input} value={numero} onChangeText={setNumero} placeholderTextColor={Colors.gray} keyboardType="numeric" />
+                </View>
+                <View style={{flex: 2, marginLeft: 12}}>
+                  <Text style={s.label}>Bairro</Text>
+                  <TextInput style={s.input} value={bairro} onChangeText={setBairro} placeholderTextColor={Colors.gray} />
+                </View>
+              </View>
               <View style={s.row}>
                 <View style={{flex: 2}}>
                   <Text style={s.label}>Cidade</Text>

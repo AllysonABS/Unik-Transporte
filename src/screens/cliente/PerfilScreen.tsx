@@ -9,6 +9,7 @@ import Toast, {useToast} from '../../components/Toast';
 import {useAuth} from '../../context/AuthContext';
 import {atualizarCliente, listarMinhasLojas, alterarSenhaCliente, listarPedidosCliente} from '../../services/api';
 import {useAlert} from '../../components/CustomAlert';
+import {buscarCep as fetchCep} from '../../utils/cep';
 import {formatDataMesAno} from '../../utils/date';
 import Icon from '../../components/Icon';
 import {useLogout} from '../../hooks/useLogout';
@@ -55,19 +56,14 @@ export default function PerfilScreen() {
   const [salvandoSenha, setSalvandoSenha] = useState(false);
 
   const buscarCep = async (cepValue: string) => {
-    const digits = cepValue.replace(/\D/g, '');
-    if (digits.length !== 8) return;
-    try {
-      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-      const data = await res.json();
-      if (!data.erro) {
-        setFormEndereco(data.logradouro || '');
-        setFormBairro(data.bairro || '');
-        setFormCidade(data.localidade || '');
-        setFormEstado(data.uf || '');
-        setFormComplemento(data.complemento || '');
-      }
-    } catch {}
+    const dados = await fetchCep(cepValue);
+    if (dados) {
+      setFormEndereco(dados.logradouro);
+      setFormBairro(dados.bairro);
+      setFormCidade(dados.cidade);
+      setFormEstado(dados.estado);
+      setFormComplemento(dados.complemento);
+    }
   };
 
   useFocusEffect(useCallback(() => {

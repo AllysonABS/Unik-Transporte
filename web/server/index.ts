@@ -271,10 +271,17 @@ const pool = new Pool({
   connectionTimeoutMillis: 3000,
 });
 
+// Roda migrations automaticamente na inicialização
+runMigrations(pool)
+  .then(() => console.log('[MIGRATION] Todas as migrations aplicadas.'))
+  .catch(err => console.error('[MIGRATION] Erro:', err.message));
+
+import { runMigrations } from './migrate.js';
+
 // Cadastro de empresa
 app.post('/api/cadastro', async (req, res) => {
   try {
-    const { nome_empresa, cnpj, nome_responsavel, email, telefone, senha, endereco, cidade, estado, cep } = req.body;
+    const { nome_empresa, cnpj, nome_responsavel, email, telefone, senha, endereco, numero, bairro, cidade, estado, cep } = req.body;
 
     if (!nome_empresa || !cnpj || !nome_responsavel || !email || !telefone || !senha) {
       return res.status(400).json({ error: 'Campos obrigatórios não preenchidos.' });
@@ -305,9 +312,9 @@ app.post('/api/cadastro', async (req, res) => {
 
     // Inserir empresa
     const result = await pool.query(
-      `INSERT INTO empresas (nome_empresa, cnpj, nome_responsavel, email, telefone, senha_hash, endereco, cidade, estado, cep, data_vencimento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, email`,
-      [nome_empresa, cnpj, nome_responsavel, email, telefone, senha_hash, endereco, cidade, estado, cep, data_vencimento]
+      `INSERT INTO empresas (nome_empresa, cnpj, nome_responsavel, email, telefone, senha_hash, endereco, numero, bairro, cidade, estado, cep, data_vencimento)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id, email`,
+      [nome_empresa, cnpj, nome_responsavel, email, telefone, senha_hash, endereco || null, numero || null, bairro || null, cidade, estado, cep, data_vencimento]
     );
 
     const empresaId = result.rows[0].id;
@@ -350,6 +357,7 @@ app.post('/api/login-unificado', loginRateLimit, async (req, res) => {
             id: empresa.id, nome_empresa: empresa.nome_empresa, cnpj: empresa.cnpj,
             nome_responsavel: empresa.nome_responsavel, email: empresa.email,
             telefone: empresa.telefone, endereco: empresa.endereco || '',
+            numero: empresa.numero || '', bairro: empresa.bairro || '',
             cidade: empresa.cidade || '', estado: empresa.estado || '',
             cep: empresa.cep || '', status_assinatura: empresa.status_assinatura,
           },
@@ -435,6 +443,8 @@ app.post('/api/login', async (req, res) => {
         email: empresa.email,
         telefone: empresa.telefone,
         endereco: empresa.endereco || '',
+        numero: empresa.numero || '',
+        bairro: empresa.bairro || '',
         cidade: empresa.cidade || '',
         estado: empresa.estado || '',
         cep: empresa.cep || '',
@@ -459,7 +469,7 @@ app.get('/api/empresa/:id', auth, async (req, res) => {
   try {
     const {id} = req.params;
     const result = await pool.query(
-      'SELECT id, nome_empresa, cnpj, nome_responsavel, email, telefone, endereco, cidade, estado, cep, horario_funcionamento, status_assinatura FROM empresas WHERE id = $1',
+      'SELECT id, nome_empresa, cnpj, nome_responsavel, email, telefone, endereco, numero, bairro, cidade, estado, cep, horario_funcionamento, status_assinatura FROM empresas WHERE id = $1',
       [id]
     );
     if (result.rows.length === 0) {
@@ -480,10 +490,10 @@ app.put('/api/empresa/:id', auth, async (req, res) => {
     if (user.tipo !== 'empresa' || user.id !== id) {
       return res.status(403).json({error: 'Sem permissão.'});
     }
-    const {nome_empresa, telefone, email, endereco, cidade, estado, cep, horario_funcionamento} = req.body;
+    const {nome_empresa, telefone, email, endereco, numero, bairro, cidade, estado, cep, horario_funcionamento} = req.body;
     await pool.query(
-      `UPDATE empresas SET nome_empresa=$1, telefone=$2, email=$3, endereco=$4, cidade=$5, estado=$6, cep=$7, horario_funcionamento=$8 WHERE id=$9`,
-      [nome_empresa, telefone, email, endereco, cidade, estado, cep, horario_funcionamento, id]
+      `UPDATE empresas SET nome_empresa=$1, telefone=$2, email=$3, endereco=$4, numero=$5, bairro=$6, cidade=$7, estado=$8, cep=$9, horario_funcionamento=$10 WHERE id=$11`,
+      [nome_empresa, telefone, email, endereco, numero || null, bairro || null, cidade, estado, cep, horario_funcionamento, id]
     );
     res.json({success: true});
   } catch (err: any) {
@@ -549,7 +559,7 @@ app.post('/api/empresa/:empresaId/cadastrar-cliente', auth, async (req, res) => 
     if (user.tipo !== 'empresa' || user.id !== empresaId) {
       return res.status(403).json({error: 'Sem permissão.'});
     }
-    const {nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, cidade, estado, observacoes} = req.body;
+    const {nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, numero, bairro, cidade, estado, observacoes} = req.body;
     if (!nome || (!cpf && !cnpj)) {
       return res.status(400).json({error: 'Preencha o nome e pelo menos CPF ou CNPJ.'});
     }
@@ -571,9 +581,9 @@ app.post('/api/empresa/:empresaId/cadastrar-cliente', auth, async (req, res) => 
       if (c.rows.length > 0) clienteId = c.rows[0].id;
     }
     await pool.query(
-      `INSERT INTO cliente_empresa (cliente_id, empresa_id, nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, cidade, estado, observacoes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
-      [clienteId, empresaId, nome, cpf || null, cnpj || null, rg || null, telefone || null, email || null, data_nascimento || null, cep || null, endereco || null, cidade || null, estado || null, observacoes || null]
+      `INSERT INTO cliente_empresa (cliente_id, empresa_id, nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, numero, bairro, cidade, estado, observacoes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+      [clienteId, empresaId, nome, cpf || null, cnpj || null, rg || null, telefone || null, email || null, data_nascimento || null, cep || null, endereco || null, numero || null, bairro || null, cidade || null, estado || null, observacoes || null]
     );
     res.status(201).json({success: true});
   } catch (err: any) {
@@ -746,7 +756,7 @@ app.get('/api/empresa/:id/clientes', auth, async (req, res) => {
     if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
     const result = await pool.query(
       `SELECT ce.id as vinculo_id, ce.status, ce.nome, ce.cpf, ce.cnpj, ce.rg, ce.telefone, ce.email,
-              ce.data_nascimento, ce.cep, ce.endereco, ce.cidade, ce.estado, ce.observacoes, ce.data_vinculo,
+              ce.data_nascimento, ce.cep, ce.endereco, ce.numero, ce.bairro, ce.cidade, ce.estado, ce.observacoes, ce.data_vinculo,
               c.id as cliente_id, c.nome as cliente_nome, c.cpf as cliente_cpf, c.email as cliente_email, c.telefone as cliente_telefone
        FROM cliente_empresa ce JOIN clientes c ON c.id = ce.cliente_id
        WHERE ce.empresa_id = $1 ORDER BY ce.data_vinculo DESC`, [id]
@@ -760,7 +770,7 @@ app.get('/api/empresa/:id/clientes', auth, async (req, res) => {
       telefone: r.telefone || r.cliente_telefone,
       email: r.email || r.cliente_email,
       data_nascimento: r.data_nascimento || '',
-      cep: r.cep || '', endereco: r.endereco || '',
+      cep: r.cep || '', endereco: r.endereco || '', numero: r.numero || '', bairro: r.bairro || '',
       cidade: r.cidade || '', estado: r.estado || '',
       observacoes: r.observacoes || '', data_vinculo: r.data_vinculo,
     }));
@@ -780,11 +790,11 @@ app.put('/api/empresa/vinculo/:vinculoId', auth, async (req, res) => {
     const owner = await pool.query('SELECT empresa_id FROM cliente_empresa WHERE id=$1', [vinculoId]);
     if (owner.rows.length === 0) return res.status(404).json({error: 'Vínculo não encontrado.'});
     if (owner.rows[0].empresa_id !== user.id) return res.status(403).json({error: 'Sem permissão.'});
-    const {nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, cidade, estado, observacoes} = req.body;
+    const {nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, numero, bairro, cidade, estado, observacoes} = req.body;
     await pool.query(
       `UPDATE cliente_empresa SET nome=$1, cpf=$2, cnpj=$3, rg=$4, telefone=$5, email=$6,
-       data_nascimento=$7, cep=$8, endereco=$9, cidade=$10, estado=$11, observacoes=$12 WHERE id=$13`,
-      [nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, cidade, estado, observacoes, vinculoId]
+       data_nascimento=$7, cep=$8, endereco=$9, numero=$10, bairro=$11, cidade=$12, estado=$13, observacoes=$14 WHERE id=$15`,
+      [nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, numero || null, bairro || null, cidade, estado, observacoes, vinculoId]
     );
     res.json({success: true});
   } catch (err: any) {
@@ -1474,7 +1484,7 @@ app.put('/api/cliente/:id/alterar-senha', auth, async (req, res) => {
 // Cadastro de cliente
 app.post('/api/cadastro-cliente', async (req, res) => {
   try {
-    const {nome, cpf, cnpj, email, telefone, data_nascimento, endereco, cidade, estado, cep, senha} = req.body;
+    const {nome, cpf, cnpj, email, telefone, data_nascimento, endereco, numero, bairro, cidade, estado, cep, senha} = req.body;
     if (!nome || !cpf || !email || !telefone || !senha) {
       return res.status(400).json({error: 'Campos obrigatórios não preenchidos.'});
     }
@@ -1497,9 +1507,9 @@ app.post('/api/cadastro-cliente', async (req, res) => {
     }
     const senha_hash = await bcrypt.hash(senha, 10);
     const result = await pool.query(
-      `INSERT INTO clientes (nome, cpf, cnpj, email, telefone, data_nascimento, endereco, cidade, estado, cep, senha_hash)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
-      [nome, cpf, cnpj || null, email, telefone, data_nascimento || null, endereco || null, cidade || null, estado || null, cep || null, senha_hash]
+      `INSERT INTO clientes (nome, cpf, cnpj, email, telefone, data_nascimento, endereco, numero, bairro, cidade, estado, cep, senha_hash)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
+      [nome, cpf, cnpj || null, email, telefone, data_nascimento || null, endereco || null, numero || null, bairro || null, cidade || null, estado || null, cep || null, senha_hash]
     );
     res.status(201).json({success: true, cliente_id: result.rows[0].id});
   } catch (err: any) {

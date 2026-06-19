@@ -18,7 +18,12 @@
       "Bash(awk '{sum += $3} END {print \"Arquivos de abril para deletar:\", NR, \"arquivos\"; print \"Tamanho aproximado: calculando...\"}')",
       "Bash(split -l 1000 /tmp/r2_delete_list.txt /tmp/r2_batch_)",
       "Bash(awk '{ *)",
-      "Bash(grep '\\\\.pdf$')"
+      "Bash(grep '\\\\.pdf$')",
+      "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@76.13.70.131 'echo \"Conectado com sucesso\" && uname -a && uptime')",
+      "Bash(xargs ls)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
