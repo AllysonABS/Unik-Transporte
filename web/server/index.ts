@@ -272,10 +272,12 @@ const pool = new Pool({
   connectionTimeoutMillis: 3000,
 });
 
-// Roda migrations automaticamente na inicialização
-runMigrations(pool)
-  .then(() => console.log('[MIGRATION] Todas as migrations aplicadas.'))
-  .catch(err => console.error('[MIGRATION] Erro:', err.message));
+// Roda migrations apenas no worker primário
+if (!cluster.isWorker) {
+  runMigrations(pool)
+    .then(() => console.log('[MIGRATION] Todas as migrations aplicadas.'))
+    .catch(err => console.error('[MIGRATION] Erro:', err.message));
+}
 
 // Cadastro de empresa
 app.post('/api/cadastro', async (req, res) => {
