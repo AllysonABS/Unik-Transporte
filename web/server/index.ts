@@ -1,5 +1,6 @@
 import express from 'express';
 import compression from 'compression';
+import { runMigrations } from './migrate.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
@@ -275,8 +276,6 @@ const pool = new Pool({
 runMigrations(pool)
   .then(() => console.log('[MIGRATION] Todas as migrations aplicadas.'))
   .catch(err => console.error('[MIGRATION] Erro:', err.message));
-
-import { runMigrations } from './migrate.js';
 
 // Cadastro de empresa
 app.post('/api/cadastro', async (req, res) => {
