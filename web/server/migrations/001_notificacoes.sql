@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS notificacoes (
   criado_em TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_notificacoes_empresa ON notificacoes(empresa_id, criado_em DESC);
-CREATE INDEX idx_notificacoes_nao_lidas ON notificacoes(empresa_id) WHERE lida = false;
+CREATE INDEX IF NOT EXISTS idx_notificacoes_empresa ON notificacoes(empresa_id, criado_em DESC);
+CREATE INDEX IF NOT EXISTS idx_notificacoes_nao_lidas ON notificacoes(empresa_id) WHERE lida = false;
 
 -- Tabela de tokens FCM das empresas
 CREATE TABLE IF NOT EXISTS empresa_fcm_tokens (
