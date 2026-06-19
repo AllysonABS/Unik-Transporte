@@ -21,6 +21,23 @@ import nodemailer from 'nodemailer';
 const NUM_WORKERS = parseInt(process.env.WORKERS || '') || Math.min(os.cpus().length, 4);
 
 if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
+  const primaryPool = new Pool({
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT || '5432'),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: process.env.DB_SSL === 'true',
+  });
+  runMigrations(primaryPool)
+    .then(() => {
+      console.log('[MIGRATION] Todas as migrations aplicadas.');
+      primaryPool.end();
+    })
+    .catch(err => {
+      console.error('[MIGRATION] Erro:', err.message);
+      primaryPool.end();
+    });
   console.log(`[CLUSTER] Primary ${process.pid} starting ${NUM_WORKERS} workers`);
   for (let i = 0; i < NUM_WORKERS; i++) cluster.fork();
   cluster.on('exit', (worker) => {
@@ -271,13 +288,6 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 3000,
 });
-
-// Roda migrations apenas no worker primário
-if (!cluster.isWorker) {
-  runMigrations(pool)
-    .then(() => console.log('[MIGRATION] Todas as migrations aplicadas.'))
-    .catch(err => console.error('[MIGRATION] Erro:', err.message));
-}
 
 // Cadastro de empresa
 app.post('/api/cadastro', async (req, res) => {
