@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link2, Package, AlertTriangle, Bell } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
+import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarNotificacoes, marcarNotificacoesLidas } from '@/services/notificacoes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatRelativo } from '@/lib/format';
@@ -15,6 +16,7 @@ const ICONS: Record<string, { icon: typeof Link2; color: string }> = {
 
 export default function NotificacoesPage() {
   const { empresa } = useEmpresaAuth();
+  useSetPageHeader('Notificações', 'Acompanhe as atividades recentes');
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -37,8 +39,6 @@ export default function NotificacoesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-clareza">Notificações</h1>
-
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (

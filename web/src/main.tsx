@@ -41,7 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/empresa" element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
                 <Route path="dashboard" element={<DashboardPage />} />
-                <Route path="pedidos" element={<PedidosPage />} />
+                <Route path="despachos" element={<PedidosPage />} />
                 <Route path="clientes" element={<ClientesPage />} />
                 <Route path="despachantes" element={<DespachantesPage />} />
                 <Route path="excursoes" element={<ExcursoesPage />} />

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
+import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarPedidosEmpresa } from '@/services/pedidos';
 import { listarDespachantes } from '@/services/despachantes';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,6 +34,7 @@ function inicioPeriodo(periodo: Periodo): Date {
 
 export default function RelatoriosPage() {
   const { empresa } = useEmpresaAuth();
+  useSetPageHeader('Relatórios', 'Acompanhe o desempenho da operação');
   const [periodo, setPeriodo] = useState<Periodo>('hoje');
 
   const { data: pedidosData, isLoading: loadingPedidos } = useQuery({
@@ -83,8 +85,7 @@ export default function RelatoriosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-clareza">Relatórios</h1>
+      <div className="flex items-center justify-end">
         <div className="flex gap-2 rounded-lg border border-border bg-card p-1">
           {periodos.map(p => (
             <Button
@@ -102,7 +103,6 @@ export default function RelatoriosPage() {
           ))}
         </div>
       </div>
-
       {isLoading ? (
         <div className="grid grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -112,7 +112,7 @@ export default function RelatoriosPage() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Total de pedidos" value={totalPedidos} color="#F1F5F9" />
+            <StatCard label="Total de despachos" value={totalPedidos} color="#F1F5F9" />
             <StatCard label="Entregues" value={entregues} color="#86EFAC" />
             <StatCard label="Aguardando" value={aguardando} color="#F59E0B" />
             <StatCard label="Em trânsito" value={emTransito} color="#00E676" />
@@ -134,7 +134,7 @@ export default function RelatoriosPage() {
                   />
                 </div>
                 <p className="text-xs text-gray">
-                  {entregues} de {totalPedidos} pedidos entregues
+                  {entregues} de {totalPedidos} despachos entregues
                   {cancelados > 0 && ` · ${cancelados} cancelados`}
                 </p>
               </CardContent>

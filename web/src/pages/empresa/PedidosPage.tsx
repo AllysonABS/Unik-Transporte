@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Search } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
+import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarPedidosEmpresa } from '@/services/pedidos';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ import type { PedidoData, PedidoStatus } from '@/types/empresa';
 
 export default function PedidosPage() {
   const { empresa } = useEmpresaAuth();
+  useSetPageHeader('Despachos', 'Gerencie os despachos da sua empresa');
   const [busca, setBusca] = useState('');
   const [status, setStatus] = useState<PedidoStatus | 'todos'>('todos');
   const [detalhe, setDetalhe] = useState<PedidoData | null>(null);
@@ -57,14 +59,6 @@ export default function PedidosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-clareza">Pedidos</h1>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Novo pedido
-        </Button>
-      </div>
-
       <div className="flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray" />
@@ -87,6 +81,10 @@ export default function PedidosPage() {
             <SelectItem value="cancelado">Cancelado</SelectItem>
           </SelectContent>
         </Select>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Novo despacho
+        </Button>
       </div>
 
       {isLoading ? (
@@ -112,7 +110,7 @@ export default function PedidosPage() {
               {filtrados.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-gray py-8">
-                    Nenhum pedido encontrado.
+                    Nenhum despacho encontrado.
                   </TableCell>
                 </TableRow>
               ) : (

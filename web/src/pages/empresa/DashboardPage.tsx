@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users, Truck, Map, Package, Navigation, Clock, CheckCircle, Inbox } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
+import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { getDashboard } from '@/services/dashboard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +20,7 @@ function getGreeting() {
 export default function DashboardPage() {
   const { empresa } = useEmpresaAuth();
   const [detalhe, setDetalhe] = useState<PedidoData | null>(null);
+  useSetPageHeader(getGreeting(), empresa?.nome_empresa);
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', empresa?.id],
@@ -40,7 +42,7 @@ export default function DashboardPage() {
     { label: 'Clientes ativos', value: stats?.total_clientes ?? 0, icon: Users, color: '#00E676' },
     { label: 'Despachantes', value: stats?.total_despachantes ?? 0, icon: Truck, color: '#60A5FA' },
     { label: 'Excursões', value: stats?.total_excursoes ?? 0, icon: Map, color: '#F59E0B' },
-    { label: 'Pedidos hoje', value: pedidosHoje.length, icon: Package, color: '#C084FC' },
+    { label: 'Despachos hoje', value: pedidosHoje.length, icon: Package, color: '#C084FC' },
   ];
 
   const statusCards = [
@@ -51,11 +53,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-sm text-gray">{getGreeting()}</p>
-        <h1 className="text-2xl font-bold text-clareza">{empresa?.nome_empresa}</h1>
-      </div>
-
       {isLoading ? (
         <div className="grid grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -82,7 +79,7 @@ export default function DashboardPage() {
 
           <div>
             <h2 className="text-xs uppercase tracking-widest text-gray font-semibold mb-3">
-              Status dos pedidos
+              Status dos despachos
             </h2>
             <div className="grid grid-cols-3 gap-3">
               {statusCards.map(item => (
@@ -103,12 +100,12 @@ export default function DashboardPage() {
 
           <div>
             <h2 className="text-xs uppercase tracking-widest text-gray font-semibold mb-3">
-              Pedidos recentes
+              Despachos recentes
             </h2>
             {recentes.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-10 text-gray">
                 <Inbox className="h-8 w-8" />
-                <p className="text-sm">Nenhum pedido criado ainda</p>
+                <p className="text-sm">Nenhum despacho criado ainda</p>
               </div>
             ) : (
               <div className="space-y-2">

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
+import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { buscarEmpresa, atualizarEmpresa } from '@/services/empresaPerfil';
 import { buscarCep } from '@/lib/cep';
 import { ApiError } from '@/lib/apiClient';
@@ -39,6 +40,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function ConfiguracoesPage() {
   const { empresa, updateEmpresa } = useEmpresaAuth();
+  useSetPageHeader('Configurações', 'Dados e preferências da empresa');
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -119,7 +121,6 @@ export default function ConfiguracoesPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold text-clareza">Configurações</h1>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

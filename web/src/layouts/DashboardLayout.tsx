@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Package,
@@ -8,15 +7,15 @@ import {
   Truck,
   Map,
   BarChart2,
-  Bell,
   Settings,
   LogOut,
   ChevronLeft,
 } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
-import { contarNotificacoesNaoLidas } from '@/services/notificacoes';
+import { PageHeaderProvider } from '@/context/PageHeaderContext';
 import { cn } from '@/lib/utils';
 import LogoMark from '@/components/empresa/LogoMark';
+import TopHeader from '@/components/empresa/TopHeader';
 import {
   Tooltip,
   TooltipContent,
@@ -26,13 +25,11 @@ import {
 
 const navItems = [
   { to: '/empresa/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/empresa/pedidos', label: 'Pedidos', icon: Package },
+  { to: '/empresa/despachos', label: 'Despachos', icon: Package },
   { to: '/empresa/clientes', label: 'Clientes', icon: Users },
   { to: '/empresa/despachantes', label: 'Despachantes', icon: Truck },
   { to: '/empresa/excursoes', label: 'Excursões', icon: Map },
   { to: '/empresa/relatorios', label: 'Relatórios', icon: BarChart2 },
-  { to: '/empresa/notificacoes', label: 'Notificações', icon: Bell, badge: true },
-  { to: '/empresa/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
 const COLLAPSE_KEY = 'narota_sidebar_collapsed';
@@ -46,14 +43,6 @@ export default function DashboardLayout() {
   useEffect(() => {
     localStorage.setItem(COLLAPSE_KEY, String(collapsed));
   }, [collapsed]);
-
-  const { data } = useQuery({
-    queryKey: ['notificacoes-nao-lidas', empresa?.id],
-    queryFn: () => contarNotificacoesNaoLidas(empresa!.id),
-    enabled: !!empresa?.id,
-    refetchInterval: 60_000,
-  });
-  const naoLidas = data?.total ?? 0;
 
   function handleLogout() {
     logout();
@@ -72,12 +61,12 @@ export default function DashboardLayout() {
           <button
             onClick={() => setCollapsed(!collapsed)}
             aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
-            className="absolute -right-3 top-9 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-gray shadow-md hover:text-pulso hover:border-pulso/40 transition-colors"
+            className="absolute -right-3 top-[17px] z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-gray shadow-md hover:text-pulso hover:border-pulso/40 transition-colors"
           >
             <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform', collapsed && 'rotate-180')} />
           </button>
 
-          <div className={cn('flex items-center gap-3 px-5 py-6', collapsed && 'justify-center px-0')}>
+          <div className={cn('flex items-center gap-3 px-5 h-14 border-b border-border', collapsed && 'justify-center px-0')}>
             <LogoMark size="sm" />
             {!collapsed && (
               <div className="overflow-hidden">
@@ -86,8 +75,6 @@ export default function DashboardLayout() {
               </div>
             )}
           </div>
-
-          <div className="border-t border-border" />
 
           <nav className="flex-1 space-y-1 px-3 py-3">
             {navItems.map(item => {
@@ -107,15 +94,7 @@ export default function DashboardLayout() {
                   <span className={cn('flex items-center gap-3', collapsed && 'relative')}>
                     <item.icon className="h-4 w-4 shrink-0" />
                     {!collapsed && item.label}
-                    {collapsed && item.badge && naoLidas > 0 && (
-                      <span className="absolute -right-1.5 -top-1.5 h-2 w-2 rounded-full bg-destructive" />
-                    )}
-                  </span>
-                  {!collapsed && item.badge && naoLidas > 0 && (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
-                      {naoLidas > 9 ? '9+' : naoLidas}
                     </span>
-                  )}
                 </Link>
               );
 
@@ -131,6 +110,42 @@ export default function DashboardLayout() {
               );
             })}
           </nav>
+
+          <div className="px-3 pb-2">
+            {collapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/empresa/configuracoes"
+                    className={cn(
+                      'flex w-full items-center justify-center rounded-md py-2.5 transition-colors',
+                      location.pathname === '/empresa/configuracoes'
+                        ? 'bg-pulso/10 text-pulso'
+                        : 'text-gray hover:bg-accent hover:text-clareza',
+                    )}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-card border-border text-clareza">
+                  Configurações
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Link
+                to="/empresa/configuracoes"
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
+                  location.pathname === '/empresa/configuracoes'
+                    ? 'bg-pulso/10 text-pulso'
+                    : 'text-gray hover:bg-accent hover:text-clareza',
+                )}
+              >
+                <Settings className="h-4 w-4" />
+                Configurações
+              </Link>
+            )}
+          </div>
 
           <div className="px-3 py-4 border-t border-border">
             {collapsed ? (
@@ -159,10 +174,13 @@ export default function DashboardLayout() {
             )}
           </div>
         </aside>
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-6xl mx-auto p-8">
-            <Outlet />
-          </div>
+        <main className="flex-1 flex flex-col overflow-y-auto">
+          <PageHeaderProvider>
+            <TopHeader />
+            <div className="flex-1 p-6">
+              <Outlet />
+            </div>
+          </PageHeaderProvider>
         </main>
       </div>
     </TooltipProvider>

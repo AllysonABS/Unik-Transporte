@@ -102,14 +102,14 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
       });
     },
     onSuccess: () => {
-      toast.success('Pedido criado com sucesso.');
+      toast.success('Despacho criado com sucesso.');
       queryClient.invalidateQueries({ queryKey: ['pedidos', empresa?.id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard', empresa?.id] });
       form.reset();
       onOpenChange(false);
     },
     onError: (err: unknown) => {
-      setServerError(err instanceof ApiError ? err.message : 'Erro ao criar pedido.');
+      setServerError(err instanceof ApiError ? err.message : 'Erro ao criar despacho.');
     },
   });
 
@@ -122,7 +122,7 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border">
         <DialogHeader>
-          <DialogTitle className="text-clareza">Novo pedido</DialogTitle>
+          <DialogTitle className="text-clareza">Novo despacho</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -227,7 +227,7 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
             {serverError && <p className="text-sm font-medium text-destructive">{serverError}</p>}
             <DialogFooter>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Criando...' : 'Criar pedido'}
+                {mutation.isPending ? 'Criando...' : 'Criar despacho'}
               </Button>
             </DialogFooter>
           </form>
