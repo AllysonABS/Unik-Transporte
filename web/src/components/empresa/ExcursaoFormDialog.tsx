@@ -28,8 +28,8 @@ import type { ExcursaoData } from '@/types/empresa';
 
 const schema = z.object({
   nome: z.string().min(1, 'Informe o nome'),
-  setor: z.string().min(1, 'Informe o setor'),
-  vaga: z.string().min(1, 'Informe a vaga'),
+  setor: z.string().min(1, 'Informe o setor').max(200, 'Máximo de 200 caracteres'),
+  vaga: z.string().min(1, 'Informe a vaga').max(200, 'Máximo de 200 caracteres'),
   responsavel: z.string().min(1, 'Informe o responsável'),
   telefone: z.string().optional(),
 });
@@ -113,7 +113,7 @@ export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Pro
                   <FormItem>
                     <FormLabel>Setor</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} maxLength={200} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -126,7 +126,7 @@ export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Pro
                   <FormItem>
                     <FormLabel>Vaga</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} maxLength={200} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

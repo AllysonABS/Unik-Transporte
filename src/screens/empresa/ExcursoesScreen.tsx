@@ -210,11 +210,11 @@ export default function ExcursoesScreen() {
             <View style={s.row2}>
               <View style={{flex: 1}}>
                 <Text style={s.label}>Setor *</Text>
-                <TextInput style={s.input} placeholder="Ex: A" placeholderTextColor={Colors.gray} value={setor} onChangeText={setSetor} autoCapitalize="characters" />
+                <TextInput style={s.input} placeholder="Ex: A" placeholderTextColor={Colors.gray} value={setor} onChangeText={v => setSetor(v.slice(0, 200))} autoCapitalize="characters" maxLength={200} />
               </View>
               <View style={{flex: 1}}>
                 <Text style={s.label}>Nº da vaga *</Text>
-                <TextInput style={s.input} placeholder="Ex: 12" placeholderTextColor={Colors.gray} value={vaga} onChangeText={v => setVaga(v.replace(/[^0-9]/g, '').slice(0, 5))} keyboardType="numeric" />
+                <TextInput style={s.input} placeholder="Ex: 12" placeholderTextColor={Colors.gray} value={vaga} onChangeText={v => setVaga(v.slice(0, 200))} maxLength={200} />
               </View>
             </View>
 
