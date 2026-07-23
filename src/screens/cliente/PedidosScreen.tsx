@@ -139,7 +139,7 @@ export default function PedidosScreen() {
 
       <Modal visible={!!selecionado} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => setSelecionado(null)}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
                 <View>
@@ -181,7 +181,7 @@ export default function PedidosScreen() {
               )}
 
             </ScrollView>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </View>

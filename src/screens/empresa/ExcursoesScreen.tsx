@@ -176,7 +176,7 @@ export default function ExcursoesScreen() {
       {/* Modal detalhes */}
       <Modal visible={!!detalhe} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => setDetalhe(null)}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <View style={s.sheetHeader}>
               <Text style={s.sheetTitle}>{detalhe?.nome}</Text>
               <TouchableOpacity onPress={() => setDetalhe(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
@@ -194,14 +194,14 @@ export default function ExcursoesScreen() {
                 <Text style={s.detValue}>{row.value}</Text>
               </View>
             ))}
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
 
       {/* Modal cadastro/edição */}
       <Modal visible={modal} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => {limpar(); setModal(false);}}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <Text style={s.sheetTitle}>{editandoId ? 'Editar Excursão' : 'Nova Excursão'}</Text>
 
             <Text style={s.label}>Nome da excursão *</Text>
@@ -232,7 +232,7 @@ export default function ExcursoesScreen() {
                 <Text style={s.saveBtnText}>{editandoId ? 'Salvar' : 'Cadastrar'}</Text>
               </TouchableOpacity>
             </View>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </View>

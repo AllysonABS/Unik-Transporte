@@ -292,7 +292,7 @@ export default function PedidosScreen() {
 
       <Modal visible={!!detalhe} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => setDetalhe(null)}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
                 <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
@@ -339,13 +339,13 @@ export default function PedidosScreen() {
               ) : null}
 
             </ScrollView>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
 
       <Modal visible={modalNovo} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => setModalNovo(false)}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={s.sheetTitle}>Novo Pedido</Text>
 
@@ -386,7 +386,7 @@ export default function PedidosScreen() {
                 </TouchableOpacity>
               </View>
             </ScrollView>
-          </Pressable>
+          </View>
 
           <PickerModal
             visible={showPickerCliente}

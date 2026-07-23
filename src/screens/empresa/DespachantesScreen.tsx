@@ -187,7 +187,7 @@ export default function DespachantesScreen() {
 
       <Modal visible={modal} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => {limpar(); setModal(false);}}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <Text style={s.sheetTitle}>{editandoId ? 'Editar Despachante' : 'Novo Despachante'}</Text>
             <Text style={s.label}>Nome completo *</Text>
             <TextInput style={s.input} placeholder="Nome..." placeholderTextColor={Colors.gray} value={nome} onChangeText={setNome} />
@@ -221,7 +221,7 @@ export default function DespachantesScreen() {
                 <Text style={s.saveBtnText}>{editandoId ? 'Salvar' : 'Cadastrar'}</Text>
               </TouchableOpacity>
             </View>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </View>

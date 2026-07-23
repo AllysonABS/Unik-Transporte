@@ -122,7 +122,7 @@ export default function EmAndamentoScreen() {
 
       <Modal visible={!!detalhe} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => setDetalhe(null)}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
                 <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
@@ -145,7 +145,7 @@ export default function EmAndamentoScreen() {
               ))}
 
             </ScrollView>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </View>

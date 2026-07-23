@@ -136,7 +136,6 @@ export default function ClientesScreen() {
 
   const salvarNovo = async () => {
     if (!nome || !telefone) { show({title: 'Atenção', message: 'Preencha o nome e o telefone', type: 'warning'}); return; }
-    if (!cpf && !cnpj) { show({title: 'Atenção', message: 'Preencha pelo menos CPF ou CNPJ', type: 'warning'}); return; }
     if (!empresa?.id) return;
     const res = await cadastrarClienteManual(empresa.id, {
       nome, cpf: cpf ? cpf.replace(/\D/g, '') : undefined, cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined, rg: rg || undefined,
@@ -262,7 +261,7 @@ export default function ClientesScreen() {
 
       <Modal visible={modal} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={fecharModal}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={s.sheetTitle}>Editar Cliente</Text>
 
@@ -322,12 +321,12 @@ export default function ClientesScreen() {
                 </TouchableOpacity>
               </View>
             </ScrollView>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
       <Modal visible={modalNovo} transparent animationType="slide">
         <Pressable style={s.overlay} onPress={() => setModalNovo(false)}>
-          <Pressable style={s.sheet} onPress={() => {}}>
+          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={s.sheetTitle}>Novo Cliente</Text>
 
@@ -387,7 +386,7 @@ export default function ClientesScreen() {
                 </TouchableOpacity>
               </View>
             </ScrollView>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </View>

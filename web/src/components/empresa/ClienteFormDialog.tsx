@@ -29,27 +29,22 @@ import {
 } from '@/components/ui/form';
 import type { ClienteVinculo } from '@/types/empresa';
 
-const schema = z
-  .object({
-    nome: z.string().min(1, 'Informe o nome'),
-    cpf: z.string().optional(),
-    cnpj: z.string().optional(),
-    rg: z.string().optional(),
-    telefone: z.string().min(1, 'Informe o telefone'),
-    email: z.string().optional(),
-    data_nascimento: z.string().optional(),
-    cep: z.string().optional(),
-    endereco: z.string().optional(),
-    numero: z.string().optional(),
-    bairro: z.string().optional(),
-    cidade: z.string().optional(),
-    estado: z.string().optional(),
-    observacoes: z.string().optional(),
-  })
-  .refine(data => !!data.cpf || !!data.cnpj, {
-    message: 'Informe ao menos CPF ou CNPJ',
-    path: ['cpf'],
-  });
+const schema = z.object({
+  nome: z.string().min(1, 'Informe o nome'),
+  cpf: z.string().optional(),
+  cnpj: z.string().optional(),
+  rg: z.string().optional(),
+  telefone: z.string().min(1, 'Informe o telefone'),
+  email: z.string().optional(),
+  data_nascimento: z.string().optional(),
+  cep: z.string().optional(),
+  endereco: z.string().optional(),
+  numero: z.string().optional(),
+  bairro: z.string().optional(),
+  cidade: z.string().optional(),
+  estado: z.string().optional(),
+  observacoes: z.string().optional(),
+});
 
 type FormValues = z.infer<typeof schema>;
 

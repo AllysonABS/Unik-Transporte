@@ -643,9 +643,6 @@ app.post('/api/empresa/:empresaId/cadastrar-cliente', auth, async (req, res) => 
     if (!nome || !telefone) {
       return res.status(400).json({error: 'Preencha o nome e o telefone.'});
     }
-    if (!cpf && !cnpj) {
-      return res.status(400).json({error: 'Informe ao menos CPF ou CNPJ.'});
-    }
     if (cpf) {
       const existe = await pool.query('SELECT id FROM cliente_empresa WHERE empresa_id=$1 AND cpf=$2', [empresaId, cpf]);
       if (existe.rows.length > 0) return res.status(409).json({error: 'Já existe um cliente com este CPF vinculado.'});
