@@ -162,6 +162,7 @@ export default function PedidosScreen() {
       despachante_id: novoDespachante.id || undefined,
       excursao_id: novoExcursao.id || undefined,
       cliente_nome: novoCliente.nome,
+      cliente_telefone: novoCliente.telefone || undefined,
       despachante_nome: novoDespachante.nome,
       excursao_nome: `${novoExcursao.nome} (Setor ${novoExcursao.setor}, Vaga ${novoExcursao.vaga})`,
       volumes: parseInt(novoVolumes, 10),

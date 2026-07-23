@@ -313,7 +313,7 @@ export type PedidoData = {
 
 export async function criarPedido(empresaId: string, dados: {
   cliente_id?: string; despachante_id?: string; excursao_id?: string;
-  cliente_nome: string; despachante_nome: string; excursao_nome: string;
+  cliente_nome: string; cliente_telefone?: string; despachante_nome: string; excursao_nome: string;
   volumes: number; descricao?: string;
 }): Promise<{success: boolean; pedido_id?: string; error?: string}> {
   try {

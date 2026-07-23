@@ -146,7 +146,8 @@ export default function ChecklistScreen({route, navigation}: Props) {
     hapticSuccess();
 
     if (isColeta) {
-      navigation.navigate('Tabs', {screen: 'Em Andamento', params: {abrirPedidoId: pedidoId}});
+      navigation.navigate('Tabs', {screen: 'Em Andamento'});
+      navigation.navigate('Checklist', {pedidoId, etapa: 'entrega', volumes});
     } else {
       const msgExtra = isOnline ? '' : '\nSerá sincronizado quando a internet voltar.';
       show({title: 'Entrega confirmada!', message: `Pedido finalizado com sucesso.${msgExtra}`, type: 'success', buttons: [

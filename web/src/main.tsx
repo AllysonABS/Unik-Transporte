@@ -32,6 +32,7 @@ import AdminClientesPage from './pages/admin/ClientesPage';
 import AdminDespachantesPage from './pages/admin/DespachantesPage';
 import AdminPedidosPage from './pages/admin/PedidosPage';
 import AdminAssinaturasPage from './pages/admin/AssinaturasPage';
+import AdminWhatsappPage from './pages/admin/WhatsappPage';
 import { Toaster } from './components/ui/sonner';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -72,6 +73,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   <Route path="despachantes" element={<AdminDespachantesPage />} />
                   <Route path="pedidos" element={<AdminPedidosPage />} />
                   <Route path="assinaturas" element={<AdminAssinaturasPage />} />
+                  <Route path="whatsapp" element={<AdminWhatsappPage />} />
                 </Route>
               </Route>
             </Routes>

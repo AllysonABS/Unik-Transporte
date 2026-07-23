@@ -11,6 +11,7 @@ export interface CriarPedidoPayload {
   despachante_id?: string;
   excursao_id?: string;
   cliente_nome: string;
+  cliente_telefone?: string;
   despachante_nome: string;
   excursao_nome: string;
   volumes: number;

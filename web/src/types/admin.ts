@@ -80,3 +80,13 @@ export interface AdminStats {
   total_pedidos: number;
   assinaturas_ativas: number;
 }
+
+export interface WhatsappConfig {
+  id: string;
+  instance_name: string;
+  status: 'disconnected' | 'connecting' | 'connected' | string;
+  profile_name: string | null;
+  numero_conectado: string | null;
+  qrcode: string | null;
+  paircode: string | null;
+}

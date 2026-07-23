@@ -6,6 +6,7 @@ import type {
   DespachanteAdmin,
   PedidoAdmin,
   AssinaturaAdmin,
+  WhatsappConfig,
 } from '@/types/admin';
 
 // --- Stats ---
@@ -68,4 +69,21 @@ export function listarAssinaturasAdmin() {
 
 export function atualizarAssinaturaAdmin(id: string, payload: Partial<AssinaturaAdmin>) {
   return adminApi.put<{ success: boolean }>(`/api/admin/assinaturas/${id}`, payload);
+}
+
+// --- WhatsApp ---
+export function buscarStatusWhatsapp() {
+  return adminApi.get<{ success: boolean; config: WhatsappConfig | null }>('/api/admin/whatsapp/status');
+}
+
+export function criarInstanciaWhatsapp(name: string) {
+  return adminApi.post<{ success: boolean }>('/api/admin/whatsapp/instance', { name });
+}
+
+export function conectarWhatsapp() {
+  return adminApi.post<{ success: boolean; qrcode: string | null; connected: boolean }>('/api/admin/whatsapp/connect');
+}
+
+export function desconectarWhatsapp() {
+  return adminApi.post<{ success: boolean }>('/api/admin/whatsapp/disconnect');
 }

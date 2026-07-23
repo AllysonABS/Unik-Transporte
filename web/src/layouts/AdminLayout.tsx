@@ -7,6 +7,7 @@ import {
   Truck,
   Package,
   CreditCard,
+  MessageCircle,
   LogOut,
   ChevronLeft,
 } from 'lucide-react';
@@ -27,6 +28,7 @@ const navItems = [
   { to: '/admin/despachantes', label: 'Despachantes', icon: Truck },
   { to: '/admin/pedidos', label: 'Pedidos', icon: Package },
   { to: '/admin/assinaturas', label: 'Assinaturas', icon: CreditCard },
+  { to: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle },
 ];
 
 const COLLAPSE_KEY = 'narota_admin_sidebar_collapsed';

@@ -87,14 +87,15 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
   const mutation = useMutation({
     mutationFn: () => {
       const values = form.getValues();
-      const cliente = clientes.find(c => c.cliente_id === values.cliente_id);
+      const cliente = clientes.find(c => c.vinculo_id === values.cliente_id);
       const despachante = despachantes.find(d => d.id === values.despachante_id);
       const excursao = excursoes.find(e => e.id === values.excursao_id);
       return criarPedido(empresa!.id, {
-        cliente_id: values.cliente_id,
+        cliente_id: cliente?.cliente_id || undefined,
         despachante_id: values.despachante_id,
         excursao_id: values.excursao_id,
         cliente_nome: cliente?.nome ?? '',
+        cliente_telefone: cliente?.telefone || undefined,
         despachante_nome: despachante?.nome ?? '',
         excursao_nome: excursao?.nome ?? '',
         volumes: Number(values.volumes),
@@ -140,7 +141,7 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
                     </FormControl>
                     <SelectContent>
                       {clientes.map(c => (
-                        <SelectItem key={c.cliente_id} value={c.cliente_id}>
+                        <SelectItem key={c.vinculo_id} value={c.vinculo_id}>
                           {c.nome}
                         </SelectItem>
                       ))}

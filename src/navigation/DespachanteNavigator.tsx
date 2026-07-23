@@ -15,7 +15,7 @@ import {useLogout} from '../hooks/useLogout';
 
 export type DespachanteTabParamList = {
   Fila: undefined;
-  'Em Andamento': {abrirPedidoId?: string} | undefined;
+  'Em Andamento': undefined;
   Histórico: undefined;
 };
 

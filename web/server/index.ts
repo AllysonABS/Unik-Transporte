@@ -64,6 +64,67 @@ const r2 = new S3Client({
 });
 const R2_BUCKET = process.env.R2_BUCKET || '';
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
+
+// === WHATSAPP (uazapi) ===
+const UAZAPI_URL = process.env.UAZAPI_URL || '';
+const UAZAPI_ADMIN_TOKEN = process.env.UAZAPI_ADMIN_TOKEN || '';
+
+async function uazapiAdminRequest(path: string, method: string, body?: any) {
+  const res = await fetch(`${UAZAPI_URL}${path}`, {
+    method,
+    headers: {'Content-Type': 'application/json', admintoken: UAZAPI_ADMIN_TOKEN},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Erro na API do WhatsApp.');
+  return data;
+}
+
+async function uazapiInstanceRequest(path: string, method: string, instanceToken: string, body?: any) {
+  const res = await fetch(`${UAZAPI_URL}${path}`, {
+    method,
+    headers: {'Content-Type': 'application/json', token: instanceToken},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Erro na API do WhatsApp.');
+  return data;
+}
+
+// Envia a notificação de entrega (texto + fotos) pro cliente via WhatsApp.
+// Silencioso em qualquer falha — não deve travar a confirmação de entrega do despachante.
+async function enviarWhatsappEntrega(pedidoId: string) {
+  try {
+    const cfgRes = await pool.query("SELECT * FROM whatsapp_config WHERE status='connected' ORDER BY criado_em DESC LIMIT 1");
+    if (cfgRes.rows.length === 0) return;
+    const cfg = cfgRes.rows[0];
+
+    const pedidoRes = await pool.query(
+      `SELECT p.numero, p.cliente_nome, p.cliente_telefone, p.excursao_nome, e.nome_empresa
+       FROM pedidos p JOIN empresas e ON e.id = p.empresa_id WHERE p.id=$1`,
+      [pedidoId]
+    );
+    if (pedidoRes.rows.length === 0) return;
+    const pedido = pedidoRes.rows[0];
+    if (!pedido.cliente_telefone) return;
+
+    const fotosRes = await pool.query('SELECT url FROM pedido_fotos WHERE pedido_id=$1 ORDER BY criado_em', [pedidoId]);
+    const fotos = fotosRes.rows.map((r: any) => r.url as string);
+
+    let numero = String(pedido.cliente_telefone).replace(/\D/g, '');
+    if (!numero.startsWith('55')) numero = '55' + numero;
+
+    const texto = `Olá, ${pedido.cliente_nome}! 🎉\n\nSeu pedido *#${pedido.numero}* da *${pedido.nome_empresa}* foi entregue com sucesso na excursão *${pedido.excursao_nome}*!\n\nObrigado por usar o Na Rota. 🚐📦`;
+
+    await uazapiInstanceRequest('/send/text', 'POST', cfg.instance_token, {number: numero, text: texto});
+
+    for (const url of fotos) {
+      await uazapiInstanceRequest('/send/media', 'POST', cfg.instance_token, {number: numero, type: 'image', file: url});
+    }
+  } catch (err: any) {
+    console.error('[WHATSAPP] Erro ao enviar notificação de entrega:', err.message);
+  }
+}
 const ALLOWED_MIMETYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -1022,14 +1083,14 @@ app.post('/api/empresa/:empresaId/pedidos', auth, async (req, res) => {
     if (user.tipo !== 'empresa' || user.id !== empresaId) {
       return res.status(403).json({error: 'Sem permissão.'});
     }
-    const {cliente_id, despachante_id, excursao_id, cliente_nome, despachante_nome, excursao_nome, volumes, descricao} = req.body;
+    const {cliente_id, despachante_id, excursao_id, cliente_nome, despachante_nome, excursao_nome, cliente_telefone, volumes, descricao} = req.body;
     if (!cliente_nome || !despachante_nome || !excursao_nome) {
       return res.status(400).json({error: 'Preencha cliente, despachante e excurs\u00e3o.'});
     }
     const result = await pool.query(
-      `INSERT INTO pedidos (empresa_id, cliente_id, despachante_id, excursao_id, cliente_nome, despachante_nome, excursao_nome, volumes, descricao)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
-      [empresaId, cliente_id || null, despachante_id || null, excursao_id || null, cliente_nome, despachante_nome, excursao_nome, volumes || 1, descricao || null]
+      `INSERT INTO pedidos (empresa_id, cliente_id, despachante_id, excursao_id, cliente_nome, despachante_nome, excursao_nome, cliente_telefone, volumes, descricao)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
+      [empresaId, cliente_id || null, despachante_id || null, excursao_id || null, cliente_nome, despachante_nome, excursao_nome, cliente_telefone || null, volumes || 1, descricao || null]
     );
     const pedidoId = result.rows[0].id;
     // Busca o numero sequencial
@@ -1267,6 +1328,7 @@ app.put('/api/pedidos/:pedidoId/concluir-etapas', auth, async (req, res) => {
         [pedidoId]
       );
       await pool.query('UPDATE pedidos SET status=$1, atualizado_em=NOW() WHERE id=$2', ['entregue', pedidoId]);
+      await enviarWhatsappEntrega(pedidoId);
     }
     res.json({success: true});
   } catch (err: any) {
@@ -2057,6 +2119,89 @@ app.put('/api/admin/assinaturas/:id', auth, requireAdmin, async (req, res) => {
   } catch (err: any) {
     console.error('Erro ao atualizar assinatura (admin):', err);
     res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// --- WhatsApp (uazapi) ---
+app.get('/api/admin/whatsapp/status', auth, requireAdmin, async (_req, res) => {
+  try {
+    const cfgRes = await pool.query('SELECT * FROM whatsapp_config ORDER BY criado_em DESC LIMIT 1');
+    if (cfgRes.rows.length === 0) {
+      return res.json({success: true, config: null});
+    }
+    const cfg = cfgRes.rows[0];
+    const data = await uazapiInstanceRequest('/instance/status', 'GET', cfg.instance_token);
+    const conectado = !!data.status?.connected;
+    const status = conectado ? 'connected' : (data.instance?.status || 'disconnected');
+    const profileName = data.instance?.profileName || null;
+    const numero = data.status?.jid?.user || null;
+    await pool.query(
+      'UPDATE whatsapp_config SET status=$1, profile_name=$2, numero_conectado=$3, atualizado_em=NOW() WHERE id=$4',
+      [status, profileName, numero, cfg.id]
+    );
+    res.json({
+      success: true,
+      config: {
+        id: cfg.id,
+        instance_name: cfg.instance_name,
+        status,
+        profile_name: profileName,
+        numero_conectado: numero,
+        qrcode: data.instance?.qrcode || null,
+        paircode: data.instance?.paircode || null,
+      },
+    });
+  } catch (err: any) {
+    console.error('Erro ao buscar status whatsapp (admin):', err.message);
+    res.status(500).json({error: 'Erro ao consultar status do WhatsApp.'});
+  }
+});
+
+app.post('/api/admin/whatsapp/instance', auth, requireAdmin, async (req, res) => {
+  try {
+    const existe = await pool.query('SELECT id FROM whatsapp_config LIMIT 1');
+    if (existe.rows.length > 0) {
+      return res.status(409).json({error: 'Já existe uma instância configurada.'});
+    }
+    const {name} = req.body;
+    const instanceName = name || 'na-rota';
+    const data = await uazapiAdminRequest('/instance/init', 'POST', {name: instanceName});
+    await pool.query(
+      'INSERT INTO whatsapp_config (instance_id, instance_token, instance_name, status) VALUES ($1,$2,$3,$4)',
+      [data.instance?.id || null, data.token, instanceName, 'disconnected']
+    );
+    res.status(201).json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao criar instância whatsapp (admin):', err.message);
+    res.status(500).json({error: 'Erro ao criar instância do WhatsApp.'});
+  }
+});
+
+app.post('/api/admin/whatsapp/connect', auth, requireAdmin, async (_req, res) => {
+  try {
+    const cfgRes = await pool.query('SELECT * FROM whatsapp_config ORDER BY criado_em DESC LIMIT 1');
+    if (cfgRes.rows.length === 0) return res.status(404).json({error: 'Nenhuma instância configurada.'});
+    const cfg = cfgRes.rows[0];
+    const data = await uazapiInstanceRequest('/instance/connect', 'POST', cfg.instance_token, {});
+    await pool.query('UPDATE whatsapp_config SET status=$1, atualizado_em=NOW() WHERE id=$2', ['connecting', cfg.id]);
+    res.json({success: true, qrcode: data.instance?.qrcode || null, connected: !!data.connected});
+  } catch (err: any) {
+    console.error('Erro ao conectar whatsapp (admin):', err.message);
+    res.status(500).json({error: 'Erro ao conectar WhatsApp.'});
+  }
+});
+
+app.post('/api/admin/whatsapp/disconnect', auth, requireAdmin, async (_req, res) => {
+  try {
+    const cfgRes = await pool.query('SELECT * FROM whatsapp_config ORDER BY criado_em DESC LIMIT 1');
+    if (cfgRes.rows.length === 0) return res.status(404).json({error: 'Nenhuma instância configurada.'});
+    const cfg = cfgRes.rows[0];
+    await uazapiInstanceRequest('/instance/disconnect', 'POST', cfg.instance_token);
+    await pool.query('UPDATE whatsapp_config SET status=$1, atualizado_em=NOW() WHERE id=$2', ['disconnected', cfg.id]);
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao desconectar whatsapp (admin):', err.message);
+    res.status(500).json({error: 'Erro ao desconectar WhatsApp.'});
   }
 });
 
