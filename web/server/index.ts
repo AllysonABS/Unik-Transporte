@@ -1328,7 +1328,9 @@ app.put('/api/pedidos/:pedidoId/concluir-etapas', auth, async (req, res) => {
         [pedidoId]
       );
       await pool.query('UPDATE pedidos SET status=$1, atualizado_em=NOW() WHERE id=$2', ['entregue', pedidoId]);
-      await enviarWhatsappEntrega(pedidoId);
+      // Não aguarda — o envio ao WhatsApp roda em segundo plano, sem travar a resposta pro despachante.
+      // A função já trata os próprios erros internamente (nunca rejeita).
+      enviarWhatsappEntrega(pedidoId);
     }
     res.json({success: true});
   } catch (err: any) {
