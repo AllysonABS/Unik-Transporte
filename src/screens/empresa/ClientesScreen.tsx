@@ -260,8 +260,9 @@ export default function ClientesScreen() {
       )}
 
       <Modal visible={modal} transparent animationType="slide">
-        <Pressable style={s.overlay} onPress={fecharModal}>
-          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={fecharModal} />
+          <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={s.sheetTitle}>Editar Cliente</Text>
 
@@ -322,11 +323,12 @@ export default function ClientesScreen() {
               </View>
             </ScrollView>
           </View>
-        </Pressable>
+        </View>
       </Modal>
       <Modal visible={modalNovo} transparent animationType="slide">
-        <Pressable style={s.overlay} onPress={() => setModalNovo(false)}>
-          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalNovo(false)} />
+          <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={s.sheetTitle}>Novo Cliente</Text>
 
@@ -387,7 +389,7 @@ export default function ClientesScreen() {
               </View>
             </ScrollView>
           </View>
-        </Pressable>
+        </View>
       </Modal>
     </View>
   );

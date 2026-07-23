@@ -38,6 +38,7 @@ export default function ExcursoesScreen() {
   const [vaga, setVaga] = useState('');
   const [responsavel, setResponsavel] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [observacoes, setObservacoes] = useState('');
   const [menuAberto, setMenuAberto] = useState<{id: string; y: number; item: ExcursaoData} | null>(null);
 
   const jaCarregou = useRef(false);
@@ -58,12 +59,12 @@ export default function ExcursoesScreen() {
   }, [empresa?.id]));
 
   const limpar = () => {
-    setNome(''); setSetor(''); setVaga(''); setResponsavel(''); setTelefone(''); setEditandoId(null);
+    setNome(''); setSetor(''); setVaga(''); setResponsavel(''); setTelefone(''); setObservacoes(''); setEditandoId(null);
   };
 
   const abrirEditar = (e: ExcursaoData) => {
     setEditandoId(e.id); setNome(e.nome); setSetor(e.setor); setVaga(e.vaga);
-    setResponsavel(e.responsavel); setTelefone(e.telefone || ''); setModal(true);
+    setResponsavel(e.responsavel); setTelefone(e.telefone || ''); setObservacoes(e.observacoes || ''); setModal(true);
   };
 
   const excluir = (id: string) => {
@@ -83,7 +84,7 @@ export default function ExcursoesScreen() {
       return;
     }
     if (!empresa?.id) return;
-    const dados = {nome, setor, vaga, responsavel, telefone};
+    const dados = {nome, setor, vaga, responsavel, telefone, observacoes};
     if (editandoId) {
       const res = await atualizarExcursao(editandoId, dados);
       if (res.success) { showToast('Excursão atualizada!', 'success'); carregar(); }
@@ -175,8 +176,9 @@ export default function ExcursoesScreen() {
 
       {/* Modal detalhes */}
       <Modal visible={!!detalhe} transparent animationType="slide">
-        <Pressable style={s.overlay} onPress={() => setDetalhe(null)}>
-          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setDetalhe(null)} />
+          <View style={s.sheet}>
             <View style={s.sheetHeader}>
               <Text style={s.sheetTitle}>{detalhe?.nome}</Text>
               <TouchableOpacity onPress={() => setDetalhe(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
@@ -188,6 +190,7 @@ export default function ExcursoesScreen() {
               {label: 'Vaga',         value: detalhe?.vaga},
               {label: 'Responsável',  value: detalhe?.responsavel},
               {label: 'Telefone',     value: detalhe?.telefone || '—'},
+              {label: 'Observações',  value: detalhe?.observacoes || '—'},
             ].map(row => (
               <View key={row.label} style={s.detRow}>
                 <Text style={s.detLabel}>{row.label}</Text>
@@ -195,45 +198,51 @@ export default function ExcursoesScreen() {
               </View>
             ))}
           </View>
-        </Pressable>
+        </View>
       </Modal>
 
       {/* Modal cadastro/edição */}
       <Modal visible={modal} transparent animationType="slide">
-        <Pressable style={s.overlay} onPress={() => {limpar(); setModal(false);}}>
-          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
-            <Text style={s.sheetTitle}>{editandoId ? 'Editar Excursão' : 'Nova Excursão'}</Text>
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => {limpar(); setModal(false);}} />
+          <View style={[s.sheet, {maxHeight: '90%'}]}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={s.sheetTitle}>{editandoId ? 'Editar Excursão' : 'Nova Excursão'}</Text>
 
-            <Text style={s.label}>Nome da excursão *</Text>
-            <TextInput style={s.input} placeholder="Ex: Trans Silva - SP" placeholderTextColor={Colors.gray} value={nome} onChangeText={setNome} />
+              <Text style={s.label}>Nome da excursão *</Text>
+              <TextInput style={s.input} placeholder="Ex: Trans Silva - SP" placeholderTextColor={Colors.gray} value={nome} onChangeText={setNome} />
 
-            <View style={s.row2}>
-              <View style={{flex: 1}}>
-                <Text style={s.label}>Setor *</Text>
-                <TextInput style={s.input} placeholder="Ex: A" placeholderTextColor={Colors.gray} value={setor} onChangeText={v => setSetor(v.slice(0, 200))} autoCapitalize="characters" maxLength={200} />
+              <View style={s.row2}>
+                <View style={{flex: 1}}>
+                  <Text style={s.label}>Setor *</Text>
+                  <TextInput style={s.input} placeholder="Ex: A" placeholderTextColor={Colors.gray} value={setor} onChangeText={v => setSetor(v.slice(0, 200))} autoCapitalize="characters" maxLength={200} />
+                </View>
+                <View style={{flex: 1}}>
+                  <Text style={s.label}>Nº da vaga *</Text>
+                  <TextInput style={s.input} placeholder="Ex: 12" placeholderTextColor={Colors.gray} value={vaga} onChangeText={v => setVaga(v.slice(0, 200))} maxLength={200} />
+                </View>
               </View>
-              <View style={{flex: 1}}>
-                <Text style={s.label}>Nº da vaga *</Text>
-                <TextInput style={s.input} placeholder="Ex: 12" placeholderTextColor={Colors.gray} value={vaga} onChangeText={v => setVaga(v.slice(0, 200))} maxLength={200} />
+
+              <Text style={s.label}>Nome do responsável *</Text>
+              <TextInput style={s.input} placeholder="Nome do motorista/responsável" placeholderTextColor={Colors.gray} value={responsavel} onChangeText={setResponsavel} />
+
+              <Text style={s.label}>Telefone</Text>
+              <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} keyboardType="phone-pad" />
+
+              <Text style={s.label}>Observações</Text>
+              <TextInput style={[s.input, {height: 80, textAlignVertical: 'top', paddingTop: 12}]} placeholder="Ex: Ponto de encontro, horário de saída..." placeholderTextColor={Colors.gray} value={observacoes} onChangeText={setObservacoes} multiline />
+
+              <View style={s.btnRow}>
+                <TouchableOpacity style={s.cancelBtn} onPress={() => {limpar(); setModal(false);}}>
+                  <Text style={s.cancelBtnText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={s.saveBtn} onPress={salvar}>
+                  <Text style={s.saveBtnText}>{editandoId ? 'Salvar' : 'Cadastrar'}</Text>
+                </TouchableOpacity>
               </View>
-            </View>
-
-            <Text style={s.label}>Nome do responsável *</Text>
-            <TextInput style={s.input} placeholder="Nome do motorista/responsável" placeholderTextColor={Colors.gray} value={responsavel} onChangeText={setResponsavel} />
-
-            <Text style={s.label}>Telefone</Text>
-            <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} keyboardType="phone-pad" />
-
-            <View style={s.btnRow}>
-              <TouchableOpacity style={s.cancelBtn} onPress={() => {limpar(); setModal(false);}}>
-                <Text style={s.cancelBtnText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={s.saveBtn} onPress={salvar}>
-                <Text style={s.saveBtnText}>{editandoId ? 'Salvar' : 'Cadastrar'}</Text>
-              </TouchableOpacity>
-            </View>
+            </ScrollView>
           </View>
-        </Pressable>
+        </View>
       </Modal>
     </View>
   );

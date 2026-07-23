@@ -605,6 +605,7 @@ export type ExcursaoData = {
   vaga: string;
   responsavel: string;
   telefone?: string;
+  observacoes?: string;
 };
 
 export async function listarExcursoes(empresaId: string): Promise<{success: boolean; excursoes?: ExcursaoData[]; error?: string}> {

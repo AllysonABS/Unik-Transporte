@@ -9,6 +9,7 @@ import { cadastrarExcursao, atualizarExcursao } from '@/services/excursoes';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ const schema = z.object({
   vaga: z.string().min(1, 'Informe a vaga').max(200, 'Máximo de 200 caracteres'),
   responsavel: z.string().min(1, 'Informe o responsável'),
   telefone: z.string().optional(),
+  observacoes: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -50,15 +52,15 @@ export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Pro
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { nome: '', setor: '', vaga: '', responsavel: '', telefone: '' },
+    defaultValues: { nome: '', setor: '', vaga: '', responsavel: '', telefone: '', observacoes: '' },
   });
 
   useEffect(() => {
     if (open) {
       form.reset(
         excursao
-          ? { ...excursao, telefone: excursao.telefone ?? '' }
-          : { nome: '', setor: '', vaga: '', responsavel: '', telefone: '' },
+          ? { ...excursao, telefone: excursao.telefone ?? '', observacoes: excursao.observacoes ?? '' }
+          : { nome: '', setor: '', vaga: '', responsavel: '', telefone: '', observacoes: '' },
       );
       setServerError(null);
     }
@@ -160,6 +162,18 @@ export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Pro
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="observacoes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
             {serverError && <p className="text-sm font-medium text-destructive">{serverError}</p>}
             <DialogFooter>
               <Button type="submit" disabled={mutation.isPending}>

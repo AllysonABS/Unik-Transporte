@@ -95,6 +95,7 @@ export interface ExcursaoData {
   vaga: string;
   responsavel: string;
   telefone?: string;
+  observacoes?: string;
 }
 
 export interface NotificacaoData {

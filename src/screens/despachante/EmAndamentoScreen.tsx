@@ -121,8 +121,9 @@ export default function EmAndamentoScreen() {
       </ScrollView>
 
       <Modal visible={!!detalhe} transparent animationType="slide">
-        <Pressable style={s.overlay} onPress={() => setDetalhe(null)}>
-          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setDetalhe(null)} />
+          <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
                 <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
@@ -146,7 +147,7 @@ export default function EmAndamentoScreen() {
 
             </ScrollView>
           </View>
-        </Pressable>
+        </View>
       </Modal>
     </View>
   );

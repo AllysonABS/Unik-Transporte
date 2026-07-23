@@ -1472,7 +1472,7 @@ app.get('/api/empresa/:id/excursoes', auth, async (req, res) => {
     const user = (req as any).user as TokenPayload;
     if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
     const result = await pool.query(
-      'SELECT id, nome, setor, vaga, responsavel, telefone FROM excursoes WHERE empresa_id=$1 ORDER BY data_cadastro DESC', [id]
+      'SELECT id, nome, setor, vaga, responsavel, telefone, observacoes FROM excursoes WHERE empresa_id=$1 ORDER BY data_cadastro DESC', [id]
     );
     res.json({success: true, excursoes: result.rows});
   } catch (err: any) {
@@ -1489,7 +1489,7 @@ app.post('/api/empresa/:id/excursoes', auth, async (req, res) => {
     if (user.tipo !== 'empresa' || user.id !== id) {
       return res.status(403).json({error: 'Sem permissão.'});
     }
-    const {nome, setor, vaga, responsavel, telefone} = req.body;
+    const {nome, setor, vaga, responsavel, telefone, observacoes} = req.body;
     if (!nome || !setor || !vaga || !responsavel) {
       return res.status(400).json({error: 'Preencha todos os campos obrigatórios.'});
     }
@@ -1497,8 +1497,8 @@ app.post('/api/empresa/:id/excursoes', auth, async (req, res) => {
       return res.status(400).json({error: 'Setor e vaga devem ter no máximo 200 caracteres.'});
     }
     const result = await pool.query(
-      'INSERT INTO excursoes (empresa_id, nome, setor, vaga, responsavel, telefone) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id',
-      [id, nome, setor, vaga, responsavel, telefone || null]
+      'INSERT INTO excursoes (empresa_id, nome, setor, vaga, responsavel, telefone, observacoes) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id',
+      [id, nome, setor, vaga, responsavel, telefone || null, observacoes || null]
     );
     res.status(201).json({success: true, id: result.rows[0].id});
   } catch (err: any) {
@@ -1517,7 +1517,7 @@ app.put('/api/excursoes/:excursaoId', auth, async (req, res) => {
     const owner = await pool.query('SELECT empresa_id FROM excursoes WHERE id=$1', [excursaoId]);
     if (owner.rows.length === 0) return res.status(404).json({error: 'Excursão não encontrada.'});
     if (owner.rows[0].empresa_id !== user.id) return res.status(403).json({error: 'Sem permissão.'});
-    const {nome, setor, vaga, responsavel, telefone} = req.body;
+    const {nome, setor, vaga, responsavel, telefone, observacoes} = req.body;
     if (setor && setor.length > 200) {
       return res.status(400).json({error: 'Setor deve ter no máximo 200 caracteres.'});
     }
@@ -1525,8 +1525,8 @@ app.put('/api/excursoes/:excursaoId', auth, async (req, res) => {
       return res.status(400).json({error: 'Vaga deve ter no máximo 200 caracteres.'});
     }
     await pool.query(
-      'UPDATE excursoes SET nome=$1, setor=$2, vaga=$3, responsavel=$4, telefone=$5 WHERE id=$6',
-      [nome, setor, vaga, responsavel, telefone || null, excursaoId]
+      'UPDATE excursoes SET nome=$1, setor=$2, vaga=$3, responsavel=$4, telefone=$5, observacoes=$6 WHERE id=$7',
+      [nome, setor, vaga, responsavel, telefone || null, observacoes || null, excursaoId]
     );
     res.json({success: true});
   } catch (err: any) {

@@ -228,8 +228,9 @@ export default function PerfilScreen() {
 
       {/* Modal editar */}
       <Modal visible={modalEditar} transparent animationType="slide">
-        <Pressable style={s.overlay} onPress={() => setModalEditar(false)}>
-          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalEditar(false)} />
+          <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={s.sheetTitle}>Editar Perfil</Text>
 
@@ -280,13 +281,14 @@ export default function PerfilScreen() {
               </View>
             </ScrollView>
           </View>
-        </Pressable>
+        </View>
       </Modal>
 
       {/* Modal alterar senha */}
       <Modal visible={modalSenha} transparent animationType="slide">
-        <Pressable style={s.overlay} onPress={() => { setModalSenha(false); setSenhaAtual(''); setNovaSenha(''); setConfirmarNovaSenha(''); }}>
-          <View style={s.sheet} {...({onStartShouldSetResponder: () => true} as any)}>
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => { setModalSenha(false); setSenhaAtual(''); setNovaSenha(''); setConfirmarNovaSenha(''); }} />
+          <View style={s.sheet}>
             <Text style={s.sheetTitle}>Alterar Senha</Text>
 
             <Text style={s.label}>Senha atual</Text>
@@ -305,7 +307,7 @@ export default function PerfilScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </Pressable>
+        </View>
       </Modal>
     </View>
   );
