@@ -35,6 +35,18 @@ function maskCep(value: string): string {
   return digits.replace(/(\d{5})(\d)/, '$1-$2');
 }
 
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 10) {
+    return digits
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{4})(\d{1,4})$/, '$1-$2');
+  }
+  return digits
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+}
+
 type ClienteVinculo = {
   vinculo_id: string; cliente_id: string; status: string;
   nome: string; cpf: string; cnpj: string; rg: string;
@@ -119,12 +131,13 @@ export default function ClientesScreen() {
   };
 
   const salvarNovo = async () => {
-    if (!nome || (!cpf && !cnpj)) { show({title: 'Atenção', message: 'Preencha o nome e pelo menos CPF ou CNPJ', type: 'warning'}); return; }
+    if (!nome || !telefone) { show({title: 'Atenção', message: 'Preencha o nome e o telefone', type: 'warning'}); return; }
+    if (!cpf && !cnpj) { show({title: 'Atenção', message: 'Preencha pelo menos CPF ou CNPJ', type: 'warning'}); return; }
     if (!empresa?.id) return;
     const res = await cadastrarClienteManual(empresa.id, {
-      nome, cpf: cpf || undefined, cnpj: cnpj || undefined, rg: rg || undefined,
-      telefone: telefone || undefined, email: email || undefined,
-      data_nascimento: dataNascimento || undefined, cep: cep || undefined,
+      nome, cpf: cpf ? cpf.replace(/\D/g, '') : undefined, cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined, rg: rg || undefined,
+      telefone: telefone.replace(/\D/g, ''), email: email || undefined,
+      data_nascimento: dataNascimento || undefined, cep: cep ? cep.replace(/\D/g, '') : undefined,
       endereco: endereco || undefined, numero: numero || undefined, bairro: bairro || undefined,
       cidade: cidade || undefined, estado: estado || undefined, observacoes: observacoes || undefined,
     });
@@ -141,8 +154,8 @@ export default function ClientesScreen() {
     if (!nome || !telefone) { show({title: 'Atenção', message: 'Preencha nome e telefone', type: 'warning'}); return; }
     if (!editando) return;
     const res = await atualizarVinculoCliente(editando.vinculo_id, {
-      nome, cpf, cnpj, rg, telefone, email, data_nascimento: dataNascimento,
-      cep, endereco, numero, bairro, cidade, estado, observacoes,
+      nome, cpf: cpf.replace(/\D/g, ''), cnpj: cnpj.replace(/\D/g, ''), rg, telefone: telefone.replace(/\D/g, ''), email, data_nascimento: dataNascimento,
+      cep: cep.replace(/\D/g, ''), endereco, numero, bairro, cidade, estado, observacoes,
     });
     if (res.success) {
       showToast('Cliente atualizado!', 'success');
@@ -263,7 +276,7 @@ export default function ClientesScreen() {
 
               <Text style={s.sectionTitle}>Contato</Text>
               <Text style={s.label}>Telefone / WhatsApp *</Text>
-              <TextInput style={s.input} value={telefone} onChangeText={setTelefone} placeholderTextColor={Colors.gray} keyboardType="phone-pad" />
+              <TextInput style={s.input} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} placeholderTextColor={Colors.gray} keyboardType="phone-pad" />
               <Text style={s.label}>E-mail</Text>
               <TextInput style={s.input} value={email} onChangeText={setEmail} placeholderTextColor={Colors.gray} keyboardType="email-address" autoCapitalize="none" />
 
@@ -327,8 +340,8 @@ export default function ClientesScreen() {
               <TextInput style={s.input} value={dataNascimento} onChangeText={v => setDataNascimento(maskData(v))} placeholderTextColor={Colors.gray} placeholder="DD/MM/AAAA" keyboardType="numeric" />
 
               <Text style={s.sectionTitle}>Contato</Text>
-              <Text style={s.label}>Telefone / WhatsApp</Text>
-              <TextInput style={s.input} value={telefone} onChangeText={setTelefone} placeholderTextColor={Colors.gray} placeholder="(00) 00000-0000" keyboardType="phone-pad" />
+              <Text style={s.label}>Telefone / WhatsApp *</Text>
+              <TextInput style={s.input} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} placeholderTextColor={Colors.gray} placeholder="(00) 00000-0000" keyboardType="phone-pad" />
               <Text style={s.label}>E-mail</Text>
               <TextInput style={s.input} value={email} onChangeText={setEmail} placeholderTextColor={Colors.gray} placeholder="email@exemplo.com" keyboardType="email-address" autoCapitalize="none" />
 

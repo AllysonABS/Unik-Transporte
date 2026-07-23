@@ -780,7 +780,7 @@ app.get('/api/empresa/:id/clientes', auth, async (req, res) => {
       `SELECT ce.id as vinculo_id, ce.status, ce.nome, ce.cpf, ce.cnpj, ce.rg, ce.telefone, ce.email,
               ce.data_nascimento, ce.cep, ce.endereco, ce.numero, ce.bairro, ce.cidade, ce.estado, ce.observacoes, ce.data_vinculo,
               c.id as cliente_id, c.nome as cliente_nome, c.cpf as cliente_cpf, c.email as cliente_email, c.telefone as cliente_telefone
-       FROM cliente_empresa ce JOIN clientes c ON c.id = ce.cliente_id
+       FROM cliente_empresa ce LEFT JOIN clientes c ON c.id = ce.cliente_id
        WHERE ce.empresa_id = $1 ORDER BY ce.data_vinculo DESC`, [id]
     );
     const clientes = result.rows.map(r => ({
