@@ -58,7 +58,7 @@ export default function FilaScreen() {
 
   const iniciarColeta = (p: PedidoData) => {
     hapticLight();
-    navigation.navigate('Checklist', {pedidoId: p.id, etapa: 'coleta'});
+    navigation.navigate('Checklist', {pedidoId: p.id, etapa: 'coleta', volumes: p.volumes});
   };
 
   const filtrados = fila.filter(p => {

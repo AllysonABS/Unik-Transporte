@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
+import {NavigatorScreenParams} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createMaterialTopTabNavigator, MaterialTopTabBarProps} from '@react-navigation/material-top-tabs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -12,13 +13,19 @@ import ChecklistScreen from '../screens/despachante/ChecklistScreen';
 import {startSyncListener, stopSyncListener} from '../services/syncManager';
 import {useLogout} from '../hooks/useLogout';
 
+export type DespachanteTabParamList = {
+  Fila: undefined;
+  'Em Andamento': {abrirPedidoId?: string} | undefined;
+  Histórico: undefined;
+};
+
 export type DespachanteStackParamList = {
-  Tabs: undefined;
-  Checklist: {pedidoId: string; etapa: 'coleta' | 'entrega'};
+  Tabs: NavigatorScreenParams<DespachanteTabParamList> | undefined;
+  Checklist: {pedidoId: string; etapa: 'coleta' | 'entrega'; volumes?: number};
 };
 
 const Stack = createNativeStackNavigator<DespachanteStackParamList>();
-const Tab = createMaterialTopTabNavigator();
+const Tab = createMaterialTopTabNavigator<DespachanteTabParamList>();
 
 const iconMap: Record<string, string> = {
   Fila: 'clipboard',

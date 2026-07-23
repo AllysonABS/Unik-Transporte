@@ -1,8 +1,9 @@
-import React, {useState, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, RefreshControl, Pressable} from 'react-native';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import {useNavigation, useRoute, useFocusEffect, RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {DespachanteStackParamList} from '../../navigation/DespachanteNavigator';
+import {MaterialTopTabNavigationProp} from '@react-navigation/material-top-tabs';
+import {DespachanteStackParamList, DespachanteTabParamList} from '../../navigation/DespachanteNavigator';
 import {Colors} from '../../theme/colors';
 import {useAuth} from '../../context/AuthContext';
 import {listarPedidosDespachante, PedidoData} from '../../services/api';
@@ -15,8 +16,11 @@ import OfflineBanner from '../../components/OfflineBanner';
 import {SkeletonCard} from '../../components/Skeleton';
 import {hapticLight} from '../../utils/haptics';
 
+type EmAndamentoNavProp = NativeStackNavigationProp<DespachanteStackParamList> & MaterialTopTabNavigationProp<DespachanteTabParamList, 'Em Andamento'>;
+
 export default function EmAndamentoScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<DespachanteStackParamList>>();
+  const navigation = useNavigation<EmAndamentoNavProp>();
+  const route = useRoute<RouteProp<DespachanteTabParamList, 'Em Andamento'>>();
   const {despachante} = useAuth();
   const [pedidos, setPedidos] = useState<PedidoData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +53,16 @@ export default function EmAndamentoScreen() {
     }
   }, [despachante?.id]));
 
+  useEffect(() => {
+    const abrirPedidoId = route.params?.abrirPedidoId;
+    if (!abrirPedidoId) return;
+    const pedido = pedidos.find(p => p.id === abrirPedidoId);
+    if (pedido) {
+      setDetalhe(pedido);
+      navigation.setParams({abrirPedidoId: undefined});
+    }
+  }, [pedidos, route.params?.abrirPedidoId]);
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     carregar().finally(() => setRefreshing(false));
@@ -77,7 +91,7 @@ export default function EmAndamentoScreen() {
         ) : pedidos.length === 0 ? (
           <EmptyState icon="navigation" title="Nenhum pedido em andamento" subtitle="Inicie uma coleta na aba Fila para ver aqui" />
         ) : pedidos.map(p => {
-          const etapaAtual = p.etapas?.find(e => !e.concluida)?.nome || 'Em andamento';
+          const etapaAtual = 'Em rota para a excursão';
           return (
             <View key={p.id} style={s.card} accessibilityLabel={`Pedido ${p.numero}, ${p.cliente_nome}, ${etapaAtual}`}>
               <View style={s.cardLeft}>

@@ -35,32 +35,41 @@ async function solicitarPermissaoCamera(): Promise<boolean> {
 
 type Props = NativeStackScreenProps<DespachanteStackParamList, 'Checklist'>;
 
-const checklistColeta = [
-  'Pedido identificado e conferido',
-  'Volumes contados e corretos',
-  'Embalagem em bom estado',
-];
-
-const checklistEntrega = [
-  'Chegou na excursão de destino',
-  'Pedido entregue ao responsável',
-  'Conferência realizada',
-];
-
 export default function ChecklistScreen({route, navigation}: Props) {
-  const {pedidoId, etapa} = route.params;
-  const itens = etapa === 'coleta' ? checklistColeta : checklistEntrega;
+  const {pedidoId, etapa, volumes} = route.params;
+  const isColeta = etapa === 'coleta';
   const {show} = useAlert();
   const isOnline = useNetworkStatus();
 
-  const [marcados, setMarcados] = useState<boolean[]>(new Array(itens.length).fill(false));
+  const [pedidoConferido, setPedidoConferido] = useState(false);
+  const [volumesConferidos, setVolumesConferidos] = useState(false);
+  const [pedidoConferidoExcursao, setPedidoConferidoExcursao] = useState(false);
+  const [entregaRealizada, setEntregaRealizada] = useState(false);
   const [fotos, setFotos] = useState<string[]>([]);
   const [observacao, setObservacao] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const toggle = (i: number) => {
+  const confirmadoColeta = pedidoConferido && volumesConferidos;
+  const checklistEntregaOk = pedidoConferidoExcursao && entregaRealizada;
+
+  const togglePedidoConferido = () => {
     hapticLight();
-    setMarcados(prev => prev.map((v, idx) => idx === i ? !v : v));
+    setPedidoConferido(prev => !prev);
+  };
+
+  const toggleVolumesConferidos = () => {
+    hapticLight();
+    setVolumesConferidos(prev => !prev);
+  };
+
+  const togglePedidoConferidoExcursao = () => {
+    hapticLight();
+    setPedidoConferidoExcursao(prev => !prev);
+  };
+
+  const toggleEntregaRealizada = () => {
+    hapticLight();
+    setEntregaRealizada(prev => !prev);
   };
 
   const tirarFoto = async () => {
@@ -94,16 +103,23 @@ export default function ChecklistScreen({route, navigation}: Props) {
   };
 
   const concluir = async () => {
-    const todos = marcados.every(Boolean);
-    if (!todos) {
-      hapticWarning();
-      show({title: 'Atenção', message: 'Marque todos os itens do checklist.', type: 'warning'});
-      return;
-    }
-    if (fotos.length === 0) {
-      hapticWarning();
-      show({title: 'Atenção', message: 'Tire pelo menos uma foto para comprovar.', type: 'warning'});
-      return;
+    if (isColeta) {
+      if (!confirmadoColeta) {
+        hapticWarning();
+        show({title: 'Atenção', message: 'Marque o pedido e os volumes como conferidos.', type: 'warning'});
+        return;
+      }
+    } else {
+      if (!checklistEntregaOk) {
+        hapticWarning();
+        show({title: 'Atenção', message: 'Marque a conferência da excursão e a entrega realizada.', type: 'warning'});
+        return;
+      }
+      if (fotos.length === 0) {
+        hapticWarning();
+        show({title: 'Atenção', message: 'Tire pelo menos uma foto para comprovar.', type: 'warning'});
+        return;
+      }
     }
 
     setLoading(true);
@@ -129,19 +145,15 @@ export default function ChecklistScreen({route, navigation}: Props) {
     setLoading(false);
     hapticSuccess();
 
-    const msgExtra = isOnline ? '' : '\nSerá sincronizado quando a internet voltar.';
-    if (etapa === 'coleta') {
-      show({title: 'Coleta confirmada!', message: `Pedido em rota para excursão.${msgExtra}`, type: 'success', buttons: [
-        {text: 'OK', onPress: () => navigation.goBack()},
-      ]});
+    if (isColeta) {
+      navigation.navigate('Tabs', {screen: 'Em Andamento', params: {abrirPedidoId: pedidoId}});
     } else {
+      const msgExtra = isOnline ? '' : '\nSerá sincronizado quando a internet voltar.';
       show({title: 'Entrega confirmada!', message: `Pedido finalizado com sucesso.${msgExtra}`, type: 'success', buttons: [
         {text: 'OK', onPress: () => navigation.goBack()},
       ]});
     }
   };
-
-  const total = marcados.filter(Boolean).length;
 
   return (
     <View style={s.container}>
@@ -160,83 +172,130 @@ export default function ChecklistScreen({route, navigation}: Props) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>
         <View style={s.etapaHeader}>
           <View style={s.etapaIconWrap}>
-            <Icon name={etapa === 'coleta' ? 'package' : 'flag'} size={24} color={Colors.pulso} />
+            <Icon name={isColeta ? 'package' : 'flag'} size={24} color={Colors.pulso} />
           </View>
           <View>
             <Text style={s.etapaTitulo} accessibilityRole="header">
-              {etapa === 'coleta' ? 'Checklist de Coleta' : 'Checklist de Entrega'}
+              {isColeta ? 'Conferência do Pedido' : 'Confirmação de Entrega'}
             </Text>
-            <Text style={s.etapaSub}>{total}/{itens.length} itens concluídos</Text>
           </View>
         </View>
 
-        <View style={s.progressBg}>
-          <View style={[s.progressFill, {width: `${(total / itens.length) * 100}%`}]} />
-        </View>
+        {isColeta ? (
+          <>
+            <TouchableOpacity
+              style={s.checkItem}
+              onPress={togglePedidoConferido}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityState={{checked: pedidoConferido}}
+              accessibilityLabel="Pedido conferido">
+              <View style={[s.checkbox, pedidoConferido && s.checkboxOn]}>
+                {pedidoConferido && <Icon name="check" size={14} color={Colors.matriz} />}
+              </View>
+              <Text style={[s.checkLabel, pedidoConferido && s.checkLabelDone]}>Pedido Conferido</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={s.checkItem}
+              onPress={toggleVolumesConferidos}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityState={{checked: volumesConferidos}}
+              accessibilityLabel="Volumes conferidos">
+              <View style={[s.checkbox, volumesConferidos && s.checkboxOn]}>
+                {volumesConferidos && <Icon name="check" size={14} color={Colors.matriz} />}
+              </View>
+              <Text style={[s.checkLabel, volumesConferidos && s.checkLabelDone]}>
+                Volumes Conferidos{volumes != null ? ` (${volumes} vol.)` : ''}
+              </Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={s.checkItem}
+              onPress={togglePedidoConferidoExcursao}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityState={{checked: pedidoConferidoExcursao}}
+              accessibilityLabel="Pedido conferido pela excursão">
+              <View style={[s.checkbox, pedidoConferidoExcursao && s.checkboxOn]}>
+                {pedidoConferidoExcursao && <Icon name="check" size={14} color={Colors.matriz} />}
+              </View>
+              <Text style={[s.checkLabel, pedidoConferidoExcursao && s.checkLabelDone]}>
+                Pedido Conferido pela Excursão
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={s.checkItem}
+              onPress={toggleEntregaRealizada}
+              activeOpacity={0.7}
+              accessibilityRole="checkbox"
+              accessibilityState={{checked: entregaRealizada}}
+              accessibilityLabel="Entrega realizada">
+              <View style={[s.checkbox, entregaRealizada && s.checkboxOn]}>
+                {entregaRealizada && <Icon name="check" size={14} color={Colors.matriz} />}
+              </View>
+              <Text style={[s.checkLabel, entregaRealizada && s.checkLabelDone]}>Entrega Realizada</Text>
+            </TouchableOpacity>
 
-        <Text style={s.section}>Itens</Text>
-        {itens.map((item, i) => (
-          <TouchableOpacity
-            key={i}
-            style={s.checkItem}
-            onPress={() => toggle(i)}
-            activeOpacity={0.7}
-            accessibilityRole="checkbox"
-            accessibilityState={{checked: marcados[i]}}
-            accessibilityLabel={item}>
-            <View style={[s.checkbox, marcados[i] && s.checkboxOn]}>
-              {marcados[i] && <Icon name="check" size={14} color={Colors.matriz} />}
-            </View>
-            <Text style={[s.checkLabel, marcados[i] && s.checkLabelDone]}>{item}</Text>
-          </TouchableOpacity>
-        ))}
-
-        <Text style={s.section}>Fotos ({fotos.length})</Text>
-        <View style={s.fotosRow}>
-          {fotos.map((uri, i) => (
-            <Image key={i} source={{uri}} style={s.foto} accessibilityLabel={`Foto ${i + 1}`} />
-          ))}
-          <TouchableOpacity
-            style={s.addFoto}
-            onPress={tirarFoto}
-            accessibilityRole="button"
-            accessibilityLabel="Tirar foto com câmera">
-            <Icon name="camera" size={22} color={Colors.gray} />
-            <Text style={s.addFotoText}>Câmera</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={s.addFoto}
-            onPress={abrirGaleria}
-            accessibilityRole="button"
-            accessibilityLabel="Escolher foto da galeria">
-            <Icon name="image" size={22} color={Colors.gray} />
-            <Text style={s.addFotoText}>Galeria</Text>
-          </TouchableOpacity>
-        </View>
+            {checklistEntregaOk && (
+              <>
+                <Text style={s.section}>Fotos ({fotos.length})</Text>
+                <View style={s.fotosRow}>
+                  {fotos.map((uri, i) => (
+                    <Image key={i} source={{uri}} style={s.foto} accessibilityLabel={`Foto ${i + 1}`} />
+                  ))}
+                  <TouchableOpacity
+                    style={s.addFoto}
+                    onPress={tirarFoto}
+                    accessibilityRole="button"
+                    accessibilityLabel="Tirar foto com câmera">
+                    <Icon name="camera" size={22} color={Colors.gray} />
+                    <Text style={s.addFotoText}>Câmera</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={s.addFoto}
+                    onPress={abrirGaleria}
+                    accessibilityRole="button"
+                    accessibilityLabel="Escolher foto da galeria">
+                    <Icon name="image" size={22} color={Colors.gray} />
+                    <Text style={s.addFotoText}>Galeria</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </>
+        )}
 
         <Text style={s.section}>Observação (opcional)</Text>
         <TextInput
           style={s.obsInput}
           value={observacao}
           onChangeText={setObservacao}
-          placeholder="Ex: Cliente não estava, deixei com porteiro..."
+          placeholder="Ex: Volume 2 falta etiqueta"
           placeholderTextColor={Colors.gray}
           multiline
           accessibilityLabel="Campo de observação"
         />
 
         <TouchableOpacity
-          style={[s.concluirBtn, (total < itens.length || loading) && s.concluirDisabled]}
+          style={[
+            s.concluirBtn,
+            (isColeta ? !confirmadoColeta : !checklistEntregaOk || fotos.length === 0) || loading
+              ? s.concluirDisabled
+              : null,
+          ]}
           onPress={concluir}
           activeOpacity={0.85}
-          disabled={loading || total < itens.length}
+          disabled={loading || (isColeta ? !confirmadoColeta : !checklistEntregaOk || fotos.length === 0)}
           accessibilityRole="button"
-          accessibilityLabel={etapa === 'coleta' ? 'Confirmar coleta' : 'Confirmar entrega'}
-          accessibilityState={{disabled: loading || total < itens.length}}>
+          accessibilityLabel={isColeta ? 'Ir para próxima etapa' : 'Confirmar entrega'}
+          accessibilityState={{disabled: loading || (isColeta ? !confirmadoColeta : !checklistEntregaOk || fotos.length === 0)}}>
           {loading
             ? <ActivityIndicator color={Colors.matriz} />
             : <Text style={s.concluirText}>
-                {etapa === 'coleta' ? 'Confirmar Coleta' : 'Confirmar Entrega'}
+                {isColeta ? 'Ir para Próxima Etapa' : 'Confirmar Entrega'}
               </Text>}
         </TouchableOpacity>
       </ScrollView>
