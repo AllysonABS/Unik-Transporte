@@ -34,10 +34,10 @@ export default function DashboardPage() {
   const stats = data?.stats;
 
   const hoje = new Date().toDateString();
-  const pedidosHoje = pedidos.filter(p => new Date(p.criado_em).toDateString() === hoje);
-  const emTransito = pedidos.filter(p => p.status === 'em_transito').length;
-  const aguardando = pedidos.filter(p => p.status === 'aguardando').length;
-  const entreguesHoje = pedidosHoje.filter(p => p.status === 'entregue').length;
+  const pedidosHoje = pedidos.filter((p: PedidoData) => new Date(p.criado_em).toDateString() === hoje);
+  const emTransito = pedidos.filter((p: PedidoData) => p.status === 'em_transito').length;
+  const aguardando = pedidos.filter((p: PedidoData) => p.status === 'aguardando').length;
+  const entreguesHoje = pedidosHoje.filter((p: PedidoData) => p.status === 'entregue').length;
   const recentes = pedidos.slice(0, 5);
 
   const statCards = [
@@ -111,7 +111,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-2">
-                {recentes.map(p => (
+                {recentes.map((p: PedidoData) => (
                   <button
                     key={p.id}
                     onClick={() => setDetalheId(p.id)}

@@ -1,5 +1,6 @@
 import React, {useState, useCallback, useRef} from 'react';
 import {View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput, RefreshControl, ActivityIndicator, Pressable} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 import {Colors} from '../../theme/colors';
 import Toast, {useToast} from '../../components/Toast';
@@ -34,46 +35,56 @@ function PickerModal({visible, title, items, onSelect, onClose, emptyText}: {
   visible: boolean; title: string; items: PickerItem[]; onSelect: (item: PickerItem) => void; onClose: () => void; emptyText: string;
 }) {
   const [search, setSearch] = useState('');
+  const insets = useSafeAreaInsets();
+  if (!visible) return null;
   const filtered = items.filter(i => i.label.toLowerCase().includes(search.toLowerCase()));
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={pk.overlay}>
-        <View style={pk.container}>
+    <Pressable style={pk.overlay} onPress={() => {}}>
+      <View style={[pk.container, {paddingBottom: 24 + insets.bottom}]}>
+        <View style={pk.handle} />
+        <View style={pk.header}>
           <Text style={pk.title}>{title}</Text>
-          <View style={pk.searchBox}>
-            <Icon name="search" size={14} color={Colors.gray} />
-            <TextInput style={pk.searchInput} placeholder="Buscar..." placeholderTextColor={Colors.gray} value={search} onChangeText={setSearch} />
-          </View>
-          <ScrollView style={pk.list} showsVerticalScrollIndicator={false}>
-            {filtered.length === 0 ? (
-              <Text style={pk.empty}>{emptyText}</Text>
-            ) : filtered.map(item => (
-              <TouchableOpacity key={item.key} style={pk.item} onPress={() => { onSelect(item); setSearch(''); }}>
-                <Text style={pk.itemText}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-          <TouchableOpacity style={pk.closeBtn} onPress={() => { onClose(); setSearch(''); }}>
-            <Text style={pk.closeBtnText}>Fechar</Text>
+          <TouchableOpacity onPress={() => { onClose(); setSearch(''); }} style={pk.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
+            <Icon name="x" size={17} color={Colors.gray} />
           </TouchableOpacity>
         </View>
+        <View style={pk.searchBox}>
+          <Icon name="search" size={15} color={Colors.gray} />
+          <TextInput style={pk.searchInput} placeholder="Buscar..." placeholderTextColor={Colors.gray} value={search} onChangeText={setSearch} />
+        </View>
+        <ScrollView style={pk.list} showsVerticalScrollIndicator={false}>
+          {filtered.length === 0 ? (
+            <Text style={pk.empty}>{emptyText}</Text>
+          ) : filtered.map((item, index) => (
+            <TouchableOpacity
+              key={item.key}
+              style={[pk.item, index < filtered.length - 1 && pk.itemDivider]}
+              onPress={() => { onSelect(item); setSearch(''); }}
+              activeOpacity={0.6}>
+              <Text style={pk.itemText}>{item.label}</Text>
+              <Icon name="chevron-right" size={16} color="rgba(234,235,235,0.2)" />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
-    </Modal>
+    </Pressable>
   );
 }
 
 const pk = StyleSheet.create({
-  overlay:    {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', paddingHorizontal: 24},
-  container:  {backgroundColor: '#0F1F2E', borderRadius: 16, padding: 20, maxHeight: '70%'},
-  title:      {fontSize: 18, fontWeight: '700', color: Colors.clareza, marginBottom: 12},
-  searchBox:  {flexDirection: 'row', alignItems: 'center', backgroundColor: '#162433', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 12, gap: 8, marginBottom: 12},
-  searchInput:{flex: 1, height: 40, color: Colors.clareza, fontSize: 14},
-  list:       {maxHeight: 250},
-  item:       {paddingVertical: 14, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
-  itemText:   {fontSize: 15, color: Colors.clareza},
-  empty:      {padding: 20, color: Colors.gray, fontSize: 14, textAlign: 'center'},
-  closeBtn:   {height: 44, backgroundColor: '#162433', borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 12, borderWidth: 1, borderColor: '#1E3448'},
-  closeBtnText:{color: Colors.clareza, fontWeight: '600', fontSize: 14},
+  overlay:    {position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, elevation: 20, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
+  container:  {backgroundColor: '#131F2D', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 24, paddingTop: 12, maxHeight: '75%'},
+  handle:     {width: 36, height: 4, borderRadius: 2, backgroundColor: 'rgba(234,235,235,0.15)', alignSelf: 'center', marginBottom: 16},
+  header:     {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16},
+  title:      {fontSize: 19, fontWeight: '700', color: Colors.clareza, letterSpacing: -0.3},
+  closeX:     {width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(234,235,235,0.06)', alignItems: 'center', justifyContent: 'center'},
+  searchBox:  {flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(234,235,235,0.06)', borderRadius: 12, paddingHorizontal: 14, height: 44, gap: 10, marginBottom: 4},
+  searchInput:{flex: 1, color: Colors.clareza, fontSize: 14},
+  list:       {maxHeight: 280},
+  item:       {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 15},
+  itemDivider:{borderBottomWidth: 1, borderBottomColor: 'rgba(234,235,235,0.06)'},
+  itemText:   {fontSize: 15, color: Colors.clareza, fontWeight: '500'},
+  empty:      {padding: 24, color: Colors.gray, fontSize: 14, textAlign: 'center'},
 });
 
 export default function PedidosScreen() {
@@ -154,6 +165,9 @@ export default function PedidosScreen() {
   const handleCriar = async () => {
     if (!novoCliente || !novoDespachante || !novoExcursao || !novoVolumes) {
       show({title: 'Atenção', message: 'Preencha os campos obrigatórios.', type: 'warning'}); return;
+    }
+    if (parseInt(novoVolumes, 10) < 1) {
+      show({title: 'Atenção', message: 'A quantidade de volumes deve ser entre 1 e 100.', type: 'warning'}); return;
     }
     if (!empresa?.id) return;
     setCriando(true);
@@ -261,8 +275,9 @@ export default function PedidosScreen() {
                 <Text style={s.cardCliente}>{p.cliente_nome}</Text>
               </View>
               <View style={s.cardRow}>
-                <Icon name="truck" size={13} color={Colors.gray} />
-                <Text style={s.cardDesp}>{p.despachante_nome} · {p.volumes} vol.</Text>
+                <Icon name="truck" size={13} color="#60A5FA" />
+                <Text style={s.cardDesp}>{p.despachante_nome}</Text>
+                <Text style={s.cardVol}> · {p.volumes} vol.</Text>
               </View>
               <View style={s.progressRow}>
                 <View style={s.progressBg}>
@@ -294,7 +309,7 @@ export default function PedidosScreen() {
                 </View>
               </View>
               <View style={s.detRow}><Text style={s.detLabel}>Cliente</Text><Text style={s.detValue}>{detalhe?.cliente_nome}</Text></View>
-              <View style={s.detRow}><Text style={s.detLabel}>Despachante</Text><Text style={s.detValue}>{detalhe?.despachante_nome}</Text></View>
+              <View style={s.detRow}><Text style={s.detLabel}>Despachante</Text><Text style={[s.detValue, s.detValueDesp]}>{detalhe?.despachante_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Excursão</Text><Text style={s.detValue}>{detalhe?.excursao_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Volumes</Text><Text style={s.detValue}>{detalhe?.volumes}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{detalhe?.descricao || '—'}</Text></View>
@@ -353,7 +368,11 @@ export default function PedidosScreen() {
               </TouchableOpacity>
 
               <Text style={s.label}>Quantidade de volumes *</Text>
-              <TextInput style={s.input} placeholder="Ex: 3" placeholderTextColor={Colors.gray} value={novoVolumes} onChangeText={setNovoVolumes} keyboardType="numeric" accessibilityLabel="Quantidade de volumes" />
+              <TextInput style={s.input} placeholder="Ex: 3" placeholderTextColor={Colors.gray} value={novoVolumes} onChangeText={text => {
+                const digitos = text.replace(/[^0-9]/g, '');
+                if (digitos !== '' && parseInt(digitos, 10) > 100) return;
+                setNovoVolumes(digitos);
+              }} keyboardType="numeric" accessibilityLabel="Quantidade de volumes" />
 
               <Text style={s.label}>Descrição</Text>
               <TextInput style={[s.input, {height: 70, textAlignVertical: 'top', paddingTop: 12}]} placeholder="Descreva os itens..." placeholderTextColor={Colors.gray} value={novoDescricao} onChangeText={setNovoDescricao} multiline accessibilityLabel="Descrição do pedido" />
@@ -368,34 +387,33 @@ export default function PedidosScreen() {
               </View>
             </ScrollView>
           </Pressable>
+
+          <PickerModal
+            visible={showPickerCliente}
+            title="Selecionar Cliente"
+            items={clientes.map(c => ({key: c.vinculo_id, label: c.nome, data: c}))}
+            onSelect={(item) => { setNovoCliente(item.data); setShowPickerCliente(false); }}
+            onClose={() => setShowPickerCliente(false)}
+            emptyText="Nenhum cliente vinculado"
+          />
+          <PickerModal
+            visible={showPickerDesp}
+            title="Selecionar Despachante"
+            items={despachantes.map(d => ({key: d.id, label: d.nome, data: d}))}
+            onSelect={(item) => { setNovoDespachante(item.data); setShowPickerDesp(false); }}
+            onClose={() => setShowPickerDesp(false)}
+            emptyText="Nenhum despachante cadastrado"
+          />
+          <PickerModal
+            visible={showPickerExc}
+            title="Selecionar Excursão"
+            items={excursoes.map(e => ({key: e.id, label: `${e.nome} (Setor ${e.setor}, Vaga ${e.vaga})`, data: e}))}
+            onSelect={(item) => { setNovoExcursao(item.data); setShowPickerExc(false); }}
+            onClose={() => setShowPickerExc(false)}
+            emptyText="Nenhuma excursão cadastrada"
+          />
         </Pressable>
       </Modal>
-
-      {/* Picker modals */}
-      <PickerModal
-        visible={showPickerCliente}
-        title="Selecionar Cliente"
-        items={clientes.map(c => ({key: c.vinculo_id, label: c.nome, data: c}))}
-        onSelect={(item) => { setNovoCliente(item.data); setShowPickerCliente(false); }}
-        onClose={() => setShowPickerCliente(false)}
-        emptyText="Nenhum cliente vinculado"
-      />
-      <PickerModal
-        visible={showPickerDesp}
-        title="Selecionar Despachante"
-        items={despachantes.map(d => ({key: d.id, label: d.nome, data: d}))}
-        onSelect={(item) => { setNovoDespachante(item.data); setShowPickerDesp(false); }}
-        onClose={() => setShowPickerDesp(false)}
-        emptyText="Nenhum despachante cadastrado"
-      />
-      <PickerModal
-        visible={showPickerExc}
-        title="Selecionar Excursão"
-        items={excursoes.map(e => ({key: e.id, label: `${e.nome} (Setor ${e.setor}, Vaga ${e.vaga})`, data: e}))}
-        onSelect={(item) => { setNovoExcursao(item.data); setShowPickerExc(false); }}
-        onClose={() => setShowPickerExc(false)}
-        emptyText="Nenhuma excursão cadastrada"
-      />
     </View>
   );
 }
@@ -421,7 +439,8 @@ const s = StyleSheet.create({
   badgeText:    {fontSize: 12, fontWeight: '700'},
   cardRow:      {flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4},
   cardCliente:  {fontSize: 13, color: Colors.clareza},
-  cardDesp:     {fontSize: 13, color: Colors.gray},
+  cardDesp:     {fontSize: 13, color: '#60A5FA', fontWeight: '600'},
+  cardVol:      {fontSize: 13, color: Colors.gray},
   progressRow:  {flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8},
   progressBg:   {flex: 1, height: 6, backgroundColor: '#1E3448', borderRadius: 3, overflow: 'hidden'},
   progressFill: {height: 6, borderRadius: 3},
@@ -435,6 +454,7 @@ const s = StyleSheet.create({
   detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
   detLabel:     {fontSize: 13, color: Colors.gray},
   detValue:     {fontSize: 13, fontWeight: '600', color: Colors.clareza, flex: 1, textAlign: 'right'},
+  detValueDesp: {color: '#60A5FA'},
   sectionTitle: {fontSize: 14, fontWeight: '700', color: Colors.pulso, marginTop: 20, marginBottom: 12},
   etapaRow:     {flexDirection: 'row', alignItems: 'center', marginBottom: 16, position: 'relative'},
   etapaDot:     {width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#1E3448', backgroundColor: '#0F1F2E', marginRight: 10},

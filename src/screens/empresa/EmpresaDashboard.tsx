@@ -131,11 +131,11 @@ export default function EmpresaDashboard() {
         <>
           <View style={s.statsGrid}>
             {stats.map(item => (
-              <TouchableOpacity key={item.label} style={s.statCard} activeOpacity={0.7} onPress={() => (navigation as any).navigate(item.route)} accessibilityRole="button" accessibilityLabel={`${item.label}: ${item.value}`}>
-                <View style={s.statTopRow}>
-                  <Icon name={item.icon} size={22} color={item.color} />
-                  <Text style={[s.statValue, {color: item.color}]}>{item.value}</Text>
+              <TouchableOpacity key={item.label} style={s.statCard} activeOpacity={0.75} onPress={() => (navigation as any).navigate(item.route)} accessibilityRole="button" accessibilityLabel={`${item.label}: ${item.value}`}>
+                <View style={[s.statIconBadge, {backgroundColor: item.color + '1A'}]}>
+                  <Icon name={item.icon} size={21} color={item.color} />
                 </View>
+                <Text style={s.statValue}>{item.value}</Text>
                 <Text style={s.statLabel}>{item.label}</Text>
               </TouchableOpacity>
             ))}
@@ -241,10 +241,10 @@ const s = StyleSheet.create({
   notifBtn:    {position: 'relative', padding: 8},
   badgeNotif:  {position: 'absolute', top: 2, right: 2, backgroundColor: '#EF4444', borderRadius: 10, minWidth: 18, height: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4},
   badgeNotifText:{color: '#FFF', fontSize: 10, fontWeight: '800'},
-  statsGrid:   {flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24},
-  statCard:    {flex: 1, minWidth: '45%', backgroundColor: '#162433', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#1E3448', gap: 6},
-  statTopRow:  {flexDirection: 'row', alignItems: 'center', gap: 10},
-  statValue:   {fontSize: 28, fontWeight: '800'},
+  statsGrid:   {flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 28},
+  statCard:    {flex: 1, minWidth: '46%', backgroundColor: '#131F2D', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(234,235,235,0.05)', gap: 10},
+  statIconBadge: {width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center'},
+  statValue:   {fontSize: 26, fontWeight: '700', color: Colors.clareza},
   statLabel:   {fontSize: 12, color: Colors.gray, fontWeight: '500'},
   section:     {fontSize: 13, color: Colors.gray, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: '600', marginBottom: 12, marginTop: 8},
   statusRow:   {flexDirection: 'row', gap: 10, marginBottom: 20},

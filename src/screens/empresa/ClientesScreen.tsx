@@ -30,6 +30,10 @@ function maskData(value: string): string {
   return digits.replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})(\d)/, '$1/$2');
 }
 
+function maskRg(value: string): string {
+  return value.replace(/\D/g, '').slice(0, 10);
+}
+
 function maskCep(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 8);
   return digits.replace(/(\d{5})(\d)/, '$1-$2');
@@ -138,7 +142,7 @@ export default function ClientesScreen() {
       nome, cpf: cpf ? cpf.replace(/\D/g, '') : undefined, cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined, rg: rg || undefined,
       telefone: telefone.replace(/\D/g, ''), email: email || undefined,
       data_nascimento: dataNascimento || undefined, cep: cep ? cep.replace(/\D/g, '') : undefined,
-      endereco: endereco || undefined, numero: numero || undefined, bairro: bairro || undefined,
+      endereco: endereco || undefined, numero: numero || 's/n', bairro: bairro || undefined,
       cidade: cidade || undefined, estado: estado || undefined, observacoes: observacoes || undefined,
     });
     if (res.success) {
@@ -155,7 +159,7 @@ export default function ClientesScreen() {
     if (!editando) return;
     const res = await atualizarVinculoCliente(editando.vinculo_id, {
       nome, cpf: cpf.replace(/\D/g, ''), cnpj: cnpj.replace(/\D/g, ''), rg, telefone: telefone.replace(/\D/g, ''), email, data_nascimento: dataNascimento,
-      cep: cep.replace(/\D/g, ''), endereco, numero, bairro, cidade, estado, observacoes,
+      cep: cep.replace(/\D/g, ''), endereco, numero: numero || 's/n', bairro, cidade, estado, observacoes,
     });
     if (res.success) {
       showToast('Cliente atualizado!', 'success');
@@ -270,7 +274,7 @@ export default function ClientesScreen() {
               <Text style={s.label}>CNPJ</Text>
               <TextInput style={s.input} value={cnpj} onChangeText={v => setCnpj(maskCnpj(v))} placeholderTextColor={Colors.gray} keyboardType="numeric" />
               <Text style={s.label}>RG</Text>
-              <TextInput style={s.input} value={rg} onChangeText={setRg} placeholderTextColor={Colors.gray} />
+              <TextInput style={s.input} value={rg} onChangeText={v => setRg(maskRg(v))} placeholderTextColor={Colors.gray} keyboardType="numeric" />
               <Text style={s.label}>Data de Nascimento</Text>
               <TextInput style={s.input} value={dataNascimento} onChangeText={v => setDataNascimento(maskData(v))} placeholderTextColor={Colors.gray} keyboardType="numeric" />
 
@@ -288,7 +292,7 @@ export default function ClientesScreen() {
               <View style={s.row}>
                 <View style={{flex: 1}}>
                   <Text style={s.label}>Número</Text>
-                  <TextInput style={s.input} value={numero} onChangeText={setNumero} placeholderTextColor={Colors.gray} keyboardType="numeric" />
+                  <TextInput style={s.input} value={numero} onChangeText={v => setNumero(v.slice(0, 10))} placeholderTextColor={Colors.gray} placeholder="10 ou s/n" />
                 </View>
                 <View style={{flex: 2, marginLeft: 12}}>
                   <Text style={s.label}>Bairro</Text>
@@ -335,7 +339,7 @@ export default function ClientesScreen() {
               <Text style={s.label}>CNPJ</Text>
               <TextInput style={s.input} value={cnpj} onChangeText={v => setCnpj(maskCnpj(v))} placeholderTextColor={Colors.gray} placeholder="00.000.000/0000-00" keyboardType="numeric" />
               <Text style={s.label}>RG</Text>
-              <TextInput style={s.input} value={rg} onChangeText={setRg} placeholderTextColor={Colors.gray} />
+              <TextInput style={s.input} value={rg} onChangeText={v => setRg(maskRg(v))} placeholderTextColor={Colors.gray} keyboardType="numeric" />
               <Text style={s.label}>Data de Nascimento</Text>
               <TextInput style={s.input} value={dataNascimento} onChangeText={v => setDataNascimento(maskData(v))} placeholderTextColor={Colors.gray} placeholder="DD/MM/AAAA" keyboardType="numeric" />
 
@@ -353,7 +357,7 @@ export default function ClientesScreen() {
               <View style={s.row}>
                 <View style={{flex: 1}}>
                   <Text style={s.label}>Número</Text>
-                  <TextInput style={s.input} value={numero} onChangeText={setNumero} placeholderTextColor={Colors.gray} keyboardType="numeric" />
+                  <TextInput style={s.input} value={numero} onChangeText={v => setNumero(v.slice(0, 10))} placeholderTextColor={Colors.gray} placeholder="10 ou s/n" />
                 </View>
                 <View style={{flex: 2, marginLeft: 12}}>
                   <Text style={s.label}>Bairro</Text>

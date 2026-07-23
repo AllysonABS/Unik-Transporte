@@ -37,7 +37,7 @@ export default function Toast() {
 }
 
 const s = StyleSheet.create({
-  container: {position: 'absolute', top: 60, left: 24, right: 24, borderRadius: 10, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, zIndex: 9999},
+  container: {position: 'absolute', top: '75%', left: 24, right: 24, borderRadius: 10, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, zIndex: 9999},
   icon: {fontSize: 18, fontWeight: '800'},
   text: {fontSize: 14, fontWeight: '600', flex: 1},
 });

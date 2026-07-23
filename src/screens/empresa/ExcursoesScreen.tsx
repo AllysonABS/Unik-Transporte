@@ -9,6 +9,18 @@ import {listarExcursoes, cadastrarExcursao, atualizarExcursao, excluirExcursao, 
 import {useAlert} from '../../components/CustomAlert';
 import Icon from '../../components/Icon';
 
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 10) {
+    return digits
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{4})(\d{1,4})$/, '$1-$2');
+  }
+  return digits
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+}
+
 export default function ExcursoesScreen() {
   const navigation = useNavigation();
   const {empresa} = useAuth();
@@ -202,7 +214,7 @@ export default function ExcursoesScreen() {
               </View>
               <View style={{flex: 1}}>
                 <Text style={s.label}>Nº da vaga *</Text>
-                <TextInput style={s.input} placeholder="Ex: 12" placeholderTextColor={Colors.gray} value={vaga} onChangeText={setVaga} keyboardType="numeric" />
+                <TextInput style={s.input} placeholder="Ex: 12" placeholderTextColor={Colors.gray} value={vaga} onChangeText={v => setVaga(v.replace(/[^0-9]/g, '').slice(0, 5))} keyboardType="numeric" />
               </View>
             </View>
 
@@ -210,7 +222,7 @@ export default function ExcursoesScreen() {
             <TextInput style={s.input} placeholder="Nome do motorista/responsável" placeholderTextColor={Colors.gray} value={responsavel} onChangeText={setResponsavel} />
 
             <Text style={s.label}>Telefone</Text>
-            <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
+            <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} keyboardType="phone-pad" />
 
             <View style={s.btnRow}>
               <TouchableOpacity style={s.cancelBtn} onPress={() => {limpar(); setModal(false);}}>

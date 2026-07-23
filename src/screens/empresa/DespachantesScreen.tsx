@@ -87,9 +87,15 @@ export default function DespachantesScreen() {
     ]});
   };
 
+  const senhaTemTamanho = senha.length >= 8;
+  const senhaTemMaiuscula = /[A-Z]/.test(senha);
+  const senhaTemNumero = /[0-9]/.test(senha);
+  const senhaValida = senhaTemTamanho && senhaTemMaiuscula && senhaTemNumero;
+
   const salvar = async () => {
     if (!nome || !cpf) { show({title: 'Atenção', message: 'Preencha nome e CPF', type: 'warning'}); return; }
     if (!editandoId && !senha) { show({title: 'Atenção', message: 'Preencha a senha de acesso', type: 'warning'}); return; }
+    if (senha && !senhaValida) { show({title: 'Atenção', message: 'A senha deve ter no mínimo 8 caracteres, 1 letra maiúscula e 1 número.', type: 'warning'}); return; }
     if (!empresa?.id) return;
 
     if (editandoId) {
@@ -190,7 +196,23 @@ export default function DespachantesScreen() {
             <Text style={s.label}>Telefone</Text>
             <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={telefone} onChangeText={v => setTelefone(maskTelefone(v))} keyboardType="phone-pad" />
             <Text style={s.label}>{editandoId ? 'Nova senha (deixe vazio para manter)' : 'Senha de acesso *'}</Text>
-            <TextInput style={s.input} placeholder="Min 8 chars, 1 maiúscula, 1 número" placeholderTextColor={Colors.gray} value={senha} onChangeText={setSenha} secureTextEntry />
+            <TextInput style={s.input} placeholder="Min 8 caracteres, 1 maiúscula, 1 número" placeholderTextColor={Colors.gray} value={senha} onChangeText={setSenha} secureTextEntry />
+            {senha.length > 0 && (
+              <View style={s.senhaChecklist}>
+                <View style={s.senhaCheckItem}>
+                  <Icon name={senhaTemTamanho ? 'check-circle' : 'circle'} size={13} color={senhaTemTamanho ? Colors.pulso : Colors.gray} />
+                  <Text style={[s.senhaCheckText, senhaTemTamanho && s.senhaCheckTextOk]}>Mínimo de 8 caracteres</Text>
+                </View>
+                <View style={s.senhaCheckItem}>
+                  <Icon name={senhaTemMaiuscula ? 'check-circle' : 'circle'} size={13} color={senhaTemMaiuscula ? Colors.pulso : Colors.gray} />
+                  <Text style={[s.senhaCheckText, senhaTemMaiuscula && s.senhaCheckTextOk]}>1 letra maiúscula</Text>
+                </View>
+                <View style={s.senhaCheckItem}>
+                  <Icon name={senhaTemNumero ? 'check-circle' : 'circle'} size={13} color={senhaTemNumero ? Colors.pulso : Colors.gray} />
+                  <Text style={[s.senhaCheckText, senhaTemNumero && s.senhaCheckTextOk]}>1 número</Text>
+                </View>
+              </View>
+            )}
             <View style={s.btnRow}>
               <TouchableOpacity style={s.cancelBtn} onPress={() => {limpar(); setModal(false);}}>
                 <Text style={s.cancelBtnText}>Cancelar</Text>
@@ -234,6 +256,10 @@ const s = StyleSheet.create({
   sheetTitle:{fontSize: 20, fontWeight: '700', color: Colors.clareza, marginBottom: 24},
   label:     {fontSize: 13, fontWeight: '600', color: Colors.gray, marginBottom: 6, marginTop: 12},
   input:     {height: 50, backgroundColor: '#162433', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 16, color: Colors.clareza, fontSize: 15},
+  senhaChecklist: {marginTop: 8, gap: 5},
+  senhaCheckItem: {flexDirection: 'row', alignItems: 'center', gap: 7},
+  senhaCheckText: {fontSize: 12, color: Colors.gray, fontWeight: '500'},
+  senhaCheckTextOk: {color: Colors.pulso},
   saveBtn:   {flex: 1, height: 52, backgroundColor: Colors.pulso, borderRadius: 8, alignItems: 'center', justifyContent: 'center'},
   saveBtnText:{color: Colors.matriz, fontWeight: '700', fontSize: 16},
   btnRow:    {flexDirection: 'row', gap: 12, marginTop: 24},
