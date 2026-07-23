@@ -124,7 +124,7 @@ if (!JWT_SECRET) {
 }
 const JWT_EXPIRES_IN = '7d';
 
-type TokenPayload = { id: string; tipo: 'empresa' | 'despachante' | 'cliente' };
+type TokenPayload = { id: string; tipo: 'empresa' | 'despachante' | 'cliente' | 'admin' };
 
 function gerarToken(payload: TokenPayload): string {
   return jwt.sign(payload, JWT_SECRET!, { expiresIn: JWT_EXPIRES_IN });
@@ -143,6 +143,13 @@ function auth(req: express.Request, res: express.Response, next: express.NextFun
   } catch {
     return res.status(401).json({ error: 'Token inválido ou expirado.' });
   }
+}
+
+// Middleware — exige tipo 'admin' (usar depois de `auth`)
+function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const user = (req as any).user as TokenPayload;
+  if (user.tipo !== 'admin') return res.status(403).json({ error: 'Sem permissão.' });
+  next();
 }
 
 // === SANITIZAÇÃO DE INPUT ===
@@ -220,7 +227,7 @@ const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_BLOCK_DURATION = 300000; // 5 minutos
 
 function loginRateLimit(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const doc = req.body?.doc || req.body?.cnpj || req.body?.cpf || '';
+  const doc = req.body?.doc || req.body?.cnpj || req.body?.cpf || req.body?.email || '';
   if (!doc) return next();
   const now = Date.now();
   const entry = loginAttemptMap.get(doc);
@@ -292,7 +299,8 @@ const pool = new Pool({
 // Cadastro de empresa
 app.post('/api/cadastro', async (req, res) => {
   try {
-    const { nome_empresa, cnpj, nome_responsavel, email, telefone, senha, endereco, numero, bairro, cidade, estado, cep } = req.body;
+    const { nome_empresa, nome_responsavel, email, telefone, senha, endereco, numero, bairro, cidade, estado, cep } = req.body;
+    const cnpj = (req.body.cnpj || '').replace(/\D/g, '');
 
     if (!nome_empresa || !cnpj || !nome_responsavel || !email || !telefone || !senha) {
       return res.status(400).json({ error: 'Campos obrigatórios não preenchidos.' });
@@ -571,8 +579,11 @@ app.post('/api/empresa/:empresaId/cadastrar-cliente', auth, async (req, res) => 
       return res.status(403).json({error: 'Sem permissão.'});
     }
     const {nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, numero, bairro, cidade, estado, observacoes} = req.body;
-    if (!nome || (!cpf && !cnpj)) {
-      return res.status(400).json({error: 'Preencha o nome e pelo menos CPF ou CNPJ.'});
+    if (!nome || !telefone) {
+      return res.status(400).json({error: 'Preencha o nome e o telefone.'});
+    }
+    if (!cpf && !cnpj) {
+      return res.status(400).json({error: 'Informe ao menos CPF ou CNPJ.'});
     }
     if (cpf) {
       const existe = await pool.query('SELECT id FROM cliente_empresa WHERE empresa_id=$1 AND cpf=$2', [empresaId, cpf]);
@@ -802,6 +813,9 @@ app.put('/api/empresa/vinculo/:vinculoId', auth, async (req, res) => {
     if (owner.rows.length === 0) return res.status(404).json({error: 'Vínculo não encontrado.'});
     if (owner.rows[0].empresa_id !== user.id) return res.status(403).json({error: 'Sem permissão.'});
     const {nome, cpf, cnpj, rg, telefone, email, data_nascimento, cep, endereco, numero, bairro, cidade, estado, observacoes} = req.body;
+    if (!nome || !telefone) {
+      return res.status(400).json({error: 'Preencha o nome e o telefone.'});
+    }
     await pool.query(
       `UPDATE cliente_empresa SET nome=$1, cpf=$2, cnpj=$3, rg=$4, telefone=$5, email=$6,
        data_nascimento=$7, cep=$8, endereco=$9, numero=$10, bairro=$11, cidade=$12, estado=$13, observacoes=$14 WHERE id=$15`,
@@ -1791,6 +1805,257 @@ app.post('/api/exclusao-dados', async (req, res) => {
     res.json({success: true});
   } catch (err: any) {
     console.error('Erro na solicitação de exclusão:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// === ADMIN (gestão completa da plataforma) ===
+
+app.post('/api/login-admin', loginRateLimit, async (req, res) => {
+  try {
+    const {email, senha} = req.body;
+    if (!email || !senha) return res.status(400).json({error: 'E-mail e senha são obrigatórios.'});
+    const result = await pool.query('SELECT * FROM admins WHERE email=$1 AND ativo=true', [email]);
+    if (result.rows.length === 0) {
+      registrarLoginFalho(email);
+      return res.status(401).json({error: 'Credenciais inválidas.'});
+    }
+    const admin = result.rows[0];
+    const senhaValida = await bcrypt.compare(senha, admin.senha_hash);
+    if (!senhaValida) {
+      registrarLoginFalho(email);
+      return res.status(401).json({error: 'Credenciais inválidas.'});
+    }
+    limparLoginAttempt(email);
+    const token = gerarToken({id: admin.id, tipo: 'admin'});
+    res.json({success: true, token, admin: {id: admin.id, nome: admin.nome, email: admin.email}});
+  } catch (err: any) {
+    console.error('Erro no login admin:', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Estatísticas gerais da plataforma
+app.get('/api/admin/stats', auth, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        (SELECT COUNT(*)::int FROM empresas) as total_empresas,
+        (SELECT COUNT(*)::int FROM empresas WHERE ativa=true) as empresas_ativas,
+        (SELECT COUNT(*)::int FROM clientes) as total_clientes,
+        (SELECT COUNT(*)::int FROM despachantes) as total_despachantes,
+        (SELECT COUNT(*)::int FROM pedidos) as total_pedidos,
+        (SELECT COUNT(*)::int FROM assinaturas WHERE status='ativa') as assinaturas_ativas
+    `);
+    res.json({success: true, stats: result.rows[0]});
+  } catch (err: any) {
+    console.error('Erro ao buscar stats admin:', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// --- Empresas ---
+app.get('/api/admin/empresas', auth, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, nome_empresa, cnpj, nome_responsavel, email, telefone, endereco, numero, bairro,
+              cidade, estado, cep, plano, valor_plano, status_assinatura, ativa, data_cadastro, data_vencimento
+       FROM empresas ORDER BY data_cadastro DESC`
+    );
+    res.json({success: true, empresas: result.rows});
+  } catch (err: any) {
+    console.error('Erro ao listar empresas (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.put('/api/admin/empresas/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {nome_empresa, nome_responsavel, email, telefone, endereco, numero, bairro,
+      cidade, estado, cep, plano, valor_plano, status_assinatura, ativa, data_vencimento} = req.body;
+    const cnpj = (req.body.cnpj || '').replace(/\D/g, '');
+    const result = await pool.query(
+      `UPDATE empresas SET nome_empresa=$1, cnpj=$2, nome_responsavel=$3, email=$4, telefone=$5,
+        endereco=$6, numero=$7, bairro=$8, cidade=$9, estado=$10, cep=$11, plano=$12, valor_plano=$13,
+        status_assinatura=$14, ativa=$15, data_vencimento=$16 WHERE id=$17 RETURNING id`,
+      [nome_empresa, cnpj, nome_responsavel, email, telefone, endereco || null, numero || null, bairro || null,
+        cidade, estado, cep, plano, valor_plano, status_assinatura, ativa, data_vencimento || null, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({error: 'Empresa não encontrada.'});
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao atualizar empresa (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.delete('/api/admin/empresas/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const result = await pool.query('DELETE FROM empresas WHERE id=$1 RETURNING id', [id]);
+    if (result.rows.length === 0) return res.status(404).json({error: 'Empresa não encontrada.'});
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao excluir empresa (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// --- Clientes ---
+app.get('/api/admin/clientes', auth, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT c.id, c.nome, c.cpf, c.cnpj, c.email, c.telefone, c.cidade, c.estado, c.ativo, c.data_cadastro,
+              (SELECT COUNT(*)::int FROM cliente_empresa ce WHERE ce.cliente_id = c.id) as total_vinculos
+       FROM clientes c ORDER BY c.data_cadastro DESC`
+    );
+    res.json({success: true, clientes: result.rows});
+  } catch (err: any) {
+    console.error('Erro ao listar clientes (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.put('/api/admin/clientes/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {nome, cpf, cnpj, email, telefone, cidade, estado, ativo} = req.body;
+    const result = await pool.query(
+      `UPDATE clientes SET nome=$1, cpf=$2, cnpj=$3, email=$4, telefone=$5, cidade=$6, estado=$7, ativo=$8
+       WHERE id=$9 RETURNING id`,
+      [nome, cpf, cnpj || null, email, telefone, cidade || null, estado || null, ativo, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({error: 'Cliente não encontrado.'});
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao atualizar cliente (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.delete('/api/admin/clientes/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const result = await pool.query('DELETE FROM clientes WHERE id=$1 RETURNING id', [id]);
+    if (result.rows.length === 0) return res.status(404).json({error: 'Cliente não encontrado.'});
+    res.json({success: true});
+  } catch (err: any) {
+    if (err.code === '23503') {
+      return res.status(409).json({error: 'Não é possível excluir: existem pedidos vinculados a este cliente.'});
+    }
+    console.error('Erro ao excluir cliente (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// --- Despachantes ---
+app.get('/api/admin/despachantes', auth, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT d.id, d.nome, d.cpf, d.telefone, d.ativo, d.data_cadastro,
+        (SELECT json_agg(json_build_object('id', e.id, 'nome_empresa', e.nome_empresa))
+         FROM despachante_empresa de JOIN empresas e ON e.id = de.empresa_id
+         WHERE de.despachante_id = d.id) as empresas
+      FROM despachantes d ORDER BY d.data_cadastro DESC
+    `);
+    res.json({success: true, despachantes: result.rows});
+  } catch (err: any) {
+    console.error('Erro ao listar despachantes (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.put('/api/admin/despachantes/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {nome, cpf, telefone, ativo} = req.body;
+    const result = await pool.query(
+      'UPDATE despachantes SET nome=$1, cpf=$2, telefone=$3, ativo=$4 WHERE id=$5 RETURNING id',
+      [nome, cpf, telefone || null, ativo, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({error: 'Despachante não encontrado.'});
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao atualizar despachante (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.delete('/api/admin/despachantes/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const result = await pool.query('DELETE FROM despachantes WHERE id=$1 RETURNING id', [id]);
+    if (result.rows.length === 0) return res.status(404).json({error: 'Despachante não encontrado.'});
+    res.json({success: true});
+  } catch (err: any) {
+    if (err.code === '23503') {
+      return res.status(409).json({error: 'Não é possível excluir: existem pedidos vinculados a este despachante.'});
+    }
+    console.error('Erro ao excluir despachante (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// --- Pedidos ---
+app.get('/api/admin/pedidos', auth, requireAdmin, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+    const offset = parseInt(req.query.offset as string) || 0;
+    const result = await pool.query(
+      `SELECT p.*, e.nome_empresa
+       FROM pedidos p JOIN empresas e ON e.id = p.empresa_id
+       ORDER BY p.criado_em DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    res.json({success: true, pedidos: result.rows});
+  } catch (err: any) {
+    console.error('Erro ao listar pedidos (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.delete('/api/admin/pedidos/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const result = await pool.query('DELETE FROM pedidos WHERE id=$1 RETURNING id', [id]);
+    if (result.rows.length === 0) return res.status(404).json({error: 'Pedido não encontrado.'});
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao excluir pedido (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// --- Assinaturas ---
+app.get('/api/admin/assinaturas', auth, requireAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT a.*, e.nome_empresa
+       FROM assinaturas a JOIN empresas e ON e.id = a.empresa_id
+       ORDER BY a.data_vencimento ASC`
+    );
+    res.json({success: true, assinaturas: result.rows});
+  } catch (err: any) {
+    console.error('Erro ao listar assinaturas (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.put('/api/admin/assinaturas/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {status, valor, data_vencimento} = req.body;
+    const result = await pool.query(
+      'UPDATE assinaturas SET status=$1, valor=$2, data_vencimento=$3 WHERE id=$4 RETURNING id',
+      [status, valor, data_vencimento || null, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({error: 'Assinatura não encontrada.'});
+    // Mantém status_assinatura da empresa em sincronia
+    await pool.query('UPDATE empresas SET status_assinatura=$1 WHERE id=(SELECT empresa_id FROM assinaturas WHERE id=$2)', [status, id]);
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao atualizar assinatura (admin):', err);
     res.status(500).json({error: 'Erro interno do servidor.'});
   }
 });

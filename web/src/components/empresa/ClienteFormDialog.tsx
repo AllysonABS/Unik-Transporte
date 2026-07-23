@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { cadastrarClienteManual, atualizarVinculoCliente } from '@/services/clientes';
 import { buscarCep } from '@/lib/cep';
+import { maskCpf, maskCnpj, maskTelefone, maskCep } from '@/lib/mask';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,7 @@ const schema = z
     cpf: z.string().optional(),
     cnpj: z.string().optional(),
     rg: z.string().optional(),
-    telefone: z.string().optional(),
+    telefone: z.string().min(1, 'Informe o telefone'),
     email: z.string().optional(),
     data_nascimento: z.string().optional(),
     cep: z.string().optional(),
@@ -120,7 +121,13 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
 
   function onSubmit(values: FormValues) {
     setServerError(null);
-    mutation.mutate(values);
+    mutation.mutate({
+      ...values,
+      cpf: values.cpf ? values.cpf.replace(/\D/g, '') : values.cpf,
+      cnpj: values.cnpj ? values.cnpj.replace(/\D/g, '') : values.cnpj,
+      telefone: values.telefone.replace(/\D/g, ''),
+      cep: values.cep ? values.cep.replace(/\D/g, '') : values.cep,
+    });
   }
 
   return (
@@ -138,7 +145,7 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
               name="nome"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome</FormLabel>
+                  <FormLabel>Nome *</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -154,7 +161,10 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
                   <FormItem>
                     <FormLabel>CPF</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        onChange={e => field.onChange(maskCpf(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -167,7 +177,10 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
                   <FormItem>
                     <FormLabel>CNPJ</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        onChange={e => field.onChange(maskCnpj(e.target.value))}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -191,10 +204,14 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
                 name="telefone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Telefone</FormLabel>
+                    <FormLabel>Telefone *</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input
+                        {...field}
+                        onChange={e => field.onChange(maskTelefone(e.target.value))}
+                      />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -234,6 +251,7 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
                   <FormControl>
                     <Input
                       {...field}
+                      onChange={e => field.onChange(maskCep(e.target.value))}
                       onBlur={e => {
                         field.onBlur();
                         handleCepBlur(e.target.value);

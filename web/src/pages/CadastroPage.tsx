@@ -70,7 +70,7 @@ export default function CadastroPage() {
       const res = await fetch('/api/cadastro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, cnpj: form.cnpj.replace(/\D/g, '') }),
       });
       const data = await res.json();
       if (!res.ok) { setErro(data.error || 'Erro ao cadastrar.'); setLoading(false); return; }
