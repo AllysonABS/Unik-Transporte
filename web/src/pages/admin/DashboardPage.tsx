@@ -19,6 +19,7 @@ export default function AdminDashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: buscarStatsAdmin,
+    refetchInterval: 5000,
   });
 
   const stats = data?.stats;

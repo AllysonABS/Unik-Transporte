@@ -38,6 +38,7 @@ export default function AdminEmpresasPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-empresas'],
     queryFn: listarEmpresasAdmin,
+    refetchInterval: 5000,
   });
 
   const empresas = data?.empresas ?? [];

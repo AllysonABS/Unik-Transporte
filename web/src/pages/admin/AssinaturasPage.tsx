@@ -33,6 +33,7 @@ export default function AdminAssinaturasPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-assinaturas'],
     queryFn: listarAssinaturasAdmin,
+    refetchInterval: 5000,
   });
 
   const assinaturas = data?.assinaturas ?? [];

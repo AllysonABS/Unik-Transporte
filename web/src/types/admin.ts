@@ -37,6 +37,7 @@ export interface ClienteAdmin {
   ativo: boolean;
   data_cadastro: string;
   total_vinculos: number;
+  manual: boolean;
 }
 
 export interface DespachanteAdmin {

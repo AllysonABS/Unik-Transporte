@@ -38,6 +38,7 @@ export default function AdminClientesPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-clientes'],
     queryFn: listarClientesAdmin,
+    refetchInterval: 5000,
   });
 
   const clientes = data?.clientes ?? [];
@@ -103,7 +104,14 @@ export default function AdminClientesPage() {
               ) : (
                 filtrados.map(c => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium text-clareza">{c.nome}</TableCell>
+                    <TableCell className="font-medium text-clareza">
+                      {c.nome}
+                      {c.manual && (
+                        <Badge variant="outline" className="ml-2 text-[10px] font-normal text-gray">
+                          Sem conta no app
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell>{c.cpf}</TableCell>
                     <TableCell>{c.email}</TableCell>
                     <TableCell>{c.total_vinculos}</TableCell>

@@ -37,6 +37,7 @@ export default function AdminDespachantesPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-despachantes'],
     queryFn: listarDespachantesAdmin,
+    refetchInterval: 5000,
   });
 
   const despachantes = data?.despachantes ?? [];

@@ -32,16 +32,18 @@ export default function PedidosPage() {
   useSetPageHeader('Despachos', 'Gerencie os despachos da sua empresa');
   const [busca, setBusca] = useState('');
   const [status, setStatus] = useState<PedidoStatus | 'todos'>('todos');
-  const [detalhe, setDetalhe] = useState<PedidoData | null>(null);
+  const [detalheId, setDetalheId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['pedidos', empresa?.id],
     queryFn: () => listarPedidosEmpresa(empresa!.id),
     enabled: !!empresa?.id,
+    refetchInterval: 5000,
   });
 
   const pedidos = data?.pedidos ?? [];
+  const detalhe = pedidos.find(p => p.id === detalheId) ?? null;
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -118,7 +120,7 @@ export default function PedidosPage() {
                   <TableRow
                     key={p.id}
                     className="cursor-pointer hover:bg-accent/40"
-                    onClick={() => setDetalhe(p)}
+                    onClick={() => setDetalheId(p.id)}
                   >
                     <TableCell className="font-medium text-clareza">#{p.numero}</TableCell>
                     <TableCell>{p.cliente_nome}</TableCell>
@@ -136,7 +138,7 @@ export default function PedidosPage() {
         </div>
       )}
 
-      <PedidoDetailSheet pedido={detalhe} onOpenChange={open => !open && setDetalhe(null)} />
+      <PedidoDetailSheet pedido={detalhe} onOpenChange={open => !open && setDetalheId(null)} />
       <CreatePedidoDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );

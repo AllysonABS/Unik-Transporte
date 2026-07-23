@@ -1969,11 +1969,22 @@ app.delete('/api/admin/empresas/:id', auth, requireAdmin, async (req, res) => {
 // --- Clientes ---
 app.get('/api/admin/clientes', auth, requireAdmin, async (_req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT c.id, c.nome, c.cpf, c.cnpj, c.email, c.telefone, c.cidade, c.estado, c.ativo, c.data_cadastro,
-              (SELECT COUNT(*)::int FROM cliente_empresa ce WHERE ce.cliente_id = c.id) as total_vinculos
-       FROM clientes c ORDER BY c.data_cadastro DESC`
-    );
+    const result = await pool.query(`
+      SELECT id, nome, cpf, cnpj, email, telefone, cidade, estado, ativo, data_cadastro, total_vinculos, manual FROM (
+        SELECT c.id, c.nome, c.cpf, c.cnpj, c.email, c.telefone, c.cidade, c.estado, c.ativo, c.data_cadastro,
+               (SELECT COUNT(*)::int FROM cliente_empresa ce WHERE ce.cliente_id = c.id) as total_vinculos,
+               false as manual
+        FROM clientes c
+        UNION ALL
+        SELECT ce.id, ce.nome, ce.cpf, ce.cnpj, ce.email, ce.telefone, ce.cidade, ce.estado,
+               (ce.status IS DISTINCT FROM 'bloqueado') as ativo, ce.data_vinculo as data_cadastro,
+               1 as total_vinculos,
+               true as manual
+        FROM cliente_empresa ce
+        WHERE ce.cliente_id IS NULL
+      ) t
+      ORDER BY data_cadastro DESC
+    `);
     res.json({success: true, clientes: result.rows});
   } catch (err: any) {
     console.error('Erro ao listar clientes (admin):', err);
@@ -1990,7 +2001,14 @@ app.put('/api/admin/clientes/:id', auth, requireAdmin, async (req, res) => {
        WHERE id=$9 RETURNING id`,
       [nome, cpf, cnpj || null, email, telefone, cidade || null, estado || null, ativo, id]
     );
-    if (result.rows.length === 0) return res.status(404).json({error: 'Cliente não encontrado.'});
+    if (result.rows.length > 0) return res.json({success: true});
+    // Não é conta do app — é um cadastro manual feito pela empresa, vive em cliente_empresa
+    const manualResult = await pool.query(
+      `UPDATE cliente_empresa SET nome=$1, cpf=$2, cnpj=$3, email=$4, telefone=$5, cidade=$6, estado=$7,
+        status=$8 WHERE id=$9 AND cliente_id IS NULL RETURNING id`,
+      [nome, cpf, cnpj || null, email, telefone, cidade || null, estado || null, ativo ? 'ativo' : 'bloqueado', id]
+    );
+    if (manualResult.rows.length === 0) return res.status(404).json({error: 'Cliente não encontrado.'});
     res.json({success: true});
   } catch (err: any) {
     console.error('Erro ao atualizar cliente (admin):', err);
@@ -2002,7 +2020,9 @@ app.delete('/api/admin/clientes/:id', auth, requireAdmin, async (req, res) => {
   try {
     const {id} = req.params;
     const result = await pool.query('DELETE FROM clientes WHERE id=$1 RETURNING id', [id]);
-    if (result.rows.length === 0) return res.status(404).json({error: 'Cliente não encontrado.'});
+    if (result.rows.length > 0) return res.json({success: true});
+    const manualResult = await pool.query('DELETE FROM cliente_empresa WHERE id=$1 AND cliente_id IS NULL RETURNING id', [id]);
+    if (manualResult.rows.length === 0) return res.status(404).json({error: 'Cliente não encontrado.'});
     res.json({success: true});
   } catch (err: any) {
     if (err.code === '23503') {

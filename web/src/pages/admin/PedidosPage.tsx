@@ -37,6 +37,7 @@ export default function AdminPedidosPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-pedidos'],
     queryFn: listarPedidosAdmin,
+    refetchInterval: 5000,
   });
 
   const pedidos = data?.pedidos ?? [];

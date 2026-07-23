@@ -19,16 +19,18 @@ function getGreeting() {
 
 export default function DashboardPage() {
   const { empresa } = useEmpresaAuth();
-  const [detalhe, setDetalhe] = useState<PedidoData | null>(null);
+  const [detalheId, setDetalheId] = useState<string | null>(null);
   useSetPageHeader(getGreeting(), empresa?.nome_empresa);
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', empresa?.id],
     queryFn: () => getDashboard(empresa!.id),
     enabled: !!empresa?.id,
+    refetchInterval: 5000,
   });
 
   const pedidos = data?.pedidos ?? [];
+  const detalhe = pedidos.find(p => p.id === detalheId) ?? null;
   const stats = data?.stats;
 
   const hoje = new Date().toDateString();
@@ -112,7 +114,7 @@ export default function DashboardPage() {
                 {recentes.map(p => (
                   <button
                     key={p.id}
-                    onClick={() => setDetalhe(p)}
+                    onClick={() => setDetalheId(p.id)}
                     className="w-full flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-left hover:border-pulso/30 transition-colors"
                   >
                     <div className="flex-1">
@@ -130,7 +132,7 @@ export default function DashboardPage() {
         </>
       )}
 
-      <PedidoDetailSheet pedido={detalhe} onOpenChange={open => !open && setDetalhe(null)} />
+      <PedidoDetailSheet pedido={detalhe} onOpenChange={open => !open && setDetalheId(null)} />
     </div>
   );
 }
