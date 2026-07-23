@@ -158,7 +158,7 @@ export default function PedidosScreen() {
               <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{selecionado?.descricao || '—'}</Text></View>
 
               <Text style={s.sectionTitle}>Histórico</Text>
-              {selecionado?.etapas?.slice().reverse().map((t, i, arr) => (
+              {selecionado?.etapas?.slice().map((t, i, arr) => (
                 <View key={t.id} style={s.timelineItem}>
                   <View style={s.timelineLine}>
                     <View style={[s.timelineDot, t.concluida && {backgroundColor: Colors.pulso}]} />

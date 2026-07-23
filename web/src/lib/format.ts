@@ -7,23 +7,31 @@ export const STATUS_CONFIG: Record<PedidoStatus, { label: string; color: string;
   cancelado: { label: 'Cancelado', color: '#FCA5A5', bg: '#7F1D1D' },
 };
 
+// O banco retorna timestamps sem indicador de timezone (armazenados em UTC).
+// Forçamos a interpretação como UTC e exibimos sempre no fuso do Brasil,
+// independente do fuso configurado na máquina de quem está vendo a tela.
+function parseUTC(iso: string): Date {
+  const d = iso.includes('Z') || iso.includes('+') ? iso : iso.replace(' ', 'T') + 'Z';
+  return new Date(d);
+}
+
 export function formatHora(iso: string | null): string {
   if (!iso) return '';
-  return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return parseUTC(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
 }
 
 export function formatData(iso: string | null | undefined): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('pt-BR');
+  return parseUTC(iso).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 }
 
 export function formatDataHora(iso: string | null | undefined): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  return parseUTC(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' });
 }
 
 export function formatRelativo(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
+  const diffMs = Date.now() - parseUTC(iso).getTime();
   const minutos = Math.floor(diffMs / 60000);
   if (minutos < 1) return 'agora';
   if (minutos < 60) return `há ${minutos} min`;

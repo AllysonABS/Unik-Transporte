@@ -136,7 +136,7 @@ export default function EmAndamentoScreen() {
               <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{detalhe?.descricao || '—'}</Text></View>
 
               <Text style={s.sectionTitle}>Etapas</Text>
-              {detalhe?.etapas?.slice().reverse().map((etapa) => (
+              {detalhe?.etapas?.slice().map((etapa) => (
                 <View key={etapa.id} style={s.etapaRowDet}>
                   <View style={[s.etapaDot, etapa.concluida && s.etapaDotDone]} />
                   <Text style={[s.etapaNome, etapa.concluida && s.etapaNomeDone]}>{etapa.nome}</Text>

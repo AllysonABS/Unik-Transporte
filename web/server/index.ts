@@ -1036,7 +1036,7 @@ app.post('/api/empresa/:empresaId/pedidos', auth, async (req, res) => {
     const numRes = await pool.query('SELECT numero FROM pedidos WHERE id=$1', [pedidoId]);
     const numeroPedido = numRes.rows[0].numero;
     // Cria etapas padr\u00e3o
-    const etapas = ['Pedido recebido na empresa', 'Coleta realizada', 'Em rota para excurs\u00e3o', 'Entregue na excurs\u00e3o'];
+    const etapas = ['Pedido recebido', 'Pedido Conferido', 'Entregue na excurs\u00e3o'];
     for (let i = 0; i < etapas.length; i++) {
       const concluida = i === 0;
       const hora = i === 0 ? new Date() : null;
@@ -1254,9 +1254,9 @@ app.put('/api/pedidos/:pedidoId/concluir-etapas', auth, async (req, res) => {
     if (user.tipo === 'cliente') return res.status(403).json({error: 'Sem permissão.'});
     const {tipo} = req.body; // 'coleta' ou 'entrega'
     if (tipo === 'coleta') {
-      // Marca "Coleta realizada" e "Em rota para excurs\u00e3o"
+      // Marca "Pedido Conferido"
       await pool.query(
-        `UPDATE pedido_etapas SET concluida=true, hora=NOW() WHERE pedido_id=$1 AND nome IN ('Coleta realizada', 'Em rota para excurs\u00e3o') AND concluida=false`,
+        `UPDATE pedido_etapas SET concluida=true, hora=NOW() WHERE pedido_id=$1 AND nome = 'Pedido Conferido' AND concluida=false`,
         [pedidoId]
       );
       await pool.query('UPDATE pedidos SET status=$1, atualizado_em=NOW() WHERE id=$2', ['em_transito', pedidoId]);

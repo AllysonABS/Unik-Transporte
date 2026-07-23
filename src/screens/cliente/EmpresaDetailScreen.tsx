@@ -179,7 +179,7 @@ export default function EmpresaDetailScreen({route, navigation}: any) {
             </View>
 
             <Text style={s.timelineTitle}>Histórico</Text>
-            {selecionado?.etapas?.slice().reverse().map((t, i, arr) => (
+            {selecionado?.etapas?.slice().map((t, i, arr) => (
               <View key={t.id} style={s.timelineItem}>
                 <View style={s.timelineLine}>
                   <View style={[s.timelineDot, t.concluida && {backgroundColor: Colors.pulso}]} />

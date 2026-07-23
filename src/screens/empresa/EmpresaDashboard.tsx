@@ -201,7 +201,7 @@ export default function EmpresaDashboard() {
               <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{detalhe?.descricao || '—'}</Text></View>
 
               <Text style={s.sectionTitle}>Progresso</Text>
-              {detalhe?.etapas?.slice().reverse().map((etapa, i, arr) => (
+              {detalhe?.etapas?.slice().map((etapa, i, arr) => (
                 <View key={etapa.id} style={s.etapaRow}>
                   <View style={[s.etapaDot, etapa.concluida && s.etapaDotDone]} />
                   {i < arr.length - 1 && <View style={[s.etapaLine, etapa.concluida && s.etapaLineDone]} />}
