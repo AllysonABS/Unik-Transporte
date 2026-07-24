@@ -40,9 +40,10 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   despachante?: DespachanteData | null;
+  onSaved?: (despachante: { id: string; nome: string }) => void;
 }
 
-export default function DespachanteFormDialog({ open, onOpenChange, despachante }: Props) {
+export default function DespachanteFormDialog({ open, onOpenChange, despachante, onSaved }: Props) {
   const { empresa } = useEmpresaAuth();
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -65,7 +66,7 @@ export default function DespachanteFormDialog({ open, onOpenChange, despachante 
   }, [open, despachante, form]);
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => {
+    mutationFn: (values: FormValues): Promise<{ success: boolean; id?: string }> => {
       const cpf = values.cpf.replace(/\D/g, '');
       const telefone = values.telefone ? values.telefone.replace(/\D/g, '') : values.telefone;
       if (isEdit) {
@@ -86,9 +87,13 @@ export default function DespachanteFormDialog({ open, onOpenChange, despachante 
         senha: values.senha,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data, values) => {
       toast.success(isEdit ? 'Despachante atualizado.' : 'Despachante cadastrado.');
       queryClient.invalidateQueries({ queryKey: ['despachantes', empresa?.id] });
+      queryClient.invalidateQueries({ queryKey: ['despachantes-picker', empresa?.id] });
+      if (!isEdit && data.id) {
+        onSaved?.({ id: data.id, nome: values.nome });
+      }
       onOpenChange(false);
     },
     onError: (err: unknown) => {

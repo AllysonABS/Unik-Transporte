@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { Plus } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { criarPedido } from '@/services/pedidos';
 import { listarClientesEmpresa } from '@/services/clientes';
@@ -35,6 +36,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import DespachanteFormDialog from '@/components/empresa/DespachanteFormDialog';
+import ExcursaoFormDialog from '@/components/empresa/ExcursaoFormDialog';
 
 const schema = z.object({
   cliente_id: z.string().min(1, 'Selecione o cliente'),
@@ -58,6 +61,8 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
   const { empresa } = useEmpresaAuth();
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [despachanteFormOpen, setDespachanteFormOpen] = useState(false);
+  const [excursaoFormOpen, setExcursaoFormOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -83,6 +88,21 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
   const clientes = clientesData?.clientes ?? [];
   const despachantes = despachantesData?.despachantes ?? [];
   const excursoes = excursoesData?.excursoes ?? [];
+
+  // Empresa com um único despachante: seleciona automaticamente para agilizar o cadastro.
+  useEffect(() => {
+    const unico = despachantesData?.despachantes;
+    if (unico?.length === 1 && !form.getValues('despachante_id')) {
+      form.setValue('despachante_id', unico[0].id, { shouldValidate: true });
+    }
+  }, [despachantesData, form]);
+
+  useEffect(() => {
+    if (!open) {
+      setDespachanteFormOpen(false);
+      setExcursaoFormOpen(false);
+    }
+  }, [open]);
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -156,7 +176,19 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
               name="despachante_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Despachante</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Despachante</FormLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-clareza/70 hover:text-clareza"
+                      onClick={() => setDespachanteFormOpen(true)}
+                    >
+                      <Plus className="h-3 w-3" />
+                      Novo despachante
+                    </Button>
+                  </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -180,7 +212,19 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
               name="excursao_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Excursão</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Excursão</FormLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-clareza/70 hover:text-clareza"
+                      onClick={() => setExcursaoFormOpen(true)}
+                    >
+                      <Plus className="h-3 w-3" />
+                      Nova excursão
+                    </Button>
+                  </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -234,6 +278,17 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
           </form>
         </Form>
       </DialogContent>
+
+      <DespachanteFormDialog
+        open={despachanteFormOpen}
+        onOpenChange={setDespachanteFormOpen}
+        onSaved={despachante => form.setValue('despachante_id', despachante.id, { shouldValidate: true })}
+      />
+      <ExcursaoFormDialog
+        open={excursaoFormOpen}
+        onOpenChange={setExcursaoFormOpen}
+        onSaved={excursao => form.setValue('excursao_id', excursao.id, { shouldValidate: true })}
+      />
     </Dialog>
   );
 }

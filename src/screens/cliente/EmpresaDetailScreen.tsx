@@ -120,7 +120,6 @@ export default function EmpresaDetailScreen({route, navigation}: any) {
                 <TouchableOpacity key={p.id} style={s.pedidoCard} activeOpacity={0.8} onPress={() => setSelecionado(p)}>
                   <View style={s.pedidoLeft}>
                     <View style={s.pedidoIdRow}>
-                      <Text style={s.pedidoId}>#{p.numero}</Text>
                       <Text style={s.pedidoData}>{formatData(p.criado_em)}</Text>
                     </View>
                     <Text style={s.pedidoExcursao}>{p.excursao_nome}</Text>
@@ -166,8 +165,8 @@ export default function EmpresaDetailScreen({route, navigation}: any) {
           <View style={s.sheet}>
             <View style={s.sheetHandle} />
             <View style={s.sheetHeader}>
-              <View>
-                <Text style={s.sheetId}>#{selecionado?.numero}</Text>
+              <View style={{flex: 1, marginRight: 10}}>
+                <Text style={s.sheetId} numberOfLines={1}>{formatData(selecionado?.criado_em ?? null)}</Text>
                 <Text style={s.sheetSub}>{nome} · {selecionado?.excursao_nome}</Text>
               </View>
               <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
@@ -236,7 +235,6 @@ const s = StyleSheet.create({
   pedidoCard: {backgroundColor: '#162433', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#1E3448'},
   pedidoLeft: {flex: 1, marginRight: 12},
   pedidoIdRow: {flexDirection: 'row', alignItems: 'center', gap: 8},
-  pedidoId: {fontSize: 16, fontWeight: '700', color: Colors.clareza},
   pedidoData: {fontSize: 11, color: Colors.gray, backgroundColor: '#1E3448', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6},
   pedidoExcursao: {fontSize: 12, color: '#60A5FA', marginTop: 4},
   overlay: {flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end'},

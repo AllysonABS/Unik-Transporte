@@ -79,13 +79,13 @@ export default function EmAndamentoScreen() {
         ) : pedidos.map(p => {
           const etapaAtual = 'Em rota para a excursão';
           return (
-            <View key={p.id} style={s.card} accessibilityLabel={`Pedido ${p.numero}, ${p.cliente_nome}, ${etapaAtual}`}>
+            <View key={p.id} style={s.card} accessibilityLabel={`Pedido de ${p.cliente_nome}, ${etapaAtual}`}>
               <View style={s.cardLeft}>
                 <View style={s.pulse} />
               </View>
               <View style={s.info}>
                 <View style={s.cardTop}>
-                  <Text style={s.id}>#{p.numero} · {p.cliente_nome}</Text>
+                  <Text style={s.id}>{p.cliente_nome}</Text>
                 </View>
                 <Text style={s.empresa}>{p.volumes} vol.</Text>
                 <View style={s.etapaRow2}>
@@ -102,7 +102,7 @@ export default function EmAndamentoScreen() {
                   style={s.entregarBtn}
                   onPress={() => confirmarEntrega(p)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Entregar pedido ${p.numero}`}>
+                  accessibilityLabel={`Entregar pedido de ${p.cliente_nome}`}>
                   <Icon name="check" size={14} color={Colors.pulso} />
                   <Text style={s.entregarText}>Entregar</Text>
                 </TouchableOpacity>
@@ -110,7 +110,7 @@ export default function EmAndamentoScreen() {
                   style={s.detalhesBtn}
                   onPress={() => setDetalhe(p)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Ver detalhes do pedido ${p.numero}`}>
+                  accessibilityLabel={`Ver detalhes do pedido de ${p.cliente_nome}`}>
                   <Icon name="eye" size={14} color="#60A5FA" />
                   <Text style={s.detalhesText}>Detalhes</Text>
                 </TouchableOpacity>
@@ -126,7 +126,7 @@ export default function EmAndamentoScreen() {
           <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
-                <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
+                <Text style={s.sheetTitle} numberOfLines={1}>{detalhe?.cliente_nome}</Text>
                 <TouchableOpacity onPress={() => setDetalhe(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
                   <Icon name="x" size={18} color={Colors.gray} />
                 </TouchableOpacity>
@@ -178,7 +178,7 @@ const s = StyleSheet.create({
   overlay:     {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
   sheet:       {backgroundColor: '#0F1F2E', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '80%'},
   sheetHeader: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16},
-  sheetTitle:  {fontSize: 20, fontWeight: '700', color: Colors.clareza},
+  sheetTitle:  {fontSize: 20, fontWeight: '700', color: Colors.clareza, flex: 1, marginRight: 8},
   closeX:      {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   detRow:      {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
   detLabel:    {fontSize: 13, color: Colors.gray},

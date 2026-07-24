@@ -128,9 +128,9 @@ export default function PedidosScreen() {
         {filtrados.map(p => (
           <TouchableOpacity key={p.id} style={s.card} onPress={() => setSelecionado(p)} activeOpacity={0.8}>
             <View style={s.cardLeft}>
-              <Text style={s.pedidoId}>#{p.numero}</Text>
+              <Text style={s.pedidoId} numberOfLines={1}>{p.excursao_nome}</Text>
               <Text style={s.empresa}>{p.nome_empresa || ''}</Text>
-              <Text style={s.excursao}>{p.excursao_nome} · {p.volumes} vol.</Text>
+              <Text style={s.excursao}>{p.volumes} vol.</Text>
             </View>
             <StatusBadge status={p.status} />
           </TouchableOpacity>
@@ -143,9 +143,9 @@ export default function PedidosScreen() {
           <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
-                <View>
-                  <Text style={s.sheetId}>#{selecionado?.numero}</Text>
-                  <Text style={s.sheetEmpresa}>{selecionado?.nome_empresa} · {selecionado?.excursao_nome}</Text>
+                <View style={{flex: 1, marginRight: 10}}>
+                  <Text style={s.sheetId} numberOfLines={1}>{selecionado?.excursao_nome}</Text>
+                  <Text style={s.sheetEmpresa}>{selecionado?.nome_empresa}</Text>
                 </View>
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
                   {selecionado && <StatusBadge status={selecionado.status} />}

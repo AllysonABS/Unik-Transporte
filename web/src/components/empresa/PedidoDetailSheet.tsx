@@ -22,7 +22,7 @@ export default function PedidoDetailSheet({ pedido, onOpenChange }: Props) {
           <>
             <SheetHeader>
               <div className="flex items-center justify-between pr-6">
-                <SheetTitle className="text-clareza">#{pedido.numero}</SheetTitle>
+                <SheetTitle className="text-clareza">{pedido.cliente_nome}</SheetTitle>
                 <StatusBadge status={pedido.status} />
               </div>
             </SheetHeader>

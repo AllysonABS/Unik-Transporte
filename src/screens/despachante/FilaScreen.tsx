@@ -124,11 +124,8 @@ export default function FilaScreen() {
         ) : filtrados.length === 0 ? (
           <EmptyState icon="inbox" title="Nenhum pedido na fila" subtitle="Novos pedidos aparecerão aqui quando forem criados" />
         ) : filtrados.map(p => (
-          <View key={p.id} style={s.card} accessibilityLabel={`Pedido ${p.numero}, ${p.cliente_nome}, ${p.volumes} volumes`}>
+          <View key={p.id} style={s.card} accessibilityLabel={`Pedido de ${p.cliente_nome}, ${p.volumes} volumes`}>
             <View style={s.cardContent}>
-              <View style={s.cardTop}>
-                <Text style={s.pedidoId}>#{p.numero}</Text>
-              </View>
               <Text style={s.cliente}>{p.cliente_nome}</Text>
               <Text style={s.empresa}>{p.volumes} vol. · {p.descricao || 'Sem descrição'}</Text>
               <View style={s.destinoRow}>
@@ -141,7 +138,7 @@ export default function FilaScreen() {
                 style={s.iniciarBtn}
                 onPress={() => iniciarColeta(p)}
                 accessibilityRole="button"
-                accessibilityLabel={`Iniciar coleta do pedido ${p.numero}`}>
+                accessibilityLabel={`Iniciar coleta do pedido de ${p.cliente_nome}`}>
                 <Icon name="play" size={14} color={Colors.matriz} />
                 <Text style={s.iniciarText}>Iniciar</Text>
               </TouchableOpacity>
@@ -168,9 +165,7 @@ const s = StyleSheet.create({
   searchInput: {flex: 1, height: 44, color: Colors.clareza, fontSize: 15},
   card:        {backgroundColor: '#162433', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#1E3448'},
   cardContent: {flex: 1},
-  cardTop:     {flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4},
-  pedidoId:    {fontSize: 16, fontWeight: '700', color: Colors.clareza},
-  cliente:     {fontSize: 14, color: Colors.clareza, marginBottom: 2},
+  cliente:     {fontSize: 14, color: Colors.clareza, marginBottom: 2, marginTop: 2},
   empresa:     {fontSize: 13, color: '#60A5FA', marginBottom: 4},
   destinoRow:  {flexDirection: 'row', alignItems: 'center', gap: 4},
   destino:     {fontSize: 12, color: Colors.gray},

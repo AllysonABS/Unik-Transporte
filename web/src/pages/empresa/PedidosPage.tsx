@@ -53,8 +53,7 @@ export default function PedidosPage() {
         !termo ||
         p.cliente_nome?.toLowerCase().includes(termo) ||
         p.despachante_nome?.toLowerCase().includes(termo) ||
-        p.excursao_nome?.toLowerCase().includes(termo) ||
-        String(p.numero ?? '').includes(termo);
+        p.excursao_nome?.toLowerCase().includes(termo);
       return passaStatus && passaBusca;
     });
   }, [pedidos, busca, status]);
@@ -67,7 +66,7 @@ export default function PedidosPage() {
           <Input
             value={busca}
             onChange={e => setBusca(e.target.value)}
-            placeholder="Buscar por cliente, despachante, excursão ou número"
+            placeholder="Buscar por cliente, despachante ou excursão"
             className="pl-9"
           />
         </div>
@@ -100,7 +99,6 @@ export default function PedidosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Número</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Despachante</TableHead>
                 <TableHead>Excursão</TableHead>
@@ -111,7 +109,7 @@ export default function PedidosPage() {
             <TableBody>
               {filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray py-8">
+                  <TableCell colSpan={5} className="text-center text-gray py-8">
                     Nenhum despacho encontrado.
                   </TableCell>
                 </TableRow>
@@ -122,8 +120,7 @@ export default function PedidosPage() {
                     className="cursor-pointer hover:bg-accent/40"
                     onClick={() => setDetalheId(p.id)}
                   >
-                    <TableCell className="font-medium text-clareza">#{p.numero}</TableCell>
-                    <TableCell>{p.cliente_nome}</TableCell>
+                    <TableCell className="font-medium text-clareza">{p.cliente_nome}</TableCell>
                     <TableCell>{p.despachante_nome}</TableCell>
                     <TableCell>{p.excursao_nome}</TableCell>
                     <TableCell>{p.volumes}</TableCell>
