@@ -114,7 +114,7 @@ async function enviarWhatsappEntrega(pedidoId: string) {
     let numero = String(pedido.cliente_telefone).replace(/\D/g, '');
     if (!numero.startsWith('55')) numero = '55' + numero;
 
-    const texto = `Olá, ${pedido.cliente_nome}! 🎉\n\nSeu pedido *#${pedido.numero}* da *${pedido.nome_empresa}* foi entregue com sucesso na excursão *${pedido.excursao_nome}*!\n\nObrigado por usar o Na Rota. 🚐📦`;
+    const texto = `Olá, ${pedido.cliente_nome}!\n\nPassando para avisar que o seu pedido feito na ${pedido.nome_empresa} acabou de ser entregue com segurança na excursão ${pedido.excursao_nome}. 🚚✅\n\nAgradecemos a confiança em nossos serviços!`;
 
     await uazapiInstanceRequest('/send/text', 'POST', cfg.instance_token, {number: numero, text: texto});
 
