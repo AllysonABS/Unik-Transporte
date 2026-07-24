@@ -26,6 +26,7 @@ import {
 import ExcursaoFormDialog from '@/components/empresa/ExcursaoFormDialog';
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
 import { ApiError } from '@/lib/apiClient';
+import { maskTelefone } from '@/lib/mask';
 import type { ExcursaoData } from '@/types/empresa';
 
 export default function ExcursoesPage() {
@@ -130,7 +131,7 @@ export default function ExcursoesPage() {
                     </TableCell>
                     <TableCell>{e.vaga}</TableCell>
                     <TableCell>{e.responsavel}</TableCell>
-                    <TableCell>{e.telefone || '—'}</TableCell>
+                    <TableCell>{e.telefone ? maskTelefone(e.telefone) : '—'}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

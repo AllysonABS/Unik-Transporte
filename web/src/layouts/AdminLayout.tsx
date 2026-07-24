@@ -62,7 +62,7 @@ export default function AdminLayout() {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="min-h-screen bg-matriz flex">
+      <div className="h-screen bg-matriz flex overflow-hidden">
         <aside
           className={cn(
             'relative shrink-0 border-r border-border bg-card flex flex-col transition-[width] duration-300 ease-in-out',

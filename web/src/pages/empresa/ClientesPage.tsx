@@ -30,6 +30,7 @@ import {
 import ClienteFormDialog from '@/components/empresa/ClienteFormDialog';
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
 import { ApiError } from '@/lib/apiClient';
+import { maskCpf, maskCnpj, maskTelefone } from '@/lib/mask';
 import type { ClienteVinculo } from '@/types/empresa';
 
 export default function ClientesPage() {
@@ -140,8 +141,8 @@ export default function ClientesPage() {
                 filtrados.map(c => (
                   <TableRow key={c.vinculo_id}>
                     <TableCell className="font-medium text-clareza">{c.nome}</TableCell>
-                    <TableCell>{c.cpf || c.cnpj || '—'}</TableCell>
-                    <TableCell>{c.telefone || '—'}</TableCell>
+                    <TableCell>{c.cpf ? maskCpf(c.cpf) : c.cnpj ? maskCnpj(c.cnpj) : '—'}</TableCell>
+                    <TableCell>{c.telefone ? maskTelefone(c.telefone) : '—'}</TableCell>
                     <TableCell>
                       {c.status === 'bloqueado' ? (
                         <Badge variant="destructive">Bloqueado</Badge>

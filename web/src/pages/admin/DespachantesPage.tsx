@@ -25,6 +25,7 @@ import {
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
 import DespachanteFormDialog from '@/components/admin/DespachanteFormDialog';
 import { ApiError } from '@/lib/apiClient';
+import { maskCpf, maskTelefone } from '@/lib/mask';
 import type { DespachanteAdmin } from '@/types/admin';
 
 export default function AdminDespachantesPage() {
@@ -101,8 +102,8 @@ export default function AdminDespachantesPage() {
                 filtrados.map(d => (
                   <TableRow key={d.id}>
                     <TableCell className="font-medium text-clareza">{d.nome}</TableCell>
-                    <TableCell>{d.cpf}</TableCell>
-                    <TableCell>{d.telefone || '—'}</TableCell>
+                    <TableCell>{maskCpf(d.cpf)}</TableCell>
+                    <TableCell>{d.telefone ? maskTelefone(d.telefone) : '—'}</TableCell>
                     <TableCell>{(d.empresas ?? []).map(e => e.nome_empresa).join(', ') || '—'}</TableCell>
                     <TableCell>
                       {d.ativo ? (

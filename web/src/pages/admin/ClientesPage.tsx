@@ -5,6 +5,7 @@ import { MoreHorizontal, Search } from 'lucide-react';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarClientesAdmin, excluirClienteAdmin } from '@/services/admin';
 import { formatData } from '@/lib/format';
+import { maskCpf } from '@/lib/mask';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -112,7 +113,7 @@ export default function AdminClientesPage() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell>{c.cpf}</TableCell>
+                    <TableCell>{c.cpf ? maskCpf(c.cpf) : '—'}</TableCell>
                     <TableCell>{c.email}</TableCell>
                     <TableCell>{c.total_vinculos}</TableCell>
                     <TableCell>{formatData(c.data_cadastro)}</TableCell>

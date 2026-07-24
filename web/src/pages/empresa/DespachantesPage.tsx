@@ -30,6 +30,7 @@ import {
 import DespachanteFormDialog from '@/components/empresa/DespachanteFormDialog';
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
 import { ApiError } from '@/lib/apiClient';
+import { maskCpf, maskTelefone } from '@/lib/mask';
 import type { DespachanteData } from '@/types/empresa';
 
 export default function DespachantesPage() {
@@ -135,8 +136,8 @@ export default function DespachantesPage() {
                 filtrados.map(d => (
                   <TableRow key={d.id}>
                     <TableCell className="font-medium text-clareza">{d.nome}</TableCell>
-                    <TableCell>{d.cpf}</TableCell>
-                    <TableCell>{d.telefone || '—'}</TableCell>
+                    <TableCell>{maskCpf(d.cpf)}</TableCell>
+                    <TableCell>{d.telefone ? maskTelefone(d.telefone) : '—'}</TableCell>
                     <TableCell>
                       {d.ativo === false ? (
                         <Badge variant="destructive">Desativado</Badge>

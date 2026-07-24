@@ -5,6 +5,7 @@ import { MoreHorizontal, Search } from 'lucide-react';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarEmpresasAdmin, excluirEmpresaAdmin } from '@/services/admin';
 import { formatData } from '@/lib/format';
+import { maskCnpj } from '@/lib/mask';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -108,7 +109,7 @@ export default function AdminEmpresasPage() {
                 filtradas.map(e => (
                   <TableRow key={e.id}>
                     <TableCell className="font-medium text-clareza">{e.nome_empresa}</TableCell>
-                    <TableCell>{e.cnpj}</TableCell>
+                    <TableCell>{maskCnpj(e.cnpj)}</TableCell>
                     <TableCell>{e.cidade ? `${e.cidade}/${e.estado}` : '—'}</TableCell>
                     <TableCell className="capitalize">{e.status_assinatura}</TableCell>
                     <TableCell>{formatData(e.data_vencimento)}</TableCell>
