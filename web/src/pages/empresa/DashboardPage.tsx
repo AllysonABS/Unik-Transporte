@@ -118,9 +118,7 @@ export default function DashboardPage() {
                     className="w-full flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-left hover:border-pulso/30 transition-colors"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-clareza">
-                        #{p.numero} · {p.cliente_nome}
-                      </p>
+                      <p className="text-sm font-semibold text-clareza">{p.cliente_nome}</p>
                       <p className="text-xs text-gray mt-0.5">{p.excursao_nome}</p>
                     </div>
                     <StatusBadge status={p.status} />

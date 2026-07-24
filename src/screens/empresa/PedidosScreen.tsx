@@ -11,8 +11,24 @@ import Icon from '../../components/Icon';
 import EmptyState from '../../components/EmptyState';
 import {SkeletonCard} from '../../components/Skeleton';
 import {hapticSuccess, hapticLight} from '../../utils/haptics';
-import {criarPedido, listarPedidosEmpresa, getCachedPedidosEmpresa, invalidarCachePedidosEmpresa, listarClientesEmpresa, listarDespachantes, listarExcursoes, PedidoData} from '../../services/api';
+import {criarPedido, listarPedidosEmpresa, getCachedPedidosEmpresa, invalidarCachePedidosEmpresa, listarClientesEmpresa, listarDespachantes, listarExcursoes, cadastrarDespachante, cadastrarExcursao, PedidoData} from '../../services/api';
 import {formatHora} from '../../utils/date';
+
+function maskCpf(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  return digits
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 10) {
+    return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
+  }
+  return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+}
 
 type Status = 'aguardando' | 'em_transito' | 'entregue';
 
@@ -115,6 +131,22 @@ export default function PedidosScreen() {
   const [criando, setCriando] = useState(false);
   const jaCarregou = useRef(false);
 
+  const [modalNovoDespachante, setModalNovoDespachante] = useState(false);
+  const [dpNome, setDpNome] = useState('');
+  const [dpCpf, setDpCpf] = useState('');
+  const [dpTelefone, setDpTelefone] = useState('');
+  const [dpSenha, setDpSenha] = useState('');
+  const [dpSalvando, setDpSalvando] = useState(false);
+
+  const [modalNovoExcursao, setModalNovoExcursao] = useState(false);
+  const [exNome, setExNome] = useState('');
+  const [exSetor, setExSetor] = useState('');
+  const [exVaga, setExVaga] = useState('');
+  const [exResponsavel, setExResponsavel] = useState('');
+  const [exTelefone, setExTelefone] = useState('');
+  const [exObservacoes, setExObservacoes] = useState('');
+  const [exSalvando, setExSalvando] = useState(false);
+
   const carregar = async () => {
     if (!empresa?.id) return;
     const res = await listarPedidosEmpresa(empresa.id);
@@ -131,6 +163,9 @@ export default function PedidosScreen() {
     if (resCli.success && resCli.clientes) setClientes(resCli.clientes);
     if (resDesp.success && resDesp.despachantes) setDespachantes(resDesp.despachantes);
     if (resExc.success && resExc.excursoes) setExcursoes(resExc.excursoes);
+    return {
+      despachantes: resDesp.success ? resDesp.despachantes || [] : [],
+    };
   };
 
   useFocusEffect(useCallback(() => {
@@ -155,11 +190,65 @@ export default function PedidosScreen() {
     carregar().finally(() => setRefreshing(false));
   }, [empresa?.id]);
 
-  const abrirNovo = () => {
-    carregarDadosForm();
+  const abrirNovo = async () => {
     setNovoCliente(null); setNovoDespachante(null); setNovoExcursao(null);
     setNovoVolumes(''); setNovoDescricao('');
     setModalNovo(true);
+    const dados = await carregarDadosForm();
+    // Empresa com um único despachante: seleciona automaticamente para agilizar o cadastro.
+    if (dados?.despachantes?.length === 1) {
+      setNovoDespachante(dados.despachantes[0]);
+    }
+  };
+
+  const abrirNovoDespachante = () => {
+    setDpNome(''); setDpCpf(''); setDpTelefone(''); setDpSenha('');
+    setModalNovoDespachante(true);
+  };
+
+  const dpSenhaValida = dpSenha.length >= 8 && /[A-Z]/.test(dpSenha) && /[0-9]/.test(dpSenha);
+
+  const salvarNovoDespachante = async () => {
+    if (!dpNome || !dpCpf) { show({title: 'Atenção', message: 'Preencha nome e CPF.', type: 'warning'}); return; }
+    if (!dpSenha) { show({title: 'Atenção', message: 'Preencha a senha de acesso.', type: 'warning'}); return; }
+    if (!dpSenhaValida) { show({title: 'Atenção', message: 'A senha deve ter no mínimo 8 caracteres, 1 letra maiúscula e 1 número.', type: 'warning'}); return; }
+    if (!empresa?.id) return;
+    setDpSalvando(true);
+    const res = await cadastrarDespachante(empresa.id, {nome: dpNome, cpf: dpCpf, telefone: dpTelefone || undefined, senha: dpSenha});
+    setDpSalvando(false);
+    if (res.success && res.id) {
+      const novo = {id: res.id, nome: dpNome, cpf: dpCpf, telefone: dpTelefone || undefined, ativo: true};
+      setDespachantes(prev => [...prev, novo]);
+      setNovoDespachante(novo);
+      showToast('Despachante cadastrado!', 'success');
+      setModalNovoDespachante(false);
+    } else {
+      show({title: 'Erro', message: res.error || 'Falha ao cadastrar despachante.', type: 'error'});
+    }
+  };
+
+  const abrirNovoExcursao = () => {
+    setExNome(''); setExSetor(''); setExVaga(''); setExResponsavel(''); setExTelefone(''); setExObservacoes('');
+    setModalNovoExcursao(true);
+  };
+
+  const salvarNovoExcursao = async () => {
+    if (!exNome || !exSetor || !exVaga || !exResponsavel) {
+      show({title: 'Atenção', message: 'Preencha todos os campos obrigatórios.', type: 'warning'}); return;
+    }
+    if (!empresa?.id) return;
+    setExSalvando(true);
+    const res = await cadastrarExcursao(empresa.id, {nome: exNome, setor: exSetor, vaga: exVaga, responsavel: exResponsavel, telefone: exTelefone || undefined, observacoes: exObservacoes || undefined});
+    setExSalvando(false);
+    if (res.success && res.id) {
+      const nova = {id: res.id, nome: exNome, setor: exSetor, vaga: exVaga, responsavel: exResponsavel, telefone: exTelefone || undefined, observacoes: exObservacoes || undefined};
+      setExcursoes(prev => [...prev, nova]);
+      setNovoExcursao(nova);
+      showToast('Excursão cadastrada!', 'success');
+      setModalNovoExcursao(false);
+    } else {
+      show({title: 'Erro', message: res.error || 'Falha ao cadastrar excursão.', type: 'error'});
+    }
   };
 
   const handleCriar = async () => {
@@ -262,9 +351,9 @@ export default function PedidosScreen() {
               onPress={() => setDetalhe(p)}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel={`Pedido ${p.numero}, ${p.cliente_nome}, ${cfg.label}`}>
+              accessibilityLabel={`Pedido de ${p.cliente_nome}, ${cfg.label}`}>
               <View style={s.cardHeader}>
-                <Text style={s.pedidoId}>#{p.numero}</Text>
+                <Text style={s.pedidoId} numberOfLines={1}>{p.excursao_nome}</Text>
                 <View style={[s.badge, {backgroundColor: cfg.cor + '20'}]}>
                   <Icon name={cfg.icon} size={12} color={cfg.cor} />
                   <Text style={[s.badgeText, {color: cfg.cor}]}>{cfg.label}</Text>
@@ -296,7 +385,7 @@ export default function PedidosScreen() {
           <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
-                <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
+                <Text style={s.sheetTitle} numberOfLines={1}>{detalhe?.excursao_nome}</Text>
                 <View style={s.sheetHeaderRight}>
                   {detalhe && (
                     <View style={[s.badge, {backgroundColor: statusConfig[detalhe.status].cor + '20'}]}>
@@ -357,13 +446,25 @@ export default function PedidosScreen() {
                 <Icon name="chevron-down" size={16} color={Colors.gray} />
               </TouchableOpacity>
 
-              <Text style={s.label}>Despachante *</Text>
+              <View style={s.labelRow}>
+                <Text style={s.labelInRow}>Despachante *</Text>
+                <TouchableOpacity style={s.miniAddBtn} onPress={abrirNovoDespachante} accessibilityRole="button" accessibilityLabel="Cadastrar novo despachante">
+                  <Icon name="plus" size={12} color={Colors.pulso} />
+                  <Text style={s.miniAddText}>Novo despachante</Text>
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity style={s.selectBtn} onPress={() => setShowPickerDesp(true)} accessibilityRole="button">
                 <Text style={novoDespachante ? s.selectValue : s.selectPlaceholder}>{novoDespachante?.nome || 'Selecionar despachante...'}</Text>
                 <Icon name="chevron-down" size={16} color={Colors.gray} />
               </TouchableOpacity>
 
-              <Text style={s.label}>Excursão de destino *</Text>
+              <View style={s.labelRow}>
+                <Text style={s.labelInRow}>Excursão de destino *</Text>
+                <TouchableOpacity style={s.miniAddBtn} onPress={abrirNovoExcursao} accessibilityRole="button" accessibilityLabel="Cadastrar nova excursão">
+                  <Icon name="plus" size={12} color={Colors.pulso} />
+                  <Text style={s.miniAddText}>Nova excursão</Text>
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity style={s.selectBtn} onPress={() => setShowPickerExc(true)} accessibilityRole="button">
                 <Text style={novoExcursao ? s.selectValue : s.selectPlaceholder}>{novoExcursao ? `${novoExcursao.nome} (Setor ${novoExcursao.setor}, Vaga ${novoExcursao.vaga})` : 'Selecionar excursão...'}</Text>
                 <Icon name="chevron-down" size={16} color={Colors.gray} />
@@ -414,6 +515,86 @@ export default function PedidosScreen() {
             onClose={() => setShowPickerExc(false)}
             emptyText="Nenhuma excursão cadastrada"
           />
+
+          {modalNovoDespachante && (
+            <View style={pk.overlay}>
+              <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalNovoDespachante(false)} />
+              <View style={[s.sheet, {maxHeight: '85%'}]}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <Text style={s.sheetTitle}>Novo Despachante</Text>
+                  <Text style={s.label}>Nome completo *</Text>
+                  <TextInput style={s.input} placeholder="Nome..." placeholderTextColor={Colors.gray} value={dpNome} onChangeText={setDpNome} />
+                  <Text style={s.label}>CPF *</Text>
+                  <TextInput style={s.input} placeholder="000.000.000-00" placeholderTextColor={Colors.gray} value={dpCpf} onChangeText={v => setDpCpf(maskCpf(v))} keyboardType="numeric" />
+                  <Text style={s.label}>Telefone</Text>
+                  <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={dpTelefone} onChangeText={v => setDpTelefone(maskTelefone(v))} keyboardType="phone-pad" />
+                  <Text style={s.label}>Senha de acesso *</Text>
+                  <TextInput style={s.input} placeholder="Min 8 caracteres, 1 maiúscula, 1 número" placeholderTextColor={Colors.gray} value={dpSenha} onChangeText={setDpSenha} secureTextEntry />
+                  {dpSenha.length > 0 && (
+                    <View style={s.senhaChecklist}>
+                      <View style={s.senhaCheckItem}>
+                        <Icon name={dpSenha.length >= 8 ? 'check-circle' : 'circle'} size={13} color={dpSenha.length >= 8 ? Colors.pulso : Colors.gray} />
+                        <Text style={[s.senhaCheckText, dpSenha.length >= 8 && s.senhaCheckTextOk]}>Mínimo de 8 caracteres</Text>
+                      </View>
+                      <View style={s.senhaCheckItem}>
+                        <Icon name={/[A-Z]/.test(dpSenha) ? 'check-circle' : 'circle'} size={13} color={/[A-Z]/.test(dpSenha) ? Colors.pulso : Colors.gray} />
+                        <Text style={[s.senhaCheckText, /[A-Z]/.test(dpSenha) && s.senhaCheckTextOk]}>1 letra maiúscula</Text>
+                      </View>
+                      <View style={s.senhaCheckItem}>
+                        <Icon name={/[0-9]/.test(dpSenha) ? 'check-circle' : 'circle'} size={13} color={/[0-9]/.test(dpSenha) ? Colors.pulso : Colors.gray} />
+                        <Text style={[s.senhaCheckText, /[0-9]/.test(dpSenha) && s.senhaCheckTextOk]}>1 número</Text>
+                      </View>
+                    </View>
+                  )}
+                  <View style={s.btnRow}>
+                    <TouchableOpacity style={s.cancelBtn} onPress={() => setModalNovoDespachante(false)} accessibilityRole="button" accessibilityLabel="Cancelar">
+                      <Text style={s.cancelBtnText}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={s.saveBtn} onPress={salvarNovoDespachante} disabled={dpSalvando} accessibilityRole="button" accessibilityLabel="Cadastrar despachante">
+                      <Text style={s.saveBtnText}>{dpSalvando ? 'Cadastrando...' : 'Cadastrar'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+              </View>
+            </View>
+          )}
+
+          {modalNovoExcursao && (
+            <View style={pk.overlay}>
+              <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalNovoExcursao(false)} />
+              <View style={[s.sheet, {maxHeight: '85%'}]}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <Text style={s.sheetTitle}>Nova Excursão</Text>
+                  <Text style={s.label}>Nome da excursão *</Text>
+                  <TextInput style={s.input} placeholder="Ex: Trans Silva - SP" placeholderTextColor={Colors.gray} value={exNome} onChangeText={setExNome} />
+                  <View style={s.row2}>
+                    <View style={{flex: 1}}>
+                      <Text style={s.label}>Setor *</Text>
+                      <TextInput style={s.input} placeholder="Ex: A" placeholderTextColor={Colors.gray} value={exSetor} onChangeText={v => setExSetor(v.slice(0, 200))} autoCapitalize="characters" maxLength={200} />
+                    </View>
+                    <View style={{flex: 1}}>
+                      <Text style={s.label}>Nº da vaga *</Text>
+                      <TextInput style={s.input} placeholder="Ex: 12" placeholderTextColor={Colors.gray} value={exVaga} onChangeText={v => setExVaga(v.slice(0, 200))} maxLength={200} />
+                    </View>
+                  </View>
+                  <Text style={s.label}>Nome do responsável *</Text>
+                  <TextInput style={s.input} placeholder="Nome do motorista/responsável" placeholderTextColor={Colors.gray} value={exResponsavel} onChangeText={setExResponsavel} />
+                  <Text style={s.label}>Telefone</Text>
+                  <TextInput style={s.input} placeholder="(00) 00000-0000" placeholderTextColor={Colors.gray} value={exTelefone} onChangeText={v => setExTelefone(maskTelefone(v))} keyboardType="phone-pad" />
+                  <Text style={s.label}>Observações</Text>
+                  <TextInput style={[s.input, {height: 80, textAlignVertical: 'top', paddingTop: 12}]} placeholder="Ex: Ponto de encontro, horário de saída..." placeholderTextColor={Colors.gray} value={exObservacoes} onChangeText={setExObservacoes} multiline />
+                  <View style={s.btnRow}>
+                    <TouchableOpacity style={s.cancelBtn} onPress={() => setModalNovoExcursao(false)} accessibilityRole="button" accessibilityLabel="Cancelar">
+                      <Text style={s.cancelBtnText}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={s.saveBtn} onPress={salvarNovoExcursao} disabled={exSalvando} accessibilityRole="button" accessibilityLabel="Cadastrar excursão">
+                      <Text style={s.saveBtnText}>{exSalvando ? 'Cadastrando...' : 'Cadastrar'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+              </View>
+            </View>
+          )}
         </View>
       </Modal>
     </View>
@@ -436,7 +617,7 @@ const s = StyleSheet.create({
   filtroTextAtivo:{color: Colors.pulso},
   card:         {backgroundColor: '#162433', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#1E3448'},
   cardHeader:   {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10},
-  pedidoId:     {fontSize: 16, fontWeight: '700', color: Colors.clareza},
+  pedidoId:     {fontSize: 16, fontWeight: '700', color: Colors.clareza, flex: 1, marginRight: 8},
   badge:        {borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4, flexDirection: 'row', alignItems: 'center', gap: 4},
   badgeText:    {fontSize: 12, fontWeight: '700'},
   cardRow:      {flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4},
@@ -451,7 +632,7 @@ const s = StyleSheet.create({
   sheet:        {backgroundColor: '#0F1F2E', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '90%'},
   sheetHeader:  {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20},
   sheetHeaderRight: {flexDirection: 'row', alignItems: 'center', gap: 10},
-  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza},
+  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza, flex: 1, marginRight: 8},
   closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
   detLabel:     {fontSize: 13, color: Colors.gray},
@@ -468,6 +649,15 @@ const s = StyleSheet.create({
   etapaHora:    {fontSize: 12, color: Colors.gray, marginRight: 10, minWidth: 45},
   obsText:      {fontSize: 14, color: Colors.clareza, lineHeight: 20},
   label:        {fontSize: 13, fontWeight: '600', color: Colors.gray, marginBottom: 6, marginTop: 12},
+  labelRow:     {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, marginTop: 12},
+  labelInRow:   {fontSize: 13, fontWeight: '600', color: Colors.gray},
+  miniAddBtn:   {flexDirection: 'row', alignItems: 'center', gap: 4},
+  miniAddText:  {fontSize: 12, color: Colors.pulso, fontWeight: '600'},
+  senhaChecklist: {marginTop: 8, gap: 5},
+  senhaCheckItem: {flexDirection: 'row', alignItems: 'center', gap: 7},
+  senhaCheckText: {fontSize: 12, color: Colors.gray, fontWeight: '500'},
+  senhaCheckTextOk: {color: Colors.pulso},
+  row2:         {flexDirection: 'row', gap: 12},
   input:        {height: 50, backgroundColor: '#162433', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 16, color: Colors.clareza, fontSize: 15},
   selectBtn:    {height: 50, backgroundColor: '#162433', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
   selectValue:  {fontSize: 15, color: Colors.clareza, flex: 1},

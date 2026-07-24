@@ -48,8 +48,7 @@ export default function AdminPedidosPage() {
     return pedidos.filter(
       p =>
         p.nome_empresa?.toLowerCase().includes(termo) ||
-        p.cliente_nome?.toLowerCase().includes(termo) ||
-        String(p.numero).includes(termo),
+        p.cliente_nome?.toLowerCase().includes(termo),
     );
   }, [pedidos, busca]);
 
@@ -71,7 +70,7 @@ export default function AdminPedidosPage() {
         <Input
           value={busca}
           onChange={e => setBusca(e.target.value)}
-          placeholder="Buscar por empresa, cliente ou número"
+          placeholder="Buscar por empresa ou cliente"
           className="pl-9"
         />
       </div>
@@ -87,7 +86,6 @@ export default function AdminPedidosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead>
                 <TableHead>Empresa</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Excursão</TableHead>
@@ -99,7 +97,7 @@ export default function AdminPedidosPage() {
             <TableBody>
               {filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray py-8">
+                  <TableCell colSpan={6} className="text-center text-gray py-8">
                     Nenhum pedido encontrado.
                   </TableCell>
                 </TableRow>
@@ -112,8 +110,7 @@ export default function AdminPedidosPage() {
                   };
                   return (
                     <TableRow key={p.id}>
-                      <TableCell className="font-medium text-clareza">#{p.numero}</TableCell>
-                      <TableCell>{p.nome_empresa}</TableCell>
+                      <TableCell className="font-medium text-clareza">{p.nome_empresa}</TableCell>
                       <TableCell>{p.cliente_nome}</TableCell>
                       <TableCell>{p.excursao_nome}</TableCell>
                       <TableCell>
@@ -149,7 +146,7 @@ export default function AdminPedidosPage() {
         open={!!deleting}
         onOpenChange={open => !open && setDeleting(null)}
         title="Excluir pedido"
-        description={`O pedido #${deleting?.numero} de "${deleting?.nome_empresa}" será excluído permanentemente, junto com etapas e fotos.`}
+        description={`O pedido de "${deleting?.cliente_nome}" em "${deleting?.nome_empresa}" será excluído permanentemente, junto com etapas e fotos.`}
         confirmLabel="Excluir"
         destructive
         onConfirm={() => {

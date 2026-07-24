@@ -132,10 +132,12 @@ export default function EmpresaDashboard() {
           <View style={s.statsGrid}>
             {stats.map(item => (
               <TouchableOpacity key={item.label} style={s.statCard} activeOpacity={0.75} onPress={() => (navigation as any).navigate(item.route)} accessibilityRole="button" accessibilityLabel={`${item.label}: ${item.value}`}>
-                <View style={[s.statIconBadge, {backgroundColor: item.color + '1A'}]}>
-                  <Icon name={item.icon} size={21} color={item.color} />
+                <View style={s.statTopRow}>
+                  <View style={[s.statIconBadge, {backgroundColor: item.color + '1A'}]}>
+                    <Icon name={item.icon} size={21} color={item.color} />
+                  </View>
+                  <Text style={s.statValue}>{item.value}</Text>
                 </View>
-                <Text style={s.statValue}>{item.value}</Text>
                 <Text style={s.statLabel}>{item.label}</Text>
               </TouchableOpacity>
             ))}
@@ -161,10 +163,10 @@ export default function EmpresaDashboard() {
               <Text style={s.emptyText}>Nenhum pedido criado ainda</Text>
             </View>
           ) : recentes.map(p => (
-            <TouchableOpacity key={p.id} style={s.pedidoCard} activeOpacity={0.7} onPress={() => setDetalhe(p)} accessibilityRole="button" accessibilityLabel={`Pedido ${p.numero}, ${p.cliente_nome}, status ${p.status}`}>
+            <TouchableOpacity key={p.id} style={s.pedidoCard} activeOpacity={0.7} onPress={() => setDetalhe(p)} accessibilityRole="button" accessibilityLabel={`Pedido de ${p.cliente_nome}, status ${p.status}`}>
               <View style={[s.dot, {backgroundColor: statusCor[p.status] || Colors.gray}]} />
               <View style={s.pedidoInfo}>
-                <Text style={s.pedidoId}>#{p.numero} · {p.cliente_nome}</Text>
+                <Text style={s.pedidoId}>{p.cliente_nome}</Text>
                 <Text style={s.pedidoDest}>{p.excursao_nome}</Text>
               </View>
               <Text style={[s.pedidoStatus, {color: statusCor[p.status] || Colors.gray}]}>
@@ -181,7 +183,7 @@ export default function EmpresaDashboard() {
           <View style={s.sheet}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.sheetHeader}>
-                <Text style={s.sheetTitle}>#{detalhe?.numero}</Text>
+                <Text style={s.sheetTitle} numberOfLines={1}>{detalhe?.excursao_nome}</Text>
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
                   {detalhe && (
                     <View style={[s.badge, {backgroundColor: statusCor[detalhe.status] + '20'}]}>
@@ -244,6 +246,7 @@ const s = StyleSheet.create({
   badgeNotifText:{color: '#FFF', fontSize: 10, fontWeight: '800'},
   statsGrid:   {flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 28},
   statCard:    {flex: 1, minWidth: '46%', backgroundColor: '#131F2D', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(234,235,235,0.05)', gap: 10},
+  statTopRow:  {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
   statIconBadge: {width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center'},
   statValue:   {fontSize: 26, fontWeight: '700', color: Colors.clareza},
   statLabel:   {fontSize: 12, color: Colors.gray, fontWeight: '500'},
@@ -265,7 +268,7 @@ const s = StyleSheet.create({
   overlay:      {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
   sheet:        {backgroundColor: '#0F1F2E', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '90%'},
   sheetHeader:  {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20},
-  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza},
+  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza, flex: 1, marginRight: 8},
   closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
   badge:        {borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4},
   badgeText:    {fontSize: 12, fontWeight: '700'},

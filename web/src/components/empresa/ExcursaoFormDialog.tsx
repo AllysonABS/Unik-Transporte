@@ -43,9 +43,10 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   excursao?: ExcursaoData | null;
+  onSaved?: (excursao: { id: string; nome: string }) => void;
 }
 
-export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Props) {
+export default function ExcursaoFormDialog({ open, onOpenChange, excursao, onSaved }: Props) {
   const { empresa } = useEmpresaAuth();
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -68,13 +69,17 @@ export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Pro
   }, [open, excursao, form]);
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => {
+    mutationFn: (values: FormValues): Promise<{ success: boolean; id?: string }> => {
       const payload = { ...values, telefone: values.telefone ? values.telefone.replace(/\D/g, '') : values.telefone };
       return isEdit ? atualizarExcursao(excursao!.id, payload) : cadastrarExcursao(empresa!.id, payload);
     },
-    onSuccess: () => {
+    onSuccess: (data, values) => {
       toast.success(isEdit ? 'Excursão atualizada.' : 'Excursão cadastrada.');
       queryClient.invalidateQueries({ queryKey: ['excursoes', empresa?.id] });
+      queryClient.invalidateQueries({ queryKey: ['excursoes-picker', empresa?.id] });
+      if (!isEdit && data.id) {
+        onSaved?.({ id: data.id, nome: values.nome });
+      }
       onOpenChange(false);
     },
     onError: (err: unknown) => {
