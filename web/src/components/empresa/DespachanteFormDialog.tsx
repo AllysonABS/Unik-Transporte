@@ -9,6 +9,7 @@ import { cadastrarDespachante, atualizarDespachante } from '@/services/despachan
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { maskCpf, maskTelefone } from '@/lib/mask';
 import {
   Dialog,
   DialogContent,
@@ -65,11 +66,13 @@ export default function DespachanteFormDialog({ open, onOpenChange, despachante 
 
   const mutation = useMutation({
     mutationFn: (values: FormValues) => {
+      const cpf = values.cpf.replace(/\D/g, '');
+      const telefone = values.telefone ? values.telefone.replace(/\D/g, '') : values.telefone;
       if (isEdit) {
         return atualizarDespachante(despachante!.id, {
           nome: values.nome,
-          cpf: values.cpf,
-          telefone: values.telefone,
+          cpf,
+          telefone,
           senha: values.senha || undefined,
         });
       }
@@ -78,8 +81,8 @@ export default function DespachanteFormDialog({ open, onOpenChange, despachante 
       }
       return cadastrarDespachante(empresa!.id, {
         nome: values.nome,
-        cpf: values.cpf,
-        telefone: values.telefone,
+        cpf,
+        telefone,
         senha: values.senha,
       });
     },
@@ -129,7 +132,7 @@ export default function DespachanteFormDialog({ open, onOpenChange, despachante 
                   <FormItem>
                     <FormLabel>CPF</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} onChange={e => field.onChange(maskCpf(e.target.value))} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,7 +145,7 @@ export default function DespachanteFormDialog({ open, onOpenChange, despachante 
                   <FormItem>
                     <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} onChange={e => field.onChange(maskTelefone(e.target.value))} />
                     </FormControl>
                   </FormItem>
                 )}

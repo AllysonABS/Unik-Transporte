@@ -1942,9 +1942,10 @@ app.get('/api/admin/empresas', auth, requireAdmin, async (_req, res) => {
 app.put('/api/admin/empresas/:id', auth, requireAdmin, async (req, res) => {
   try {
     const {id} = req.params;
-    const {nome_empresa, nome_responsavel, email, telefone, endereco, numero, bairro,
+    const {nome_empresa, nome_responsavel, email, endereco, numero, bairro,
       cidade, estado, cep, plano, valor_plano, status_assinatura, ativa, data_vencimento} = req.body;
     const cnpj = (req.body.cnpj || '').replace(/\D/g, '');
+    const telefone = (req.body.telefone || '').replace(/\D/g, '');
     const result = await pool.query(
       `UPDATE empresas SET nome_empresa=$1, cnpj=$2, nome_responsavel=$3, email=$4, telefone=$5,
         endereco=$6, numero=$7, bairro=$8, cidade=$9, estado=$10, cep=$11, plano=$12, valor_plano=$13,
@@ -2001,18 +2002,21 @@ app.get('/api/admin/clientes', auth, requireAdmin, async (_req, res) => {
 app.put('/api/admin/clientes/:id', auth, requireAdmin, async (req, res) => {
   try {
     const {id} = req.params;
-    const {nome, cpf, cnpj, email, telefone, cidade, estado, ativo} = req.body;
+    const {nome, email, cidade, estado, ativo} = req.body;
+    const cpf = (req.body.cpf || '').replace(/\D/g, '');
+    const cnpj = req.body.cnpj ? String(req.body.cnpj).replace(/\D/g, '') : null;
+    const telefone = (req.body.telefone || '').replace(/\D/g, '');
     const result = await pool.query(
       `UPDATE clientes SET nome=$1, cpf=$2, cnpj=$3, email=$4, telefone=$5, cidade=$6, estado=$7, ativo=$8
        WHERE id=$9 RETURNING id`,
-      [nome, cpf, cnpj || null, email, telefone, cidade || null, estado || null, ativo, id]
+      [nome, cpf, cnpj, email, telefone, cidade || null, estado || null, ativo, id]
     );
     if (result.rows.length > 0) return res.json({success: true});
     // Não é conta do app — é um cadastro manual feito pela empresa, vive em cliente_empresa
     const manualResult = await pool.query(
       `UPDATE cliente_empresa SET nome=$1, cpf=$2, cnpj=$3, email=$4, telefone=$5, cidade=$6, estado=$7,
         status=$8 WHERE id=$9 AND cliente_id IS NULL RETURNING id`,
-      [nome, cpf, cnpj || null, email, telefone, cidade || null, estado || null, ativo ? 'ativo' : 'bloqueado', id]
+      [nome, cpf, cnpj, email, telefone, cidade || null, estado || null, ativo ? 'ativo' : 'bloqueado', id]
     );
     if (manualResult.rows.length === 0) return res.status(404).json({error: 'Cliente não encontrado.'});
     res.json({success: true});
@@ -2059,10 +2063,12 @@ app.get('/api/admin/despachantes', auth, requireAdmin, async (_req, res) => {
 app.put('/api/admin/despachantes/:id', auth, requireAdmin, async (req, res) => {
   try {
     const {id} = req.params;
-    const {nome, cpf, telefone, ativo} = req.body;
+    const {nome, ativo} = req.body;
+    const cpf = (req.body.cpf || '').replace(/\D/g, '');
+    const telefone = req.body.telefone ? String(req.body.telefone).replace(/\D/g, '') : null;
     const result = await pool.query(
       'UPDATE despachantes SET nome=$1, cpf=$2, telefone=$3, ativo=$4 WHERE id=$5 RETURNING id',
-      [nome, cpf, telefone || null, ativo, id]
+      [nome, cpf, telefone, ativo, id]
     );
     if (result.rows.length === 0) return res.status(404).json({error: 'Despachante não encontrado.'});
     res.json({success: true});

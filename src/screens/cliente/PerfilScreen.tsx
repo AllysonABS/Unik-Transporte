@@ -141,10 +141,10 @@ export default function PerfilScreen() {
     if (!cliente?.id) return;
 
     const res = await atualizarCliente(cliente.id, {
-      nome: formNome, telefone: formTelefone, email: formEmail,
+      nome: formNome, telefone: formTelefone.replace(/\D/g, ''), email: formEmail,
       data_nascimento: formNascimento, endereco: formEndereco,
       numero: formNumero, bairro: formBairro, complemento: formComplemento,
-      cidade: formCidade, estado: formEstado, cep: formCep,
+      cidade: formCidade, estado: formEstado, cep: formCep.replace(/\D/g, ''),
     });
 
     if (res.success) {
@@ -237,7 +237,7 @@ export default function PerfilScreen() {
               <Text style={s.label}>Nome *</Text>
               <TextInput style={s.input} value={formNome} onChangeText={setFormNome} placeholderTextColor={Colors.gray} />
               <Text style={s.label}>Telefone *</Text>
-              <TextInput style={s.input} value={formTelefone} onChangeText={setFormTelefone} placeholderTextColor={Colors.gray} keyboardType="phone-pad" />
+              <TextInput style={s.input} value={formTelefone} onChangeText={v => setFormTelefone(maskTelefone(v))} placeholderTextColor={Colors.gray} keyboardType="phone-pad" />
               <Text style={s.label}>E-mail</Text>
               <TextInput style={s.input} value={formEmail} onChangeText={setFormEmail} placeholderTextColor={Colors.gray} keyboardType="email-address" autoCapitalize="none" />
               <Text style={s.label}>Data de Nascimento</Text>

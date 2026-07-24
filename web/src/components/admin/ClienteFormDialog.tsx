@@ -5,6 +5,7 @@ import { atualizarClienteAdmin } from '@/services/admin';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { maskCpf, maskCnpj, maskTelefone } from '@/lib/mask';
 import {
   Select,
   SelectContent,
@@ -78,11 +79,11 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-clareza mb-1.5">CPF</label>
-              <Input value={form.cpf ?? ''} onChange={e => update('cpf', e.target.value)} />
+              <Input value={form.cpf ?? ''} onChange={e => update('cpf', maskCpf(e.target.value))} />
             </div>
             <div>
               <label className="block text-sm font-medium text-clareza mb-1.5">CNPJ</label>
-              <Input value={form.cnpj ?? ''} onChange={e => update('cnpj', e.target.value)} />
+              <Input value={form.cnpj ?? ''} onChange={e => update('cnpj', maskCnpj(e.target.value))} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -92,7 +93,7 @@ export default function ClienteFormDialog({ open, onOpenChange, cliente }: Props
             </div>
             <div>
               <label className="block text-sm font-medium text-clareza mb-1.5">Telefone</label>
-              <Input value={form.telefone ?? ''} onChange={e => update('telefone', e.target.value)} />
+              <Input value={form.telefone ?? ''} onChange={e => update('telefone', maskTelefone(e.target.value))} />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">

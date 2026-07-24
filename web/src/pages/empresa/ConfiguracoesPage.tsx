@@ -8,6 +8,7 @@ import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { buscarEmpresa, atualizarEmpresa } from '@/services/empresaPerfil';
 import { buscarCep } from '@/lib/cep';
+import { maskTelefone, maskCep, maskCnpj } from '@/lib/mask';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,7 +108,11 @@ export default function ConfiguracoesPage() {
 
   function onSubmit(values: FormValues) {
     setServerError(null);
-    mutation.mutate(values);
+    mutation.mutate({
+      ...values,
+      telefone: values.telefone.replace(/\D/g, ''),
+      cep: values.cep ? values.cep.replace(/\D/g, '') : values.cep,
+    });
   }
 
   if (isLoading) {
@@ -145,7 +150,7 @@ export default function ConfiguracoesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>CNPJ</Label>
-                  <Input value={data?.empresa.cnpj ?? ''} disabled />
+                  <Input value={data?.empresa.cnpj ? maskCnpj(data.empresa.cnpj) : ''} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label>Responsável</Label>
@@ -160,7 +165,7 @@ export default function ConfiguracoesPage() {
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} onChange={e => field.onChange(maskTelefone(e.target.value))} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -197,6 +202,7 @@ export default function ConfiguracoesPage() {
                     <FormControl>
                       <Input
                         {...field}
+                        onChange={e => field.onChange(maskCep(e.target.value))}
                         onBlur={e => {
                           field.onBlur();
                           handleCepBlur(e.target.value);

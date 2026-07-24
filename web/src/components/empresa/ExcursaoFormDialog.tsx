@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { cadastrarExcursao, atualizarExcursao } from '@/services/excursoes';
+import { maskTelefone } from '@/lib/mask';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,8 +68,10 @@ export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Pro
   }, [open, excursao, form]);
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) =>
-      isEdit ? atualizarExcursao(excursao!.id, values) : cadastrarExcursao(empresa!.id, values),
+    mutationFn: (values: FormValues) => {
+      const payload = { ...values, telefone: values.telefone ? values.telefone.replace(/\D/g, '') : values.telefone };
+      return isEdit ? atualizarExcursao(excursao!.id, payload) : cadastrarExcursao(empresa!.id, payload);
+    },
     onSuccess: () => {
       toast.success(isEdit ? 'Excursão atualizada.' : 'Excursão cadastrada.');
       queryClient.invalidateQueries({ queryKey: ['excursoes', empresa?.id] });
@@ -156,7 +159,7 @@ export default function ExcursaoFormDialog({ open, onOpenChange, excursao }: Pro
                   <FormItem>
                     <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} onChange={e => field.onChange(maskTelefone(e.target.value))} />
                     </FormControl>
                   </FormItem>
                 )}
