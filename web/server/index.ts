@@ -326,7 +326,18 @@ setInterval(() => {
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'https://narota.norum.app').split(',');
 
 const app = express();
-app.use(helmet());
+const r2Origin = (() => {
+  try { return R2_PUBLIC_URL ? new URL(R2_PUBLIC_URL).origin : null; } catch { return null; }
+})();
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      // Permite carregar as fotos dos pedidos, hospedadas no Cloudflare R2
+      'img-src': ["'self'", 'data:', ...(r2Origin ? [r2Origin] : [])],
+    },
+  },
+}));
 app.use(compression());
 app.use(cors({
   origin: (origin, callback) => {
