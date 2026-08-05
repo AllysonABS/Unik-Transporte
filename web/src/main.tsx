@@ -36,6 +36,7 @@ import AdminPedidosPage from './pages/admin/PedidosPage';
 import AdminAssinaturasPage from './pages/admin/AssinaturasPage';
 import AdminWhatsappPage from './pages/admin/WhatsappPage';
 import { Toaster } from './components/ui/sonner';
+import MetaPixelRouteTracker from './components/MetaPixelRouteTracker';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -43,6 +44,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <EmpresaAuthProvider>
         <AdminAuthProvider>
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <MetaPixelRouteTracker />
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/cadastro" element={<CadastroPage />} />

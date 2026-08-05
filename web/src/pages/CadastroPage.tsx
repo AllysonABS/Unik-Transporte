@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buscarCep } from '@/lib/cep';
 import { buscarCnpj } from '@/lib/cnpj';
+import { trackPixelEvent } from '@/lib/metaPixel';
 
 // Masks
 const maskCNPJ = (v: string) => v.replace(/\D/g, '').slice(0, 14)
@@ -140,6 +141,7 @@ export default function CadastroPage() {
     } else if (etapa === 'endereco') {
       setErro('');
       setEtapa('acesso');
+      trackPixelEvent('InitiateCheckout', { value: 69.9, currency: 'BRL' });
     }
   }
 
@@ -194,6 +196,10 @@ export default function CadastroPage() {
       });
       const data = await res.json();
       if (!res.ok) { setErro(data.error || 'Erro ao cadastrar.'); setLoading(false); return; }
+      // Conversão real — cartão já foi cobrado com sucesso nesse ponto
+      // (ver /api/cadastro no backend, que só cria a empresa depois de
+      // confirmar o pagamento).
+      trackPixelEvent('CompleteRegistration', { value: 69.9, currency: 'BRL' });
       setSucesso(true);
     } catch {
       setErro('Erro de conexão. Tente novamente.');
