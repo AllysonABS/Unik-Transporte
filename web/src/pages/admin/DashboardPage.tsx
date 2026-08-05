@@ -8,7 +8,7 @@ const cards = [
   { key: 'total_empresas', label: 'Empresas', icon: Building2, color: '#3B82F6' },
   { key: 'empresas_ativas', label: 'Empresas ativas', icon: CheckCircle2, color: '#60A5FA' },
   { key: 'total_clientes', label: 'Clientes', icon: Users, color: '#F59E0B' },
-  { key: 'total_despachantes', label: 'Despachantes', icon: Truck, color: '#A78BFA' },
+  { key: 'total_entregadores', label: 'Entregadores', icon: Truck, color: '#A78BFA' },
   { key: 'total_pedidos', label: 'Pedidos', icon: Package, color: '#FCA5A5' },
   { key: 'assinaturas_ativas', label: 'Assinaturas ativas', icon: CreditCard, color: '#86EFAC' },
 ] as const;

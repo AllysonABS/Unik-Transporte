@@ -7,12 +7,11 @@ interface PedidosResponse {
 }
 
 export interface CriarPedidoPayload {
-  cliente_id?: string;
-  despachante_id?: string;
+  entregador_id?: string;
   excursao_id?: string;
   cliente_nome: string;
   cliente_telefone?: string;
-  despachante_nome: string;
+  entregador_nome: string;
   excursao_nome: string;
   volumes: number;
   descricao?: string;

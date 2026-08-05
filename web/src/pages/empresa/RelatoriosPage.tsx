@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarPedidosEmpresa } from '@/services/pedidos';
-import { listarDespachantes } from '@/services/despachantes';
+import { listarEntregadores } from '@/services/entregadores';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,15 +42,15 @@ export default function RelatoriosPage() {
     queryFn: () => listarPedidosEmpresa(empresa!.id),
     enabled: !!empresa?.id,
   });
-  const { data: despachantesData, isLoading: loadingDespachantes } = useQuery({
-    queryKey: ['despachantes', empresa?.id],
-    queryFn: () => listarDespachantes(empresa!.id),
+  const { data: entregadoresData, isLoading: loadingEntregadores } = useQuery({
+    queryKey: ['entregadores', empresa?.id],
+    queryFn: () => listarEntregadores(empresa!.id),
     enabled: !!empresa?.id,
   });
 
-  const isLoading = loadingPedidos || loadingDespachantes;
+  const isLoading = loadingPedidos || loadingEntregadores;
   const pedidos = pedidosData?.pedidos ?? [];
-  const despachantes = despachantesData?.despachantes ?? [];
+  const entregadores = entregadoresData?.entregadores ?? [];
 
   const filtrados = useMemo(() => {
     const inicio = inicioPeriodo(periodo);
@@ -67,19 +67,19 @@ export default function RelatoriosPage() {
   const corTaxa = taxaEntrega >= 90 ? '#86EFAC' : taxaEntrega >= 50 ? '#F59E0B' : '#EF4444';
 
   const ranking = useMemo(() => {
-    return despachantes
+    return entregadores
       .map(d => {
-        const pedidosDespachante = filtrados.filter(p => p.despachante_id === d.id);
+        const pedidosEntregador = filtrados.filter(p => p.entregador_id === d.id);
         return {
           id: d.id,
           nome: d.nome,
-          entregas: pedidosDespachante.filter(p => p.status === 'entregue').length,
-          pendentes: pedidosDespachante.filter(p => p.status !== 'entregue' && p.status !== 'cancelado').length,
+          entregas: pedidosEntregador.filter(p => p.status === 'entregue').length,
+          pendentes: pedidosEntregador.filter(p => p.status !== 'entregue' && p.status !== 'cancelado').length,
         };
       })
       .filter(d => d.entregas > 0 || d.pendentes > 0)
       .sort((a, b) => b.entregas - a.entregas);
-  }, [despachantes, filtrados]);
+  }, [entregadores, filtrados]);
 
   const maiorEntregas = Math.max(1, ...ranking.map(r => r.entregas));
 
@@ -153,7 +153,7 @@ export default function RelatoriosPage() {
 
           <div>
             <h2 className="text-xs uppercase tracking-widest text-gray font-semibold mb-3">
-              Top despachantes
+              Top entregadores
             </h2>
             {ranking.length === 0 ? (
               <p className="text-sm text-gray py-6">Sem entregas no período selecionado.</p>

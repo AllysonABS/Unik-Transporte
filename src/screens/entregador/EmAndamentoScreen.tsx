@@ -2,10 +2,10 @@ import React, {useState, useCallback, useRef} from 'react';
 import {View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, RefreshControl, Pressable} from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {DespachanteStackParamList} from '../../navigation/DespachanteNavigator';
+import {EntregadorStackParamList} from '../../navigation/EntregadorNavigator';
 import {Colors} from '../../theme/colors';
 import {useAuth} from '../../context/AuthContext';
-import {listarPedidosDespachante, PedidoData} from '../../services/api';
+import {listarPedidosEntregador, PedidoData} from '../../services/api';
 import {cachePedidos, getCachedPedidos} from '../../services/offlineQueue';
 import {useNetworkStatus} from '../../hooks/useNetworkStatus';
 import {formatHora} from '../../utils/date';
@@ -16,8 +16,8 @@ import {SkeletonCard} from '../../components/Skeleton';
 import {hapticLight} from '../../utils/haptics';
 
 export default function EmAndamentoScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<DespachanteStackParamList>>();
-  const {despachante} = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<EntregadorStackParamList>>();
+  const {entregador} = useAuth();
   const [pedidos, setPedidos] = useState<PedidoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [detalhe, setDetalhe] = useState<PedidoData | null>(null);
@@ -27,15 +27,15 @@ export default function EmAndamentoScreen() {
   const jaCarregou = useRef(false);
 
   const carregar = async () => {
-    if (!despachante?.id) return;
+    if (!entregador?.id) return;
     if (isOnline) {
-      const res = await listarPedidosDespachante(despachante.id);
+      const res = await listarPedidosEntregador(entregador.id);
       if (res.success && res.pedidos) {
         setPedidos(res.pedidos.filter(p => p.status === 'em_transito'));
-        cachePedidos(despachante.id, res.pedidos);
+        cachePedidos(entregador.id, res.pedidos);
       }
     } else {
-      const cached = await getCachedPedidos(despachante.id);
+      const cached = await getCachedPedidos(entregador.id);
       if (cached) setPedidos(cached.filter((p: PedidoData) => p.status === 'em_transito'));
     }
   };
@@ -47,12 +47,14 @@ export default function EmAndamentoScreen() {
     } else {
       carregar();
     }
-  }, [despachante?.id]));
+    const intervalo = setInterval(carregar, 15000);
+    return () => clearInterval(intervalo);
+  }, [entregador?.id]));
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     carregar().finally(() => setRefreshing(false));
-  }, [despachante?.id]);
+  }, [entregador?.id]);
 
   const confirmarEntrega = (p: PedidoData) => {
     hapticLight();
@@ -87,7 +89,8 @@ export default function EmAndamentoScreen() {
                 <View style={s.cardTop}>
                   <Text style={s.id}>{p.cliente_nome}</Text>
                 </View>
-                <Text style={s.empresa}>{p.volumes} vol.</Text>
+                {!!p.nome_empresa && <Text style={s.empresa}>{p.nome_empresa}</Text>}
+                <Text style={s.detalhes}>{p.volumes} vol.</Text>
                 <View style={s.etapaRow2}>
                   <Icon name="activity" size={12} color={Colors.pulso} />
                   <Text style={s.etapa}>{etapaAtual}</Text>
@@ -131,6 +134,7 @@ export default function EmAndamentoScreen() {
                   <Icon name="x" size={18} color={Colors.gray} />
                 </TouchableOpacity>
               </View>
+              {!!detalhe?.nome_empresa && <View style={s.detRow}><Text style={s.detLabel}>Empresa</Text><Text style={s.detValue}>{detalhe.nome_empresa}</Text></View>}
               <View style={s.detRow}><Text style={s.detLabel}>Cliente</Text><Text style={s.detValue}>{detalhe?.cliente_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Destino</Text><Text style={s.detValue}>{detalhe?.excursao_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Volumes</Text><Text style={s.detValue}>{detalhe?.volumes}</Text></View>
@@ -165,7 +169,8 @@ const s = StyleSheet.create({
   info:        {flex: 1},
   cardTop:     {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'},
   id:          {fontSize: 14, fontWeight: '700', color: Colors.clareza},
-  empresa:     {fontSize: 13, color: '#60A5FA', marginTop: 4},
+  empresa:     {fontSize: 11, fontWeight: '700', color: '#60A5FA', marginTop: 4},
+  detalhes:    {fontSize: 13, color: Colors.gray, marginTop: 2},
   etapaRow2:   {flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2},
   etapa:       {fontSize: 13, color: Colors.pulso},
   destinoRow:  {flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2},

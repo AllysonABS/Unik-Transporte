@@ -6,37 +6,41 @@ import {createMaterialTopTabNavigator, MaterialTopTabBarProps} from '@react-navi
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
 import Icon from '../components/Icon';
-import FilaScreen from '../screens/despachante/FilaScreen';
-import EmAndamentoScreen from '../screens/despachante/EmAndamentoScreen';
-import HistoricoScreen from '../screens/despachante/HistoricoScreen';
-import ChecklistScreen from '../screens/despachante/ChecklistScreen';
+import FilaScreen from '../screens/entregador/FilaScreen';
+import EmAndamentoScreen from '../screens/entregador/EmAndamentoScreen';
+import HistoricoScreen from '../screens/entregador/HistoricoScreen';
+import PerfilScreen from '../screens/entregador/PerfilScreen';
+import ChecklistScreen from '../screens/entregador/ChecklistScreen';
 import {startSyncListener, stopSyncListener} from '../services/syncManager';
-import {useLogout} from '../hooks/useLogout';
 
-export type DespachanteTabParamList = {
+export type EntregadorTabParamList = {
   Fila: undefined;
   'Em Andamento': undefined;
   Histórico: undefined;
+  Perfil: undefined;
 };
 
-export type DespachanteStackParamList = {
-  Tabs: NavigatorScreenParams<DespachanteTabParamList> | undefined;
+export type EntregadorStackParamList = {
+  Tabs: NavigatorScreenParams<EntregadorTabParamList> | undefined;
   Checklist: {pedidoId: string; etapa: 'coleta' | 'entrega'; volumes?: number};
 };
 
-const Stack = createNativeStackNavigator<DespachanteStackParamList>();
-const Tab = createMaterialTopTabNavigator<DespachanteTabParamList>();
+const Stack = createNativeStackNavigator<EntregadorStackParamList>();
+const Tab = createMaterialTopTabNavigator<EntregadorTabParamList>();
 
 const iconMap: Record<string, string> = {
   Fila: 'clipboard',
   'Em Andamento': 'navigation',
   Histórico: 'check-circle',
+  Perfil: 'user',
 };
 
 function DespaTabBar({state, descriptors, navigation}: MaterialTopTabBarProps) {
   const insets = useSafeAreaInsets();
-  const logout = useLogout();
 
+  // O botão de sair rápido saiu daqui — agora mora na aba Perfil, junto com
+  // os dados do entregador e as empresas vinculadas. Menos redundante e
+  // menos apertado com a 4ª aba.
   return (
     <View style={[tb.bar, {height: 60 + insets.bottom, paddingBottom: insets.bottom + 4}]}>
       {state.routes.map((route, index) => {
@@ -53,10 +57,6 @@ function DespaTabBar({state, descriptors, navigation}: MaterialTopTabBarProps) {
           </TouchableOpacity>
         );
       })}
-      <TouchableOpacity style={tb.tab} onPress={logout} activeOpacity={0.7}>
-        <Icon name="log-out" size={20} color="#4B6070" />
-        <Text style={[tb.label, {color: '#4B6070'}]}>Sair</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -71,7 +71,7 @@ const tb = StyleSheet.create({
 function Tabs() {
   return (
     <Tab.Navigator
-      id="despachanteTab"
+      id="entregadorTab"
       tabBar={(props) => <DespaTabBar {...props} />}
       tabBarPosition="bottom"
       screenOptions={{
@@ -81,18 +81,19 @@ function Tabs() {
       <Tab.Screen name="Fila" component={FilaScreen} />
       <Tab.Screen name="Em Andamento" component={EmAndamentoScreen} />
       <Tab.Screen name="Histórico" component={HistoricoScreen} />
+      <Tab.Screen name="Perfil" component={PerfilScreen} />
     </Tab.Navigator>
   );
 }
 
-export default function DespachanteNavigator() {
+export default function EntregadorNavigator() {
   useEffect(() => {
     startSyncListener();
     return () => stopSyncListener();
   }, []);
 
   return (
-    <Stack.Navigator id="despachanteStack" screenOptions={{headerShown: false}}>
+    <Stack.Navigator id="entregadorStack" screenOptions={{headerShown: false}}>
       <Stack.Screen name="Tabs" component={Tabs} />
       <Stack.Screen
         name="Checklist"

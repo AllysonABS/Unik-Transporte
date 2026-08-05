@@ -29,7 +29,7 @@ export default function PedidoDetailSheet({ pedido, onOpenChange }: Props) {
 
             <div className="mt-6 space-y-3">
               <DetailRow label="Cliente" value={pedido.cliente_nome} />
-              <DetailRow label="Despachante" value={pedido.despachante_nome} />
+              <DetailRow label="Entregador" value={pedido.entregador_nome} />
               <DetailRow label="Excursão" value={pedido.excursao_nome} />
               <DetailRow label="Volumes" value={String(pedido.volumes)} />
               <DetailRow label="Descrição" value={pedido.descricao || '—'} />

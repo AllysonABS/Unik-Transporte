@@ -34,7 +34,7 @@ export default function TermosPage() {
             </p>
             <ul className="list-disc list-inside mt-3 space-y-2">
               <li>Gerenciar pedidos de transporte com rastreamento em tempo real.</li>
-              <li>Cadastrar e gerenciar clientes, despachantes e excursões.</li>
+              <li>Cadastrar e gerenciar clientes, entregadores e excursões.</li>
               <li>Enviar notificações push sobre status de pedidos.</li>
               <li>Registrar comprovantes fotográficos de coleta e entrega.</li>
               <li>Gerar relatórios operacionais.</li>
@@ -45,7 +45,7 @@ export default function TermosPage() {
             <h2 className="text-lg font-bold text-clareza mb-3">3. Tipos de Usuários</h2>
             <ul className="list-disc list-inside space-y-2">
               <li><strong>Empresa:</strong> Pessoa jurídica que contrata o serviço para gerenciar suas expedições.</li>
-              <li><strong>Despachante:</strong> Colaborador cadastrado pela empresa para realizar coletas e entregas.</li>
+              <li><strong>Entregador:</strong> Colaborador cadastrado pela empresa para realizar coletas e entregas.</li>
               <li><strong>Cliente:</strong> Pessoa física ou jurídica que recebe serviços de transporte da empresa.</li>
             </ul>
           </section>
@@ -57,7 +57,7 @@ export default function TermosPage() {
               <li>Você é responsável por manter a segurança de sua senha.</li>
               <li>A senha deve conter no mínimo 8 caracteres, incluindo 1 letra maiúscula e 1 número.</li>
               <li>Cada CPF/CNPJ pode ter apenas uma conta ativa.</li>
-              <li>Contas de despachantes são criadas pelas empresas.</li>
+              <li>Contas de entregadores são criadas pelas empresas.</li>
             </ul>
           </section>
 
@@ -66,8 +66,8 @@ export default function TermosPage() {
             <ul className="list-disc list-inside space-y-2">
               <li>O plano custa <strong>R$ 69,90/mês</strong> por empresa.</li>
               <li>O primeiro período de 30 dias é concedido automaticamente no cadastro.</li>
-              <li>Inclui pedidos, clientes, despachantes e excursões ilimitados.</li>
-              <li>Clientes e despachantes utilizam o app gratuitamente.</li>
+              <li>Inclui pedidos, clientes, entregadores e excursões ilimitados.</li>
+              <li>Clientes e entregadores utilizam o app gratuitamente.</li>
               <li>A empresa pode cancelar a assinatura a qualquer momento.</li>
             </ul>
           </section>

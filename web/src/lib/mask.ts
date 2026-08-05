@@ -15,6 +15,13 @@ export function maskCpf(value: string): string {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
+// Formata como CPF enquanto tiver até 11 dígitos, e vira CNPJ a partir do
+// 12º — usado onde a empresa pode se identificar por CPF ou CNPJ (login).
+export function maskCpfCnpj(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 14);
+  return digits.length > 11 ? maskCnpj(digits) : maskCpf(digits);
+}
+
 export function maskTelefone(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11);
   if (digits.length <= 10) {

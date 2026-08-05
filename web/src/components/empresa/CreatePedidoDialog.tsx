@@ -8,7 +8,7 @@ import { Plus } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { criarPedido } from '@/services/pedidos';
 import { listarClientesEmpresa } from '@/services/clientes';
-import { listarDespachantes } from '@/services/despachantes';
+import { listarEntregadores } from '@/services/entregadores';
 import { listarExcursoes } from '@/services/excursoes';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
@@ -36,12 +36,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import DespachanteFormDialog from '@/components/empresa/DespachanteFormDialog';
+import EntregadorFormDialog from '@/components/empresa/EntregadorFormDialog';
 import ExcursaoFormDialog from '@/components/empresa/ExcursaoFormDialog';
 
 const schema = z.object({
   cliente_id: z.string().min(1, 'Selecione o cliente'),
-  despachante_id: z.string().min(1, 'Selecione o despachante'),
+  entregador_id: z.string().min(1, 'Selecione o entregador'),
   excursao_id: z.string().min(1, 'Selecione a excursão'),
   volumes: z
     .string()
@@ -61,12 +61,12 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
   const { empresa } = useEmpresaAuth();
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [despachanteFormOpen, setDespachanteFormOpen] = useState(false);
+  const [entregadorFormOpen, setEntregadorFormOpen] = useState(false);
   const [excursaoFormOpen, setExcursaoFormOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { cliente_id: '', despachante_id: '', excursao_id: '', volumes: '1', descricao: '' },
+    defaultValues: { cliente_id: '', entregador_id: '', excursao_id: '', volumes: '1', descricao: '' },
   });
 
   const { data: clientesData } = useQuery({
@@ -74,9 +74,9 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
     queryFn: () => listarClientesEmpresa(empresa!.id),
     enabled: open && !!empresa?.id,
   });
-  const { data: despachantesData } = useQuery({
-    queryKey: ['despachantes-picker', empresa?.id],
-    queryFn: () => listarDespachantes(empresa!.id),
+  const { data: entregadoresData } = useQuery({
+    queryKey: ['entregadores-picker', empresa?.id],
+    queryFn: () => listarEntregadores(empresa!.id),
     enabled: open && !!empresa?.id,
   });
   const { data: excursoesData } = useQuery({
@@ -86,20 +86,20 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
   });
 
   const clientes = clientesData?.clientes ?? [];
-  const despachantes = despachantesData?.despachantes ?? [];
+  const entregadores = entregadoresData?.entregadores ?? [];
   const excursoes = excursoesData?.excursoes ?? [];
 
-  // Empresa com um único despachante: seleciona automaticamente para agilizar o cadastro.
+  // Empresa com um único entregador: seleciona automaticamente para agilizar o cadastro.
   useEffect(() => {
-    const unico = despachantesData?.despachantes;
-    if (unico?.length === 1 && !form.getValues('despachante_id')) {
-      form.setValue('despachante_id', unico[0].id, { shouldValidate: true });
+    const unico = entregadoresData?.entregadores;
+    if (unico?.length === 1 && !form.getValues('entregador_id')) {
+      form.setValue('entregador_id', unico[0].id, { shouldValidate: true });
     }
-  }, [despachantesData, form]);
+  }, [entregadoresData, form]);
 
   useEffect(() => {
     if (!open) {
-      setDespachanteFormOpen(false);
+      setEntregadorFormOpen(false);
       setExcursaoFormOpen(false);
     }
   }, [open]);
@@ -108,15 +108,14 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
     mutationFn: () => {
       const values = form.getValues();
       const cliente = clientes.find(c => c.vinculo_id === values.cliente_id);
-      const despachante = despachantes.find(d => d.id === values.despachante_id);
+      const entregador = entregadores.find(d => d.id === values.entregador_id);
       const excursao = excursoes.find(e => e.id === values.excursao_id);
       return criarPedido(empresa!.id, {
-        cliente_id: cliente?.cliente_id || undefined,
-        despachante_id: values.despachante_id,
+        entregador_id: values.entregador_id,
         excursao_id: values.excursao_id,
         cliente_nome: cliente?.nome ?? '',
         cliente_telefone: cliente?.telefone || undefined,
-        despachante_nome: despachante?.nome ?? '',
+        entregador_nome: entregador?.nome ?? '',
         excursao_nome: excursao?.nome ?? '',
         volumes: Number(values.volumes),
         descricao: values.descricao,
@@ -173,30 +172,30 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
             />
             <FormField
               control={form.control}
-              name="despachante_id"
+              name="entregador_id"
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel>Despachante</FormLabel>
+                    <FormLabel>Entregador</FormLabel>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="h-6 px-2 text-xs text-clareza/70 hover:text-clareza"
-                      onClick={() => setDespachanteFormOpen(true)}
+                      onClick={() => setEntregadorFormOpen(true)}
                     >
                       <Plus className="h-3 w-3" />
-                      Novo despachante
+                      Novo entregador
                     </Button>
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o despachante" />
+                        <SelectValue placeholder="Selecione o entregador" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {despachantes.map(d => (
+                      {entregadores.map(d => (
                         <SelectItem key={d.id} value={d.id}>
                           {d.nome}
                         </SelectItem>
@@ -279,10 +278,10 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
         </Form>
       </DialogContent>
 
-      <DespachanteFormDialog
-        open={despachanteFormOpen}
-        onOpenChange={setDespachanteFormOpen}
-        onSaved={despachante => form.setValue('despachante_id', despachante.id, { shouldValidate: true })}
+      <EntregadorFormDialog
+        open={entregadorFormOpen}
+        onOpenChange={setEntregadorFormOpen}
+        onSaved={entregador => form.setValue('entregador_id', entregador.id, { shouldValidate: true })}
       />
       <ExcursaoFormDialog
         open={excursaoFormOpen}

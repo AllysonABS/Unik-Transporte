@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { atualizarDespachanteAdmin } from '@/services/admin';
+import { atualizarEntregadorAdmin } from '@/services/admin';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,49 +20,49 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import type { DespachanteAdmin } from '@/types/admin';
+import type { EntregadorAdmin } from '@/types/admin';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  despachante: DespachanteAdmin | null;
+  entregador: EntregadorAdmin | null;
 }
 
-export default function DespachanteFormDialog({ open, onOpenChange, despachante }: Props) {
+export default function EntregadorFormDialog({ open, onOpenChange, entregador }: Props) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<Partial<DespachanteAdmin>>({});
+  const [form, setForm] = useState<Partial<EntregadorAdmin>>({});
   const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open && despachante) {
-      setForm(despachante);
+    if (open && entregador) {
+      setForm(entregador);
       setServerError(null);
     }
-  }, [open, despachante]);
+  }, [open, entregador]);
 
-  function update<K extends keyof DespachanteAdmin>(key: K, value: DespachanteAdmin[K]) {
+  function update<K extends keyof EntregadorAdmin>(key: K, value: EntregadorAdmin[K]) {
     setForm(prev => ({ ...prev, [key]: value }));
   }
 
   const mutation = useMutation({
-    mutationFn: () => atualizarDespachanteAdmin(despachante!.id, form),
+    mutationFn: () => atualizarEntregadorAdmin(entregador!.id, form),
     onSuccess: () => {
-      toast.success('Despachante atualizado.');
-      queryClient.invalidateQueries({ queryKey: ['admin-despachantes'] });
+      toast.success('Entregador atualizado.');
+      queryClient.invalidateQueries({ queryKey: ['admin-entregadores'] });
       onOpenChange(false);
     },
     onError: (err: unknown) => {
-      setServerError(err instanceof ApiError ? err.message : 'Erro ao salvar despachante.');
+      setServerError(err instanceof ApiError ? err.message : 'Erro ao salvar entregador.');
     },
   });
 
-  if (!despachante) return null;
+  if (!entregador) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border">
         <DialogHeader>
-          <DialogTitle className="text-clareza">Editar despachante</DialogTitle>
+          <DialogTitle className="text-clareza">Editar entregador</DialogTitle>
         </DialogHeader>
         <form
           className="space-y-4"

@@ -7,6 +7,6 @@ interface LoginResponse {
   token: string;
 }
 
-export function loginEmpresa(cnpj: string, senha: string) {
-  return api.post<LoginResponse>('/api/login', { cnpj, senha });
+export function loginEmpresa(doc: string, senha: string) {
+  return api.post<LoginResponse>('/api/login', { doc, senha });
 }

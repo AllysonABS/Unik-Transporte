@@ -27,7 +27,7 @@ const navItems = [
   { to: '/empresa/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/empresa/despachos', label: 'Despachos', icon: Package },
   { to: '/empresa/clientes', label: 'Clientes', icon: Users },
-  { to: '/empresa/despachantes', label: 'Despachantes', icon: Truck },
+  { to: '/empresa/entregadores', label: 'Entregadores', icon: Truck },
   { to: '/empresa/excursoes', label: 'Excursões', icon: Map },
   { to: '/empresa/relatorios', label: 'Relatórios', icon: BarChart2 },
 ];

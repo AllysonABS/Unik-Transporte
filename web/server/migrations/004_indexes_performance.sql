@@ -6,9 +6,6 @@
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_pedidos_empresa_id
   ON pedidos(empresa_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_pedidos_cliente_id
-  ON pedidos(cliente_id);
-
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_pedidos_despachante_id
   ON pedidos(despachante_id);
 
@@ -27,9 +24,6 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_pedido_fotos_pedido_id
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_cliente_empresa_empresa_id
   ON cliente_empresa(empresa_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_cliente_empresa_cliente_id
-  ON cliente_empresa(cliente_id);
-
 -- Despachante-empresa: lookup por empresa
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_despachante_empresa_empresa_id
   ON despachante_empresa(empresa_id);
@@ -44,6 +38,3 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notificacoes_empresa_lida
 -- FCM tokens
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_empresa_fcm_tokens_empresa_id
   ON empresa_fcm_tokens(empresa_id);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_cliente_fcm_tokens_cliente_id
-  ON cliente_fcm_tokens(cliente_id);

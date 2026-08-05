@@ -20,7 +20,7 @@ import EsqueceuSenhaPage from './pages/empresa/EsqueceuSenhaPage';
 import DashboardPage from './pages/empresa/DashboardPage';
 import PedidosPage from './pages/empresa/PedidosPage';
 import ClientesPage from './pages/empresa/ClientesPage';
-import DespachantesPage from './pages/empresa/DespachantesPage';
+import EntregadoresPage from './pages/empresa/EntregadoresPage';
 import ExcursoesPage from './pages/empresa/ExcursoesPage';
 import RelatoriosPage from './pages/empresa/RelatoriosPage';
 import NotificacoesPage from './pages/empresa/NotificacoesPage';
@@ -29,7 +29,7 @@ import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
 import AdminEmpresasPage from './pages/admin/EmpresasPage';
 import AdminClientesPage from './pages/admin/ClientesPage';
-import AdminDespachantesPage from './pages/admin/DespachantesPage';
+import AdminEntregadoresPage from './pages/admin/EntregadoresPage';
 import AdminPedidosPage from './pages/admin/PedidosPage';
 import AdminAssinaturasPage from './pages/admin/AssinaturasPage';
 import AdminWhatsappPage from './pages/admin/WhatsappPage';
@@ -55,7 +55,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="despachos" element={<PedidosPage />} />
                   <Route path="clientes" element={<ClientesPage />} />
-                  <Route path="despachantes" element={<DespachantesPage />} />
+                  <Route path="entregadores" element={<EntregadoresPage />} />
                   <Route path="excursoes" element={<ExcursoesPage />} />
                   <Route path="relatorios" element={<RelatoriosPage />} />
                   <Route path="notificacoes" element={<NotificacoesPage />} />
@@ -70,7 +70,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="empresas" element={<AdminEmpresasPage />} />
                   <Route path="clientes" element={<AdminClientesPage />} />
-                  <Route path="despachantes" element={<AdminDespachantesPage />} />
+                  <Route path="entregadores" element={<AdminEntregadoresPage />} />
                   <Route path="pedidos" element={<AdminPedidosPage />} />
                   <Route path="assinaturas" element={<AdminAssinaturasPage />} />
                   <Route path="whatsapp" element={<AdminWhatsappPage />} />

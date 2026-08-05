@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   const statCards = [
     { label: 'Clientes ativos', value: stats?.total_clientes ?? 0, icon: Users, color: '#3B82F6' },
-    { label: 'Despachantes', value: stats?.total_despachantes ?? 0, icon: Truck, color: '#60A5FA' },
+    { label: 'Entregadores', value: stats?.total_entregadores ?? 0, icon: Truck, color: '#60A5FA' },
     { label: 'Excursões', value: stats?.total_excursoes ?? 0, icon: Map, color: '#F59E0B' },
     { label: 'Despachos hoje', value: pedidosHoje.length, icon: Package, color: '#C084FC' },
   ];

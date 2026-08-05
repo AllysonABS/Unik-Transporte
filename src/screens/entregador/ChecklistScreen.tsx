@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {launchCamera, launchImageLibrary, CameraOptions} from 'react-native-image-picker';
-import {DespachanteStackParamList} from '../../navigation/DespachanteNavigator';
+import {EntregadorStackParamList} from '../../navigation/EntregadorNavigator';
 import {Colors} from '../../theme/colors';
 import {useAlert} from '../../components/CustomAlert';
 import {concluirEtapaPedido, atualizarStatusPedido, uploadFotoPedido, salvarObservacaoPedido} from '../../services/api';
@@ -33,7 +33,7 @@ async function solicitarPermissaoCamera(): Promise<boolean> {
   }
 }
 
-type Props = NativeStackScreenProps<DespachanteStackParamList, 'Checklist'>;
+type Props = NativeStackScreenProps<EntregadorStackParamList, 'Checklist'>;
 
 export default function ChecklistScreen({route, navigation}: Props) {
   const {pedidoId, etapa, volumes} = route.params;

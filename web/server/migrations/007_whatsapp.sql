@@ -1,4 +1,8 @@
--- Configuração da instância WhatsApp (uazapi) da plataforma
+-- Configuração da instância WhatsApp (uazapi) — um único número da Unik
+-- Transporte, compartilhado por todas as empresas (inviável cada uma das
+-- milhares de empresas conectar o próprio WhatsApp Business). O isolamento
+-- que importa é de dados: cada mensagem busca nome/telefone/empresa a partir
+-- do próprio pedido, nunca de outro.
 CREATE TABLE IF NOT EXISTS whatsapp_config (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   instance_id VARCHAR(255),

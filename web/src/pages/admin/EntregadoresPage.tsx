@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { MoreHorizontal, Search } from 'lucide-react';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { listarDespachantesAdmin, excluirDespachanteAdmin } from '@/services/admin';
+import { listarEntregadoresAdmin, excluirEntregadorAdmin } from '@/services/admin';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,40 +23,40 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
-import DespachanteFormDialog from '@/components/admin/DespachanteFormDialog';
+import EntregadorFormDialog from '@/components/admin/EntregadorFormDialog';
 import { ApiError } from '@/lib/apiClient';
 import { maskCpf, maskTelefone } from '@/lib/mask';
-import type { DespachanteAdmin } from '@/types/admin';
+import type { EntregadorAdmin } from '@/types/admin';
 
-export default function AdminDespachantesPage() {
-  useSetPageHeader('Despachantes', 'Todos os despachantes cadastrados na plataforma');
+export default function AdminEntregadoresPage() {
+  useSetPageHeader('Entregadores', 'Todos os entregadores cadastrados na plataforma');
   const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
-  const [editing, setEditing] = useState<DespachanteAdmin | null>(null);
-  const [deleting, setDeleting] = useState<DespachanteAdmin | null>(null);
+  const [editing, setEditing] = useState<EntregadorAdmin | null>(null);
+  const [deleting, setDeleting] = useState<EntregadorAdmin | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-despachantes'],
-    queryFn: listarDespachantesAdmin,
+    queryKey: ['admin-entregadores'],
+    queryFn: listarEntregadoresAdmin,
     refetchInterval: 5000,
   });
 
-  const despachantes = data?.despachantes ?? [];
+  const entregadores = data?.entregadores ?? [];
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    if (!termo) return despachantes;
-    return despachantes.filter(d => d.nome?.toLowerCase().includes(termo) || d.cpf?.includes(termo));
-  }, [despachantes, busca]);
+    if (!termo) return entregadores;
+    return entregadores.filter(d => d.nome?.toLowerCase().includes(termo) || d.cpf?.includes(termo));
+  }, [entregadores, busca]);
 
   const excluirMutation = useMutation({
-    mutationFn: (id: string) => excluirDespachanteAdmin(id),
+    mutationFn: (id: string) => excluirEntregadorAdmin(id),
     onSuccess: () => {
-      toast.success('Despachante excluído.');
-      queryClient.invalidateQueries({ queryKey: ['admin-despachantes'] });
+      toast.success('Entregador excluído.');
+      queryClient.invalidateQueries({ queryKey: ['admin-entregadores'] });
     },
     onError: (err: unknown) => {
-      toast.error(err instanceof ApiError ? err.message : 'Erro ao excluir despachante.');
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao excluir entregador.');
     },
   });
 
@@ -95,7 +95,7 @@ export default function AdminDespachantesPage() {
               {filtrados.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-gray py-8">
-                    Nenhum despachante encontrado.
+                    Nenhum entregador encontrado.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -135,16 +135,16 @@ export default function AdminDespachantesPage() {
         </div>
       )}
 
-      <DespachanteFormDialog
+      <EntregadorFormDialog
         open={!!editing}
         onOpenChange={open => !open && setEditing(null)}
-        despachante={editing}
+        entregador={editing}
       />
 
       <ConfirmDialog
         open={!!deleting}
         onOpenChange={open => !open && setDeleting(null)}
-        title="Excluir despachante"
+        title="Excluir entregador"
         description={`"${deleting?.nome}" será excluído da plataforma. Se tiver pedidos vinculados, a exclusão será bloqueada.`}
         confirmLabel="Excluir"
         destructive

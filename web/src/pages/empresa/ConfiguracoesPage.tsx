@@ -8,7 +8,7 @@ import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { buscarEmpresa, atualizarEmpresa } from '@/services/empresaPerfil';
 import { buscarCep } from '@/lib/cep';
-import { maskTelefone, maskCep, maskCnpj } from '@/lib/mask';
+import { maskTelefone, maskCep, maskCnpj, maskCpf } from '@/lib/mask';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -149,8 +149,11 @@ export default function ConfiguracoesPage() {
               />
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>CNPJ</Label>
-                  <Input value={data?.empresa.cnpj ? maskCnpj(data.empresa.cnpj) : ''} disabled />
+                  <Label>{data?.empresa.cnpj ? 'CNPJ' : 'CPF'}</Label>
+                  <Input
+                    value={data?.empresa.cnpj ? maskCnpj(data.empresa.cnpj) : data?.empresa.cpf ? maskCpf(data.empresa.cpf) : ''}
+                    disabled
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Responsável</Label>

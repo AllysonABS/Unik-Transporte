@@ -2,7 +2,7 @@
 
 ## Cenário alvo
 - 5.000 empresas
-- ~4.000 despachantes (upload simultâneo)
+- ~4.000 entregadores (upload simultâneo)
 - Milhares de clientes lendo em tempo real
 
 ## 🔴 Problemas Críticos (vai cair)
@@ -69,7 +69,7 @@ if (cluster.isPrimary) {
 1. **Aumentar pool**: `max: 50` no mínimo
 2. **Cluster mode**: PM2 ou Node cluster
 3. **Presigned URLs**: Client faz upload direto pro R2, server só salva a referência
-4. **Índices no DB**: Garantir índices em `pedidos(empresa_id)`, `pedidos(cliente_id)`, `pedidos(despachante_id)`
+4. **Índices no DB**: Garantir índices em `pedidos(empresa_id)`, `pedidos(cliente_id)`, `pedidos(entregador_id)`
 5. **Connection timeout**: Adicionar timeout nas queries
 
 ---

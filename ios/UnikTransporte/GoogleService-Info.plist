@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyDVKbzlJJHo63_7EOtB0-im-3UNPjlp_LU</string>
+	<string>AIzaSyDVKbzIJJHo63_7EOtB0-im-3UNPjlp_LU</string>
 	<key>GCM_SENDER_ID</key>
 	<string>745962341193</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.norumtransporte</string>
+	<string>com.uniktransporte</string>
 	<key>PROJECT_ID</key>
 	<string>na-rota-norum</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:745962341193:ios:17382e4694ce67e1aa5098</string>
+	<string>1:745962341193:ios:a0c3222ce1f2aaaaaa5098</string>
 </dict>
 </plist>

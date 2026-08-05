@@ -25,7 +25,7 @@ const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/empresas', label: 'Empresas', icon: Building2 },
   { to: '/admin/clientes', label: 'Clientes', icon: Users },
-  { to: '/admin/despachantes', label: 'Despachantes', icon: Truck },
+  { to: '/admin/entregadores', label: 'Entregadores', icon: Truck },
   { to: '/admin/pedidos', label: 'Pedidos', icon: Package },
   { to: '/admin/assinaturas', label: 'Assinaturas', icon: CreditCard },
   { to: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle },
