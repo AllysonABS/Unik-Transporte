@@ -27,12 +27,12 @@ const navItems = [
   { to: '/empresa/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/empresa/despachos', label: 'Despachos', icon: Package },
   { to: '/empresa/clientes', label: 'Clientes', icon: Users },
-  { to: '/empresa/despachantes', label: 'Despachantes', icon: Truck },
+  { to: '/empresa/entregadores', label: 'Entregadores', icon: Truck },
   { to: '/empresa/excursoes', label: 'Excursões', icon: Map },
   { to: '/empresa/relatorios', label: 'Relatórios', icon: BarChart2 },
 ];
 
-const COLLAPSE_KEY = 'narota_sidebar_collapsed';
+const COLLAPSE_KEY = 'uniktransporte_sidebar_collapsed';
 
 export default function DashboardLayout() {
   const { empresa, logout } = useEmpresaAuth();
@@ -70,7 +70,7 @@ export default function DashboardLayout() {
             <LogoMark size="sm" />
             {!collapsed && (
               <div className="overflow-hidden">
-                <p className="text-clareza font-bold leading-tight truncate">Na Rota</p>
+                <p className="text-clareza font-bold leading-tight truncate">Unik Transporte</p>
                 <p className="text-xs text-gray truncate">{empresa?.nome_empresa}</p>
               </div>
             )}

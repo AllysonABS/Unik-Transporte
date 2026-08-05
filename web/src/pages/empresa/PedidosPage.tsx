@@ -52,7 +52,7 @@ export default function PedidosPage() {
       const passaBusca =
         !termo ||
         p.cliente_nome?.toLowerCase().includes(termo) ||
-        p.despachante_nome?.toLowerCase().includes(termo) ||
+        p.entregador_nome?.toLowerCase().includes(termo) ||
         p.excursao_nome?.toLowerCase().includes(termo);
       return passaStatus && passaBusca;
     });
@@ -66,7 +66,7 @@ export default function PedidosPage() {
           <Input
             value={busca}
             onChange={e => setBusca(e.target.value)}
-            placeholder="Buscar por cliente, despachante ou excursão"
+            placeholder="Buscar por cliente, entregador ou excursão"
             className="pl-9"
           />
         </div>
@@ -100,7 +100,7 @@ export default function PedidosPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Cliente</TableHead>
-                <TableHead>Despachante</TableHead>
+                <TableHead>Entregador</TableHead>
                 <TableHead>Excursão</TableHead>
                 <TableHead>Volumes</TableHead>
                 <TableHead>Status</TableHead>
@@ -121,7 +121,7 @@ export default function PedidosPage() {
                     onClick={() => setDetalheId(p.id)}
                   >
                     <TableCell className="font-medium text-clareza">{p.cliente_nome}</TableCell>
-                    <TableCell>{p.despachante_nome}</TableCell>
+                    <TableCell>{p.entregador_nome}</TableCell>
                     <TableCell>{p.excursao_nome}</TableCell>
                     <TableCell>{p.volumes}</TableCell>
                     <TableCell>

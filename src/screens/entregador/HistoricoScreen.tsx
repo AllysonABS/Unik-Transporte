@@ -1,0 +1,183 @@
+import React, {useState, useCallback, useRef} from 'react';
+import {View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput, RefreshControl, ActivityIndicator, Pressable} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
+import {Colors} from '../../theme/colors';
+import {useAuth} from '../../context/AuthContext';
+import {listarPedidosEntregador, PedidoData} from '../../services/api';
+import {formatHora, formatData} from '../../utils/date';
+import Icon from '../../components/Icon';
+
+export default function HistoricoScreen() {
+  const {entregador} = useAuth();
+  const [pedidos, setPedidos] = useState<PedidoData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState('');
+  const [detalhe, setDetalhe] = useState<PedidoData | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const jaCarregou = useRef(false);
+
+  const carregar = async () => {
+    if (!entregador?.id) return;
+    const res = await listarPedidosEntregador(entregador.id);
+    if (res.success && res.pedidos) setPedidos(res.pedidos.filter(p => p.status === 'entregue'));
+  };
+
+  useFocusEffect(useCallback(() => {
+    if (!jaCarregou.current) {
+      setLoading(true);
+      carregar().finally(() => { setLoading(false); jaCarregou.current = true; });
+    } else {
+      carregar();
+    }
+  }, [entregador?.id]));
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    carregar().finally(() => setRefreshing(false));
+  }, [entregador?.id]);
+
+  const filtrados = pedidos.filter(p => {
+    const q = busca.toLowerCase();
+    return !q
+      || p.cliente_nome.toLowerCase().includes(q)
+      || p.excursao_nome.toLowerCase().includes(q)
+      || (p.nome_empresa ?? '').toLowerCase().includes(q);
+  });
+
+  const totalVolumes = pedidos.reduce((a, p) => a + p.volumes, 0);
+
+  if (loading) {
+    return <View style={[s.container, {justifyContent: 'center', alignItems: 'center'}]}><ActivityIndicator size="large" color={Colors.pulso} /></View>;
+  }
+
+  return (
+    <View style={s.container}>
+      <View style={s.header}>
+        <Text style={s.title}>Histórico</Text>
+        <Text style={s.sub}>Entregas realizadas</Text>
+      </View>
+
+      <View style={s.resumoRow}>
+        <View style={s.resumoCard}>
+          <View style={s.resumoTopRow}>
+            <Icon name="check-circle" size={16} color="#86EFAC" />
+            <Text style={[s.resumoValor, {color: '#86EFAC'}]}>{pedidos.length}</Text>
+          </View>
+          <Text style={s.resumoLabel}>Entregas</Text>
+        </View>
+        <View style={s.resumoCard}>
+          <View style={s.resumoTopRow}>
+            <Icon name="package" size={16} color="#60A5FA" />
+            <Text style={[s.resumoValor, {color: '#60A5FA'}]}>{totalVolumes}</Text>
+          </View>
+          <Text style={s.resumoLabel}>Volumes</Text>
+        </View>
+      </View>
+
+      <View style={s.searchBox}>
+        <Icon name="search" size={16} color={Colors.gray} />
+        <TextInput style={s.searchInput} placeholder="Buscar entrega..." placeholderTextColor={Colors.gray} value={busca} onChangeText={setBusca} />
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{padding: 24, paddingTop: 0, gap: 10}}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.pulso} />}
+      >
+        {filtrados.map(p => (
+          <TouchableOpacity key={p.id} style={s.card} onPress={() => setDetalhe(p)} activeOpacity={0.8}>
+            <View style={s.checkIcon}>
+              <Text style={s.checkText}>✓</Text>
+            </View>
+            <View style={s.info}>
+              <Text style={s.id}>{p.cliente_nome}</Text>
+              {!!p.nome_empresa && <Text style={s.empresa} numberOfLines={1}>{p.nome_empresa}</Text>}
+              <Text style={s.detalhes}>{p.volumes} vol.</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2}}>
+                <Icon name="map-pin" size={11} color={Colors.gray} />
+                <Text style={s.destino}>{p.excursao_nome}</Text>
+              </View>
+            </View>
+            <View style={s.right}>
+              <Text style={s.data}>{formatData(p.atualizado_em)}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+        {filtrados.length === 0 && <Text style={s.empty}>Nenhuma entrega encontrada</Text>}
+      </ScrollView>
+
+      <Modal visible={!!detalhe} transparent animationType="slide">
+        <View style={s.overlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setDetalhe(null)} />
+          <View style={s.sheet}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={s.sheetHeader}>
+                <Text style={s.sheetTitle} numberOfLines={1}>{detalhe?.cliente_nome}</Text>
+                <TouchableOpacity onPress={() => setDetalhe(null)} style={s.closeX} accessibilityRole="button" accessibilityLabel="Fechar">
+                  <Icon name="x" size={18} color={Colors.gray} />
+                </TouchableOpacity>
+              </View>
+              {!!detalhe?.nome_empresa && <View style={s.detRow}><Text style={s.detLabel}>Empresa</Text><Text style={s.detValue}>{detalhe.nome_empresa}</Text></View>}
+              <View style={s.detRow}><Text style={s.detLabel}>Cliente</Text><Text style={s.detValue}>{detalhe?.cliente_nome}</Text></View>
+              <View style={s.detRow}><Text style={s.detLabel}>Destino</Text><Text style={s.detValue}>{detalhe?.excursao_nome}</Text></View>
+              <View style={s.detRow}><Text style={s.detLabel}>Volumes</Text><Text style={s.detValue}>{detalhe?.volumes}</Text></View>
+              <View style={s.detRow}><Text style={s.detLabel}>Descrição</Text><Text style={s.detValue}>{detalhe?.descricao || '—'}</Text></View>
+
+              <Text style={s.sectionTitle}>Etapas</Text>
+              {detalhe?.etapas?.slice().map((etapa) => (
+                <View key={etapa.id} style={s.etapaRow}>
+                  <View style={[s.etapaDot, etapa.concluida && s.etapaDotDone]} />
+                  <Text style={[s.etapaNome, etapa.concluida && s.etapaNomeDone]}>{etapa.nome}</Text>
+                  {etapa.hora && <Text style={s.etapaHora}>{formatHora(etapa.hora)}</Text>}
+                </View>
+              ))}
+
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  container:    {flex: 1, backgroundColor: Colors.matriz},
+  header:       {padding: 24, paddingTop: 56, paddingBottom: 12},
+  title:        {fontSize: 22, fontWeight: '700', color: Colors.clareza},
+  sub:          {fontSize: 13, color: Colors.gray, marginTop: 4},
+  resumoRow:    {flexDirection: 'row', gap: 8, paddingHorizontal: 24, marginBottom: 12},
+  resumoCard:   {flex: 1, backgroundColor: '#102255', borderRadius: 10, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#1E3A6B'},
+  resumoTopRow: {flexDirection: 'row', alignItems: 'center', gap: 6},
+  resumoValor:  {fontSize: 20, fontWeight: '800'},
+  resumoLabel:  {fontSize: 10, color: Colors.gray, marginTop: 2, fontWeight: '600'},
+  searchBox:    {flexDirection: 'row', alignItems: 'center', marginHorizontal: 24, marginBottom: 10, backgroundColor: '#102255', borderRadius: 10, borderWidth: 1, borderColor: '#1E3A6B', paddingHorizontal: 14},
+  searchIcon:   {fontSize: 16, marginRight: 8},
+  searchInput:  {flex: 1, height: 44, color: Colors.clareza, fontSize: 15},
+  card:         {backgroundColor: '#102255', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#1E3A6B'},
+  checkIcon:    {width: 32, height: 32, borderRadius: 16, backgroundColor: '#052E16', alignItems: 'center', justifyContent: 'center'},
+  checkText:    {color: Colors.pulso, fontWeight: '800', fontSize: 14},
+  info:         {flex: 1},
+  id:           {fontSize: 14, fontWeight: '700', color: Colors.clareza},
+  empresa:      {fontSize: 11, fontWeight: '700', color: '#60A5FA', marginTop: 2},
+  detalhes:     {fontSize: 12, color: Colors.gray, marginTop: 2},
+  destino:      {fontSize: 12, color: Colors.gray, marginTop: 2},
+  right:        {alignItems: 'flex-end'},
+  data:         {fontSize: 12, color: Colors.gray},
+  empty:        {textAlign: 'center', color: Colors.gray, marginTop: 40, fontSize: 15},
+  overlay:      {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
+  sheet:        {backgroundColor: '#081544', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '85%'},
+  sheetHeader:  {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16},
+  sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza, flex: 1, marginRight: 8},
+  closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#102255', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3A6B'},
+  detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3A6B'},
+  detLabel:     {fontSize: 13, color: Colors.gray},
+  detValue:     {fontSize: 13, fontWeight: '600', color: Colors.clareza},
+  sectionTitle: {fontSize: 14, fontWeight: '700', color: Colors.pulso, marginTop: 20, marginBottom: 12},
+  etapaRow:     {flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8},
+  etapaDot:     {width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: '#1E3A6B', backgroundColor: '#081544'},
+  etapaDotDone: {backgroundColor: Colors.pulso, borderColor: Colors.pulso},
+  etapaNome:    {flex: 1, fontSize: 14, color: Colors.gray},
+  etapaNomeDone:{color: Colors.clareza, fontWeight: '600'},
+  etapaHora:    {fontSize: 12, color: Colors.gray},
+});

@@ -2,7 +2,7 @@ import type { PedidoStatus } from '@/types/empresa';
 
 export const STATUS_CONFIG: Record<PedidoStatus, { label: string; color: string; bg: string }> = {
   aguardando: { label: 'Aguardando', color: '#F59E0B', bg: '#451A03' },
-  em_transito: { label: 'Em trânsito', color: '#00E676', bg: '#052E16' },
+  em_transito: { label: 'Em trânsito', color: '#3B82F6', bg: '#052E16' },
   entregue: { label: 'Entregue', color: '#86EFAC', bg: '#14532D' },
   cancelado: { label: 'Cancelado', color: '#FCA5A5', bg: '#7F1D1D' },
 };

@@ -8,10 +8,8 @@ export default function TermosPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <div className="w-10 h-10 bg-gradient-to-br from-pulso to-emerald-400 rounded-xl flex items-center justify-center">
-              <span className="text-matriz font-black text-lg">N</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight">Na Rota</span>
+            <img src="/unik-icon.svg" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
+            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
           </button>
         </div>
       </header>
@@ -24,7 +22,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">1. Aceitação dos Termos</h2>
             <p>
-              Ao criar uma conta ou utilizar o aplicativo <strong>Na Rota</strong>, você declara que leu, compreendeu e concorda
+              Ao criar uma conta ou utilizar o aplicativo <strong>Unik Transporte</strong>, você declara que leu, compreendeu e concorda
               com estes Termos de Uso. Caso não concorde, não utilize a plataforma.
             </p>
           </section>
@@ -32,11 +30,11 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">2. Descrição do Serviço</h2>
             <p>
-              O Na Rota é uma plataforma de gestão de expedições e transporte que permite a empresas:
+              O Unik Transporte é uma plataforma de gestão de expedições e transporte que permite a empresas:
             </p>
             <ul className="list-disc list-inside mt-3 space-y-2">
               <li>Gerenciar pedidos de transporte com rastreamento em tempo real.</li>
-              <li>Cadastrar e gerenciar clientes, despachantes e excursões.</li>
+              <li>Cadastrar e gerenciar clientes, entregadores e excursões.</li>
               <li>Enviar notificações push sobre status de pedidos.</li>
               <li>Registrar comprovantes fotográficos de coleta e entrega.</li>
               <li>Gerar relatórios operacionais.</li>
@@ -47,7 +45,7 @@ export default function TermosPage() {
             <h2 className="text-lg font-bold text-clareza mb-3">3. Tipos de Usuários</h2>
             <ul className="list-disc list-inside space-y-2">
               <li><strong>Empresa:</strong> Pessoa jurídica que contrata o serviço para gerenciar suas expedições.</li>
-              <li><strong>Despachante:</strong> Colaborador cadastrado pela empresa para realizar coletas e entregas.</li>
+              <li><strong>Entregador:</strong> Colaborador cadastrado pela empresa para realizar coletas e entregas.</li>
               <li><strong>Cliente:</strong> Pessoa física ou jurídica que recebe serviços de transporte da empresa.</li>
             </ul>
           </section>
@@ -59,7 +57,7 @@ export default function TermosPage() {
               <li>Você é responsável por manter a segurança de sua senha.</li>
               <li>A senha deve conter no mínimo 8 caracteres, incluindo 1 letra maiúscula e 1 número.</li>
               <li>Cada CPF/CNPJ pode ter apenas uma conta ativa.</li>
-              <li>Contas de despachantes são criadas pelas empresas.</li>
+              <li>Contas de entregadores são criadas pelas empresas.</li>
             </ul>
           </section>
 
@@ -68,8 +66,8 @@ export default function TermosPage() {
             <ul className="list-disc list-inside space-y-2">
               <li>O plano custa <strong>R$ 69,90/mês</strong> por empresa.</li>
               <li>O primeiro período de 30 dias é concedido automaticamente no cadastro.</li>
-              <li>Inclui pedidos, clientes, despachantes e excursões ilimitados.</li>
-              <li>Clientes e despachantes utilizam o app gratuitamente.</li>
+              <li>Inclui pedidos, clientes, entregadores e excursões ilimitados.</li>
+              <li>Clientes e entregadores utilizam o app gratuitamente.</li>
               <li>A empresa pode cancelar a assinatura a qualquer momento.</li>
             </ul>
           </section>
@@ -88,7 +86,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">7. Propriedade Intelectual</h2>
             <p>
-              Todo o conteúdo do aplicativo Na Rota (código, design, marca, textos) é propriedade da Norum Tecnologia.
+              Todo o conteúdo do aplicativo Unik Transporte (código, design, marca, textos) é propriedade da Unik Tecnologia.
               É proibida a reprodução, modificação ou distribuição sem autorização expressa.
             </p>
           </section>
@@ -96,10 +94,10 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">8. Limitação de Responsabilidade</h2>
             <ul className="list-disc list-inside space-y-2">
-              <li>O Na Rota é uma ferramenta de gestão e não se responsabiliza pela execução física do transporte.</li>
+              <li>O Unik Transporte é uma ferramenta de gestão e não se responsabiliza pela execução física do transporte.</li>
               <li>Não garantimos disponibilidade ininterrupta do serviço (manutenções podem ocorrer).</li>
               <li>Não somos responsáveis por perdas decorrentes de uso indevido de credenciais pelo usuário.</li>
-              <li>A responsabilidade máxima da Norum Tecnologia é limitada ao valor pago pelo usuário no último mês.</li>
+              <li>A responsabilidade máxima da Unik Tecnologia é limitada ao valor pago pelo usuário no último mês.</li>
             </ul>
           </section>
 
@@ -118,7 +116,7 @@ export default function TermosPage() {
             <h2 className="text-lg font-bold text-clareza mb-3">10. Exclusão de Dados</h2>
             <p>
               Você pode solicitar a exclusão de seus dados a qualquer momento através do formulário disponível em{' '}
-              <a href="/exclusao-de-dados" className="text-pulso hover:underline">narota.norum.app/exclusao-de-dados</a> ou
+              <a href="/exclusao-de-dados" className="text-pulso hover:underline">transporte.unikcrm.com/exclusao-de-dados</a> ou
               pelo e-mail <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a>.
               A exclusão será processada em até 30 dias.
             </p>
@@ -143,8 +141,8 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">13. Contato</h2>
             <p>
-              <strong>Norum Tecnologia</strong><br />
-              CNPJ: 66.267.957/0001-07<br />
+              <strong>Unik Tecnologia</strong><br />
+              CPF: 100.136.644-17<br />
               Rua Maria de Lourdes Case Porto, 51 — Sala 810<br />
               Mauricio de Nassau, Caruaru/PE — CEP: 55012-075<br />
               E-mail: <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a>
@@ -154,7 +152,7 @@ export default function TermosPage() {
       </main>
 
       <footer className="px-5 md:px-16 py-8 border-t border-white/5 text-center">
-        <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Norum Tecnologia. Todos os direitos reservados.</p>
+        <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

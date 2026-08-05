@@ -8,10 +8,8 @@ export default function PrivacidadePage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <div className="w-10 h-10 bg-gradient-to-br from-pulso to-emerald-400 rounded-xl flex items-center justify-center">
-              <span className="text-matriz font-black text-lg">N</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight">Na Rota</span>
+            <img src="/unik-icon.svg" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
+            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
           </button>
         </div>
       </header>
@@ -24,12 +22,12 @@ export default function PrivacidadePage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">1. Informações Gerais</h2>
             <p>
-              Esta Política de Privacidade descreve como a <strong>Norum Tecnologia</strong> (CNPJ: 66.267.957/0001-07),
+              Esta Política de Privacidade descreve como a <strong>Unik Tecnologia</strong> (CPF: 100.136.644-17),
               doravante denominada "Nós", coleta, utiliza, armazena e protege as informações pessoais dos usuários do
-              aplicativo e plataforma <strong>Na Rota</strong>.
+              aplicativo e plataforma <strong>Unik Transporte</strong>.
             </p>
             <p className="mt-3">
-              Ao utilizar o Na Rota, você concorda com as práticas descritas nesta política, em conformidade com a
+              Ao utilizar o Unik Transporte, você concorda com as práticas descritas nesta política, em conformidade com a
               Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018) e demais legislações aplicáveis.
             </p>
           </section>
@@ -64,7 +62,7 @@ export default function PrivacidadePage() {
             <p>Seus dados pessoais podem ser compartilhados com:</p>
             <ul className="list-disc list-inside mt-3 space-y-2">
               <li><strong>Empresas de transporte:</strong> Quando você se vincula a uma loja, ela terá acesso ao seu nome, CPF/CNPJ, telefone e e-mail para gestão de pedidos.</li>
-              <li><strong>Despachantes:</strong> Acesso limitado a informações do pedido (nome do cliente, destino, volumes).</li>
+              <li><strong>Entregadores:</strong> Acesso limitado a informações do pedido (nome do cliente, destino, volumes).</li>
               <li><strong>Prestadores de serviço:</strong> Cloudflare (armazenamento de fotos), Google Firebase (notificações push), Gmail SMTP (envio de e-mails).</li>
             </ul>
             <p className="mt-3">Não vendemos, alugamos ou comercializamos seus dados pessoais com terceiros para fins de marketing.</p>
@@ -97,7 +95,7 @@ export default function PrivacidadePage() {
               Para exercer seus direitos, entre em contato pelo e-mail{' '}
               <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a> ou
               utilize o formulário de exclusão de dados disponível em{' '}
-              <a href="/exclusao-de-dados" className="text-pulso hover:underline">narota.norum.app/exclusao-de-dados</a>.
+              <a href="/exclusao-de-dados" className="text-pulso hover:underline">transporte.unikcrm.com/exclusao-de-dados</a>.
             </p>
           </section>
 
@@ -113,7 +111,7 @@ export default function PrivacidadePage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">8. Cookies e Tecnologias</h2>
             <p>
-              O aplicativo Na Rota não utiliza cookies. A versão web pode utilizar armazenamento local (localStorage)
+              O aplicativo Unik Transporte não utiliza cookies. A versão web pode utilizar armazenamento local (localStorage)
               exclusivamente para manter preferências do usuário.
             </p>
           </section>
@@ -129,8 +127,8 @@ export default function PrivacidadePage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">10. Contato</h2>
             <p>
-              <strong>Norum Tecnologia</strong><br />
-              CNPJ: 66.267.957/0001-07<br />
+              <strong>Unik Tecnologia</strong><br />
+              CPF: 100.136.644-17<br />
               Rua Maria de Lourdes Case Porto, 51 — Sala 810<br />
               Mauricio de Nassau, Caruaru/PE — CEP: 55012-075<br />
               E-mail: <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a>
@@ -140,7 +138,7 @@ export default function PrivacidadePage() {
       </main>
 
       <footer className="px-5 md:px-16 py-8 border-t border-white/5 text-center">
-        <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Norum Tecnologia. Todos os direitos reservados.</p>
+        <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

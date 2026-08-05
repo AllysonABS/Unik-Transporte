@@ -3,7 +3,7 @@ import type {
   AdminStats,
   EmpresaAdmin,
   ClienteAdmin,
-  DespachanteAdmin,
+  EntregadorAdmin,
   PedidoAdmin,
   AssinaturaAdmin,
   WhatsappConfig,
@@ -40,17 +40,17 @@ export function excluirClienteAdmin(id: string) {
   return adminApi.delete<{ success: boolean }>(`/api/admin/clientes/${id}`);
 }
 
-// --- Despachantes ---
-export function listarDespachantesAdmin() {
-  return adminApi.get<{ success: boolean; despachantes: DespachanteAdmin[] }>('/api/admin/despachantes');
+// --- Entregadores ---
+export function listarEntregadoresAdmin() {
+  return adminApi.get<{ success: boolean; entregadores: EntregadorAdmin[] }>('/api/admin/entregadores');
 }
 
-export function atualizarDespachanteAdmin(id: string, payload: Partial<DespachanteAdmin>) {
-  return adminApi.put<{ success: boolean }>(`/api/admin/despachantes/${id}`, payload);
+export function atualizarEntregadorAdmin(id: string, payload: Partial<EntregadorAdmin>) {
+  return adminApi.put<{ success: boolean }>(`/api/admin/entregadores/${id}`, payload);
 }
 
-export function excluirDespachanteAdmin(id: string) {
-  return adminApi.delete<{ success: boolean }>(`/api/admin/despachantes/${id}`);
+export function excluirEntregadorAdmin(id: string) {
+  return adminApi.delete<{ success: boolean }>(`/api/admin/entregadores/${id}`);
 }
 
 // --- Pedidos ---

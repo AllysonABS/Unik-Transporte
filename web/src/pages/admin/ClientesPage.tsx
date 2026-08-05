@@ -89,7 +89,6 @@ export default function AdminClientesPage() {
                 <TableHead>Nome</TableHead>
                 <TableHead>CPF</TableHead>
                 <TableHead>E-mail</TableHead>
-                <TableHead>Lojas vinculadas</TableHead>
                 <TableHead>Cadastro</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-10" />
@@ -105,17 +104,9 @@ export default function AdminClientesPage() {
               ) : (
                 filtrados.map(c => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium text-clareza">
-                      {c.nome}
-                      {c.manual && (
-                        <Badge variant="outline" className="ml-2 text-[10px] font-normal text-gray">
-                          Sem conta no app
-                        </Badge>
-                      )}
-                    </TableCell>
+                    <TableCell className="font-medium text-clareza">{c.nome}</TableCell>
                     <TableCell>{c.cpf ? maskCpf(c.cpf) : '—'}</TableCell>
                     <TableCell>{c.email}</TableCell>
-                    <TableCell>{c.total_vinculos}</TableCell>
                     <TableCell>{formatData(c.data_cadastro)}</TableCell>
                     <TableCell>
                       {c.ativo ? (
@@ -153,7 +144,7 @@ export default function AdminClientesPage() {
         open={!!deleting}
         onOpenChange={open => !open && setDeleting(null)}
         title="Excluir cliente"
-        description={`"${deleting?.nome}" será excluído da plataforma. Se tiver pedidos vinculados, a exclusão será bloqueada.`}
+        description={`"${deleting?.nome}" será excluído da plataforma.`}
         confirmLabel="Excluir"
         destructive
         onConfirm={() => {

@@ -1,6 +1,6 @@
 /**
- * Teste de Carga - Norum Transporte
- * Simula: despachantes upload foto + clientes lendo + empresas operando
+ * Teste de Carga - Unik Transporte
+ * Simula: entregadores upload foto + clientes lendo + empresas operando
  * Usa IDs REAIS do banco para resultados válidos.
  *
  * Uso:
@@ -9,7 +9,7 @@
  *   npx tsx stress-test.ts --users 4000 --duration 120
  */
 
-const BASE_URL = process.env.API_URL || 'https://narota.norum.app';
+const BASE_URL = process.env.API_URL || 'https://transporte.unikcrm.com';
 console.log(`\n🎯 Testando contra: ${BASE_URL}\n`);
 
 // Parse args
@@ -26,15 +26,15 @@ const REAL_DATA = {
   empresas: ['291fa316-cfd2-4abd-a2cb-579bd3770349', '9bdbb5c3-92c6-4872-989d-a07b60dc2b62'],
   pedidos: ['2b5c6d07-e603-4c02-9401-c20c1e01bec3'],
   clientes: ['7b3c13b5-cd5b-4bd8-8347-d78f82422b56'],
-  despachantes: ['84d25f85-22b3-47d7-8a7e-5dfdf8d9d6fc'],
+  entregadores: ['84d25f85-22b3-47d7-8a7e-5dfdf8d9d6fc'],
 };
 
 const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
-// Distribution: 40% despachantes, 40% clientes, 20% empresas
-const DESPACHANTES = Math.floor(TOTAL_USERS * 0.4);
+// Distribution: 40% entregadores, 40% clientes, 20% empresas
+const ENTREGADORES = Math.floor(TOTAL_USERS * 0.4);
 const CLIENTES = Math.floor(TOTAL_USERS * 0.4);
-const EMPRESAS = TOTAL_USERS - DESPACHANTES - CLIENTES;
+const EMPRESAS = TOTAL_USERS - ENTREGADORES - CLIENTES;
 
 interface Stats {
   total: number;
@@ -83,7 +83,7 @@ function record(stat: Stats, r: { ok: boolean; status: number; ms: number; body:
   else { stat.errors++; trackError(stat, `${r.status}:${typeof r.body === 'string' ? r.body : JSON.stringify(r.body)}`); }
 }
 
-async function simulaDespachante(_id: number, endTime: number) {
+async function simulaEntregador(_id: number, endTime: number) {
   while (Date.now() < endTime) {
     // Pede presigned URL (endpoint novo) — se não existir ainda, cai no 404/500
     const pedidoId = pick(REAL_DATA.pedidos);
@@ -94,9 +94,9 @@ async function simulaDespachante(_id: number, endTime: number) {
     });
     record(stats.upload_url, r);
 
-    // Consulta pedidos do despachante
-    const despId = pick(REAL_DATA.despachantes);
-    const r2 = await timedFetch(`${BASE_URL}/api/despachante/${despId}/pedidos`);
+    // Consulta pedidos do entregador
+    const despId = pick(REAL_DATA.entregadores);
+    const r2 = await timedFetch(`${BASE_URL}/api/entregador/${despId}/pedidos`);
     record(stats.listar_pedidos_desp, r2);
 
     await sleep(2000 + Math.random() * 3000);
@@ -149,9 +149,9 @@ function percentile(arr: number[], p: number): number {
 
 function printReport() {
   console.log('\n' + '='.repeat(70));
-  console.log('  RELATÓRIO DE TESTE DE CARGA - NORUM TRANSPORTE');
+  console.log('  RELATÓRIO DE TESTE DE CARGA - UNIK TRANSPORTE');
   console.log('='.repeat(70));
-  console.log(`  Usuários simulados: ${TOTAL_USERS} (${DESPACHANTES} desp | ${CLIENTES} cli | ${EMPRESAS} emp)`);
+  console.log(`  Usuários simulados: ${TOTAL_USERS} (${ENTREGADORES} ent | ${CLIENTES} cli | ${EMPRESAS} emp)`);
   console.log(`  Duração: ${DURATION_SEC}s`);
   console.log('='.repeat(70));
 
@@ -197,7 +197,7 @@ function printReport() {
 
 async function main() {
   console.log(`🚀 Iniciando teste de carga...`);
-  console.log(`   ${DESPACHANTES} despachantes | ${CLIENTES} clientes | ${EMPRESAS} empresas`);
+  console.log(`   ${ENTREGADORES} entregadores | ${CLIENTES} clientes | ${EMPRESAS} empresas`);
   console.log(`   Duração: ${DURATION_SEC}s\n`);
 
   // Verifica se servidor está online
@@ -219,8 +219,8 @@ async function main() {
   const delayPerUser = rampMs / TOTAL_USERS;
 
   let spawned = 0;
-  for (let i = 0; i < DESPACHANTES; i++) {
-    promises.push(sleep(delayPerUser * spawned++).then(() => simulaDespachante(i, endTime)));
+  for (let i = 0; i < ENTREGADORES; i++) {
+    promises.push(sleep(delayPerUser * spawned++).then(() => simulaEntregador(i, endTime)));
   }
   for (let i = 0; i < CLIENTES; i++) {
     promises.push(sleep(delayPerUser * spawned++).then(() => simulaCliente(i, endTime)));

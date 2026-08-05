@@ -9,12 +9,13 @@ import {
   Platform,
   ActivityIndicator,
   StatusBar,
+  Image,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../navigation/AppNavigator';
 import {Colors} from '../../theme/colors';
-import {loginUnificado} from '../../services/api';
+import {loginEntregador} from '../../services/api';
 import {useAuth} from '../../context/AuthContext';
 import {useAlert} from '../../components/CustomAlert';
 import Icon from '../../components/Icon';
@@ -27,89 +28,61 @@ type Props = {
 
 function LogoMark() {
   return (
-    <View style={logo.circle} accessibilityLabel="Logo Na Rota">
-      <View style={logo.card}>
-        <View style={logo.stripe} />
-      </View>
-    </View>
+    <Image
+      source={require('../../assets/Logo.png')}
+      style={logo.image}
+      accessibilityLabel="Logo Unik Transporte"
+    />
   );
 }
 
 const logo = StyleSheet.create({
-  circle: {
+  image: {
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.matriz,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#1E3448',
-  },
-  card: {
-    width: 48,
-    height: 34,
-    backgroundColor: Colors.pulso,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  stripe: {
-    position: 'absolute',
-    width: 70,
-    height: 10,
-    backgroundColor: Colors.matriz,
-    top: 12,
-    left: -12,
-    transform: [{rotate: '-35deg'}],
+    borderRadius: 20,
   },
 });
 
-function maskCpfCnpj(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 14);
-  if (digits.length <= 11) {
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  }
+function maskCpf(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
   return digits
-    .replace(/(\d{2})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
 export default function LoginScreen({navigation}: Props) {
-  const [cpfCnpj, setCpfCnpj] = useState('');
+  const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [lembrar, setLembrar] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {setEmpresa, setCliente, setDespachante, saveToken} = useAuth();
+  const {setEntregador, saveToken} = useAuth();
   const {show} = useAlert();
 
   useEffect(() => {
     AsyncStorage.getItem('lembrar_doc').then(doc => {
       if (doc) {
-        setCpfCnpj(doc);
+        setCpf(doc);
         setLembrar(true);
       }
     });
   }, []);
 
   const handleLogin = async () => {
-    if (!cpfCnpj || !password) {
-      show({title: 'Atenção', message: 'Preencha CPF/CNPJ e senha.', type: 'warning'});
+    if (!cpf || !password) {
+      show({title: 'Atenção', message: 'Preencha CPF e senha.', type: 'warning'});
       return;
     }
     setLoading(true);
-    const doc = cpfCnpj.replace(/\D/g, '');
+    const doc = cpf.replace(/\D/g, '');
 
     try {
-      const res = await loginUnificado(doc, password);
+      const res = await loginEntregador(doc, password);
 
       if (lembrar) {
-        await AsyncStorage.setItem('lembrar_doc', cpfCnpj);
+        await AsyncStorage.setItem('lembrar_doc', cpf);
       } else {
         await AsyncStorage.removeItem('lembrar_doc');
       }
@@ -118,18 +91,10 @@ export default function LoginScreen({navigation}: Props) {
         await saveToken(res.token);
       }
 
-      if (res.success && res.tipo === 'empresa' && res.empresa) {
+      if (res.success && res.entregador) {
         hapticSuccess();
-        setEmpresa(res.empresa);
-        navigation.replace('Empresa');
-      } else if (res.success && res.tipo === 'despachante' && res.despachante) {
-        hapticSuccess();
-        setDespachante(res.despachante);
-        navigation.replace('Despachante');
-      } else if (res.success && res.tipo === 'cliente' && res.cliente) {
-        hapticSuccess();
-        setCliente(res.cliente);
-        navigation.replace('Cliente');
+        setEntregador(res.entregador);
+        navigation.replace('Entregador');
       } else {
         hapticError();
         show({title: 'Erro', message: res.error || 'Credenciais inválidas.', type: 'error'});
@@ -151,25 +116,24 @@ export default function LoginScreen({navigation}: Props) {
 
         <View style={styles.header}>
           <LogoMark />
-          <Text style={styles.appName}>Na Rota</Text>
-          <Text style={styles.tagline}>Fácil Transporte</Text>
+          <Text style={styles.appName}>Unik Transporte</Text>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Entrar na sua conta</Text>
 
           <View style={styles.inputWrapper}>
-            <Text style={styles.label}>CPF / CNPJ</Text>
+            <Text style={styles.label}>CPF</Text>
             <TextInput
               style={styles.input}
               placeholder="000.000.000-00"
               placeholderTextColor={Colors.gray}
-              value={cpfCnpj}
-              onChangeText={v => setCpfCnpj(maskCpfCnpj(v))}
+              value={cpf}
+              onChangeText={v => setCpf(maskCpf(v))}
               keyboardType="numeric"
               autoCorrect={false}
-              accessibilityLabel="Campo de CPF ou CNPJ"
-              accessibilityHint="Digite seu CPF ou CNPJ para login"
+              accessibilityLabel="Campo de CPF"
+              accessibilityHint="Digite seu CPF para login"
             />
           </View>
 
@@ -234,7 +198,7 @@ export default function LoginScreen({navigation}: Props) {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Não tem uma conta? </Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate('CadastroCliente')}
+            onPress={() => navigation.navigate('CadastroEntregador')}
             accessibilityRole="link"
             accessibilityLabel="Ir para cadastro">
             <Text style={styles.footerLink}>Cadastre-se</Text>

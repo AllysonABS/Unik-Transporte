@@ -7,19 +7,12 @@ import {Colors} from '../../theme/colors';
 import {useAlert} from '../../components/CustomAlert';
 import {solicitarRecuperacao, verificarCodigoRecuperacao, redefinirSenha} from '../../services/api';
 
-function maskCpfCnpj(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 14);
-  if (digits.length <= 11) {
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  }
+function maskCpf(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
   return digits
-    .replace(/(\d{2})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
 type Props = {
@@ -29,7 +22,7 @@ type Props = {
 export default function EsqueceuSenhaScreen({navigation}: Props) {
   const {show} = useAlert();
   const [etapa, setEtapa] = useState<'email' | 'codigo' | 'novaSenha'>('email');
-  const [cpfCnpj, setCpfCnpj] = useState('');
+  const [cpf, setCpf] = useState('');
   const [emailHint, setEmailHint] = useState('');
   const [codigo, setCodigo] = useState('');
   const [resetToken, setResetToken] = useState('');
@@ -37,11 +30,11 @@ export default function EsqueceuSenhaScreen({navigation}: Props) {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const doc = cpfCnpj.replace(/\D/g, '');
+  const doc = cpf.replace(/\D/g, '');
 
   const enviarCodigo = async () => {
     if (!doc) {
-      show({title: 'Atenção', message: 'Informe seu CPF ou CNPJ.', type: 'warning'});
+      show({title: 'Atenção', message: 'Informe seu CPF.', type: 'warning'});
       return;
     }
     setLoading(true);
@@ -109,7 +102,7 @@ export default function EsqueceuSenhaScreen({navigation}: Props) {
             {etapa === 'novaSenha' && 'Nova senha'}
           </Text>
           <Text style={s.subtitle}>
-            {etapa === 'email' && 'Informe seu CPF/CNPJ para receber o código de recuperação por e-mail.'}
+            {etapa === 'email' && 'Informe seu CPF para receber o código de recuperação por e-mail.'}
             {etapa === 'codigo' && `Digite o código de 6 dígitos enviado para ${emailHint || 'seu e-mail'}.`}
             {etapa === 'novaSenha' && 'Crie uma nova senha para sua conta.'}
           </Text>
@@ -118,8 +111,8 @@ export default function EsqueceuSenhaScreen({navigation}: Props) {
         <View style={s.card}>
           {etapa === 'email' && (
             <>
-              <Text style={s.label}>CPF / CNPJ</Text>
-              <TextInput style={s.input} placeholder="000.000.000-00" placeholderTextColor={Colors.gray} value={cpfCnpj} onChangeText={v => setCpfCnpj(maskCpfCnpj(v))} keyboardType="numeric" />
+              <Text style={s.label}>CPF</Text>
+              <TextInput style={s.input} placeholder="000.000.000-00" placeholderTextColor={Colors.gray} value={cpf} onChangeText={v => setCpf(maskCpf(v))} keyboardType="numeric" />
               <TouchableOpacity style={[s.btn, loading && s.btnDisabled]} onPress={enviarCodigo} disabled={loading} activeOpacity={0.85}>
                 {loading ? <ActivityIndicator color={Colors.matriz} /> : <Text style={s.btnText}>Enviar código</Text>}
               </TouchableOpacity>
@@ -186,7 +179,7 @@ const s = StyleSheet.create({
   reenviarText:{color: Colors.pulso, fontSize: 13, fontWeight: '600'},
   erro:       {color: '#EF4444', fontSize: 12, marginTop: 6},
   steps:      {flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 32},
-  stepDot:    {width: 8, height: 8, borderRadius: 4, backgroundColor: '#1E3448'},
+  stepDot:    {width: 8, height: 8, borderRadius: 4, backgroundColor: '#1E3A6B'},
   stepDotAtivo:{width: 24, backgroundColor: Colors.pulso},
   stepDotDone:{backgroundColor: Colors.pulso},
 });

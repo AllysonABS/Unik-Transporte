@@ -6,7 +6,7 @@ import {
   verificarCodigoRecuperacao,
   redefinirSenha,
 } from '@/services/recuperacaoSenha';
-import { maskCnpj } from '@/lib/mask';
+import { maskCpfCnpj } from '@/lib/mask';
 import { ApiError } from '@/lib/apiClient';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +18,7 @@ const COPY: Record<Etapa, { icon: string; title: string; subtitle: (emailHint: s
   documento: {
     icon: '🔑',
     title: 'Recuperar senha',
-    subtitle: () => 'Informe o CNPJ da sua empresa para receber o código de recuperação por e-mail.',
+    subtitle: () => 'Informe o CPF ou CNPJ da sua empresa para receber o código de recuperação por e-mail.',
   },
   codigo: {
     icon: '📩',
@@ -35,7 +35,7 @@ const COPY: Record<Etapa, { icon: string; title: string; subtitle: (emailHint: s
 export default function EsqueceuSenhaPage() {
   const navigate = useNavigate();
   const [etapa, setEtapa] = useState<Etapa>('documento');
-  const [cnpj, setCnpj] = useState('');
+  const [documento, setDocumento] = useState('');
   const [emailHint, setEmailHint] = useState('');
   const [codigo, setCodigo] = useState('');
   const [resetToken, setResetToken] = useState('');
@@ -44,11 +44,11 @@ export default function EsqueceuSenhaPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const doc = cnpj.replace(/\D/g, '');
+  const doc = documento.replace(/\D/g, '');
 
   async function enviarCodigo() {
     if (!doc) {
-      setErro('Informe o CNPJ.');
+      setErro('Informe o CPF ou CNPJ.');
       return;
     }
     setErro(null);
@@ -125,11 +125,11 @@ export default function EsqueceuSenhaPage() {
         <div className="rounded-xl bg-white p-7 shadow-2xl shadow-black/30">
           {etapa === 'documento' && (
             <>
-              <label className="block text-xs font-semibold text-matriz mb-1.5">CNPJ</label>
+              <label className="block text-xs font-semibold text-matriz mb-1.5">CPF ou CNPJ</label>
               <input
-                value={cnpj}
-                onChange={e => setCnpj(maskCnpj(e.target.value))}
-                placeholder="00.000.000/0000-00"
+                value={documento}
+                onChange={e => setDocumento(maskCpfCnpj(e.target.value))}
+                placeholder="CPF ou CNPJ"
                 inputMode="numeric"
                 className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-matriz placeholder:text-gray outline-none focus:border-pulso"
               />

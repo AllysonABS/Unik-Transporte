@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Iniciando ambiente de desenvolvimento Na Rota..."
+echo "🚀 Iniciando ambiente de desenvolvimento Unik Transporte..."
 
 # Mata processos antigos nas portas
 lsof -ti:3001 | xargs kill -9 2>/dev/null

@@ -25,13 +25,13 @@ const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/empresas', label: 'Empresas', icon: Building2 },
   { to: '/admin/clientes', label: 'Clientes', icon: Users },
-  { to: '/admin/despachantes', label: 'Despachantes', icon: Truck },
+  { to: '/admin/entregadores', label: 'Entregadores', icon: Truck },
   { to: '/admin/pedidos', label: 'Pedidos', icon: Package },
   { to: '/admin/assinaturas', label: 'Assinaturas', icon: CreditCard },
   { to: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle },
 ];
 
-const COLLAPSE_KEY = 'narota_admin_sidebar_collapsed';
+const COLLAPSE_KEY = 'uniktransporte_admin_sidebar_collapsed';
 
 function AdminTopHeader() {
   const { title, subtitle } = usePageHeader();

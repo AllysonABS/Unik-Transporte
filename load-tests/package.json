@@ -1,5 +1,5 @@
 {
-  "name": "norum-load-tests",
+  "name": "unik-transporte-load-tests",
   "private": true,
   "scripts": {
     "test:light": "npx tsx stress-test.ts --users 100 --duration 30",

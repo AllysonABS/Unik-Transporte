@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Check, Loader2 } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
-import { maskCnpj } from '@/lib/mask';
+import { maskCpfCnpj } from '@/lib/mask';
 import { cn } from '@/lib/utils';
 import LogoMark from '@/components/empresa/LogoMark';
 
-const LEMBRAR_KEY = 'narota_lembrar_doc';
+const LEMBRAR_KEY = 'uniktransporte_lembrar_doc';
 
 export default function LoginPage() {
   const { token, login } = useEmpresaAuth();
   const navigate = useNavigate();
-  const [cnpj, setCnpj] = useState('');
+  const [doc, setDoc] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [lembrar, setLembrar] = useState(false);
@@ -21,7 +21,7 @@ export default function LoginPage() {
   useEffect(() => {
     const saved = localStorage.getItem(LEMBRAR_KEY);
     if (saved) {
-      setCnpj(saved);
+      setDoc(saved);
       setLembrar(true);
     }
   }, []);
@@ -32,20 +32,20 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!cnpj || !senha) {
-      setServerError('Preencha CNPJ e senha.');
+    if (!doc || !senha) {
+      setServerError('Preencha CPF ou CNPJ e senha.');
       return;
     }
     setServerError(null);
     setLoading(true);
 
     if (lembrar) {
-      localStorage.setItem(LEMBRAR_KEY, cnpj);
+      localStorage.setItem(LEMBRAR_KEY, doc);
     } else {
       localStorage.removeItem(LEMBRAR_KEY);
     }
 
-    const result = await login(cnpj.replace(/\D/g, ''), senha);
+    const result = await login(doc.replace(/\D/g, ''), senha);
     setLoading(false);
     if (result.success) {
       navigate('/empresa/dashboard', { replace: true });
@@ -59,8 +59,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2.5 pt-4">
           <LogoMark />
-          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Na Rota</h1>
-          <p className="text-xs font-medium uppercase tracking-[3px] text-pulso">Fácil Transporte</p>
+          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Transporte</h1>
         </div>
 
         <div className="rounded-xl bg-white p-7 shadow-2xl shadow-black/30">
@@ -68,14 +67,14 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="cnpj" className="block text-xs font-semibold text-matriz mb-1.5">
-                CNPJ
+              <label htmlFor="doc" className="block text-xs font-semibold text-matriz mb-1.5">
+                CPF ou CNPJ
               </label>
               <input
-                id="cnpj"
-                value={cnpj}
-                onChange={e => setCnpj(maskCnpj(e.target.value))}
-                placeholder="00.000.000/0000-00"
+                id="doc"
+                value={doc}
+                onChange={e => setDoc(maskCpfCnpj(e.target.value))}
+                placeholder="CPF ou CNPJ"
                 inputMode="numeric"
                 autoComplete="username"
                 className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-matriz placeholder:text-gray outline-none focus:border-pulso"

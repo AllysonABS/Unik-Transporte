@@ -2,6 +2,7 @@ export interface EmpresaData {
   id: string;
   nome_empresa: string;
   cnpj: string;
+  cpf: string;
   nome_responsavel: string;
   email: string;
   telefone: string;
@@ -36,11 +37,10 @@ export interface PedidoData {
   id: string;
   numero?: number;
   empresa_id: string;
-  cliente_id: string | null;
-  despachante_id: string | null;
+  entregador_id: string | null;
   excursao_id: string | null;
   cliente_nome: string;
-  despachante_nome: string;
+  entregador_nome: string;
   excursao_nome: string;
   volumes: number;
   descricao: string | null;
@@ -55,13 +55,12 @@ export interface PedidoData {
 export interface DashboardStats {
   notificacoes_nao_lidas: number;
   total_clientes: number;
-  total_despachantes: number;
+  total_entregadores: number;
   total_excursoes: number;
 }
 
 export interface ClienteVinculo {
   vinculo_id: string;
-  cliente_id: string;
   status: string;
   nome: string;
   cpf: string;
@@ -80,7 +79,7 @@ export interface ClienteVinculo {
   data_vinculo: string;
 }
 
-export interface DespachanteData {
+export interface EntregadorData {
   id: string;
   nome: string;
   cpf: string;

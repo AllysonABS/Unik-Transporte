@@ -1,7 +1,7 @@
 import type { EmpresaData } from '@/types/empresa';
 
-const TOKEN_KEY = 'narota_empresa_token';
-const EMPRESA_KEY = 'narota_empresa_data';
+const TOKEN_KEY = 'uniktransporte_empresa_token';
+const EMPRESA_KEY = 'uniktransporte_empresa_data';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);

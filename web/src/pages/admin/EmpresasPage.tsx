@@ -5,7 +5,7 @@ import { MoreHorizontal, Search } from 'lucide-react';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarEmpresasAdmin, excluirEmpresaAdmin } from '@/services/admin';
 import { formatData } from '@/lib/format';
-import { maskCnpj } from '@/lib/mask';
+import { maskCnpj, maskCpf } from '@/lib/mask';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +51,7 @@ export default function AdminEmpresasPage() {
       e =>
         e.nome_empresa?.toLowerCase().includes(termo) ||
         e.cnpj?.includes(termo) ||
+        e.cpf?.includes(termo) ||
         e.cidade?.toLowerCase().includes(termo),
     );
   }, [empresas, busca]);
@@ -90,7 +91,7 @@ export default function AdminEmpresasPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Empresa</TableHead>
-                <TableHead>CNPJ</TableHead>
+                <TableHead>CNPJ/CPF</TableHead>
                 <TableHead>Cidade/UF</TableHead>
                 <TableHead>Assinatura</TableHead>
                 <TableHead>Vencimento</TableHead>
@@ -109,7 +110,7 @@ export default function AdminEmpresasPage() {
                 filtradas.map(e => (
                   <TableRow key={e.id}>
                     <TableCell className="font-medium text-clareza">{e.nome_empresa}</TableCell>
-                    <TableCell>{maskCnpj(e.cnpj)}</TableCell>
+                    <TableCell>{e.cnpj ? maskCnpj(e.cnpj) : e.cpf ? maskCpf(e.cpf) : '—'}</TableCell>
                     <TableCell>{e.cidade ? `${e.cidade}/${e.estado}` : '—'}</TableCell>
                     <TableCell className="capitalize">{e.status_assinatura}</TableCell>
                     <TableCell>{formatData(e.data_vencimento)}</TableCell>
