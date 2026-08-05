@@ -84,10 +84,10 @@ export default function CadastroPage() {
   if (sucesso) {
     return (
       <div className="min-h-screen bg-matriz flex items-center justify-center px-5">
-        <div className="bg-[#162433] border border-[#1E3448] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
+        <div className="bg-[#102255] border border-[#1E3A6B] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
           <span className="text-5xl mb-6 block">🎉</span>
           <h1 className="text-2xl font-bold text-clareza mb-4">Cadastro realizado!</h1>
-          <p className="text-gray-400 mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Na Rota.</p>
+          <p className="text-gray-400 mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Unik Transporte.</p>
           <button onClick={() => navigate('/')} className="w-full bg-pulso text-matriz font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-95 transition-transform">
             Voltar para o início
           </button>
@@ -96,7 +96,7 @@ export default function CadastroPage() {
     );
   }
 
-  const inputClass = "w-full h-12 bg-[#0F1F2E] border border-[#1E3448] rounded-lg px-4 text-clareza focus:border-pulso focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
+  const inputClass = "w-full h-12 bg-[#081544] border border-[#1E3A6B] rounded-lg px-4 text-clareza focus:border-pulso focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
 
   return (
     <div className="min-h-screen bg-matriz py-8 md:py-12 px-5">
@@ -110,7 +110,7 @@ export default function CadastroPage() {
           <p className="text-gray-400 text-sm md:text-base">Preencha os dados da sua empresa para começar.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#162433] border border-[#1E3448] rounded-2xl p-6 md:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-[#102255] border border-[#1E3A6B] rounded-2xl p-6 md:p-8 space-y-6">
           {/* Empresa */}
           <h2 className="text-pulso font-bold text-xs uppercase tracking-wider">Dados da Empresa</h2>
 
@@ -279,7 +279,7 @@ export default function CadastroPage() {
           )}
 
           {/* Plano */}
-          <div className="bg-[#0F1F2E] border border-[#1E3448] rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-[#081544] border border-[#1E3A6B] rounded-xl p-4 flex items-center justify-between">
             <div>
               <p className="text-clareza font-semibold text-sm">Plano Mensal</p>
               <p className="text-gray-400 text-xs">Acesso completo ao sistema</p>

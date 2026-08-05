@@ -44,8 +44,8 @@ export default function ClienteNavigator() {
         tabBarActiveTintColor: Colors.pulso,
         tabBarInactiveTintColor: '#4B6070',
         tabBarStyle: {
-          backgroundColor: '#0A1820',
-          borderTopColor: '#1E3448',
+          backgroundColor: '#02081F',
+          borderTopColor: '#1E3A6B',
           borderTopWidth: 1,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom + 4,

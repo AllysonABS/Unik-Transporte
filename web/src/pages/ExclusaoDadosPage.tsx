@@ -73,7 +73,7 @@ export default function ExclusaoDadosPage() {
   if (sucesso) {
     return (
       <div className="min-h-screen bg-matriz flex items-center justify-center px-5">
-        <div className="bg-[#162433] border border-[#1E3448] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
+        <div className="bg-[#102255] border border-[#1E3A6B] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
           <span className="text-5xl mb-6 block">✅</span>
           <h1 className="text-2xl font-bold text-clareza mb-4">Solicitação enviada</h1>
           <p className="text-gray-400 mb-4 text-sm">
@@ -90,17 +90,15 @@ export default function ExclusaoDadosPage() {
     );
   }
 
-  const inputClass = "w-full h-12 bg-[#0F1F2E] border border-[#1E3448] rounded-lg px-4 text-clareza focus:border-pulso focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
+  const inputClass = "w-full h-12 bg-[#081544] border border-[#1E3A6B] rounded-lg px-4 text-clareza focus:border-pulso focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
 
   return (
     <div className="min-h-screen bg-matriz text-clareza">
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <div className="w-10 h-10 bg-gradient-to-br from-pulso to-emerald-400 rounded-xl flex items-center justify-center">
-              <span className="text-matriz font-black text-lg">N</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight">Na Rota</span>
+            <img src="/unik-icon.svg" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
+            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
           </button>
         </div>
       </header>
@@ -108,10 +106,10 @@ export default function ExclusaoDadosPage() {
       <main className="max-w-2xl mx-auto px-5 md:px-8 pt-28 pb-20">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Exclusão de Dados</h1>
         <p className="text-gray-400 text-sm mb-10">
-          Preencha o formulário abaixo para solicitar a exclusão completa dos seus dados pessoais da plataforma Na Rota.
+          Preencha o formulário abaixo para solicitar a exclusão completa dos seus dados pessoais da plataforma Unik Transporte.
         </p>
 
-        <div className="bg-[#162433] border border-[#1E3448] rounded-2xl p-6 md:p-8 mb-8">
+        <div className="bg-[#102255] border border-[#1E3A6B] rounded-2xl p-6 md:p-8 mb-8">
           <h2 className="text-pulso font-bold text-xs uppercase tracking-wider mb-4">⚠️ Informações Importantes</h2>
           <ul className="text-gray-400 text-sm space-y-3">
             <li>• A exclusão é <strong className="text-clareza">irreversível</strong>. Todos os seus dados serão permanentemente removidos.</li>
@@ -122,7 +120,7 @@ export default function ExclusaoDadosPage() {
           </ul>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#162433] border border-[#1E3448] rounded-2xl p-6 md:p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-[#102255] border border-[#1E3A6B] rounded-2xl p-6 md:p-8 space-y-5">
           <h2 className="text-pulso font-bold text-xs uppercase tracking-wider">Dados para Identificação</h2>
 
           <div>
@@ -178,7 +176,7 @@ export default function ExclusaoDadosPage() {
               className="mt-1 w-4 h-4 accent-pulso"
             />
             <label htmlFor="confirmacao" className="text-gray-400 text-sm">
-              Eu entendo que esta ação é <strong className="text-clareza">irreversível</strong> e que todos os meus dados serão permanentemente excluídos da plataforma Na Rota.
+              Eu entendo que esta ação é <strong className="text-clareza">irreversível</strong> e que todos os meus dados serão permanentemente excluídos da plataforma Unik Transporte.
             </label>
           </div>
 
@@ -203,7 +201,7 @@ export default function ExclusaoDadosPage() {
       </main>
 
       <footer className="px-5 md:px-16 py-8 border-t border-white/5 text-center">
-        <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Norum Tecnologia. Todos os direitos reservados.</p>
+        <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

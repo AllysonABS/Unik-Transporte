@@ -323,7 +323,7 @@ setInterval(() => {
   }
 }, 600000);
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'https://narota.norum.app').split(',');
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'https://transporte.unikcrm.com').split(',');
 
 const app = express();
 const r2Origin = (() => {
@@ -1725,9 +1725,9 @@ app.post('/api/recuperar-senha/solicitar', resetRateLimit, async (req, res) => {
     if (email && smtpTransporter) {
       const emailMasked = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Na Rota" <noreply@norum.app>',
+        from: process.env.SMTP_FROM || '"Unik Transporte" <noreply@norum.app>',
         to: email,
-        subject: 'Código de recuperação de senha - Na Rota',
+        subject: 'Código de recuperação de senha - Unik Transporte',
         html: `
           <div style="font-family:sans-serif;max-width:400px;margin:0 auto;padding:20px">
             <h2 style="color:#0F2A3F">Recuperação de Senha</h2>
@@ -1852,14 +1852,14 @@ app.post('/api/exclusao-dados', async (req, res) => {
     // Envia e-mail de confirmação para o usuário
     if (smtpTransporter) {
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Na Rota" <noreply@norum.app>',
+        from: process.env.SMTP_FROM || '"Unik Transporte" <noreply@norum.app>',
         to: email,
-        subject: 'Solicitação de exclusão de dados recebida - Na Rota',
+        subject: 'Solicitação de exclusão de dados recebida - Unik Transporte',
         html: `
           <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
             <h2 style="color:#0F2A3F">Solicitação Recebida</h2>
             <p>Olá ${nome},</p>
-            <p>Recebemos sua solicitação de exclusão de dados da plataforma Na Rota.</p>
+            <p>Recebemos sua solicitação de exclusão de dados da plataforma Unik Transporte.</p>
             <div style="background:#F3F4F6;padding:16px;border-radius:8px;margin:16px 0">
               <p style="margin:0"><strong>Documento:</strong> ${documento}</p>
               <p style="margin:8px 0 0"><strong>Prazo:</strong> Até 30 dias úteis</p>
@@ -1876,7 +1876,7 @@ app.post('/api/exclusao-dados', async (req, res) => {
     // Notifica o admin
     if (smtpTransporter) {
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Na Rota" <noreply@norum.app>',
+        from: process.env.SMTP_FROM || '"Unik Transporte" <noreply@norum.app>',
         to: process.env.SMTP_USER || 'norumtecnologia@gmail.com',
         subject: `[LGPD] Solicitação de exclusão - ${nome}`,
         html: `<p><strong>Nome:</strong> ${nome}</p><p><strong>Doc:</strong> ${documento}</p><p><strong>Email:</strong> ${email}</p><p><strong>Motivo:</strong> ${motivo || 'Não informado'}</p>`,

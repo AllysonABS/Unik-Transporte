@@ -100,7 +100,7 @@ export function AlertProvider({children}: {children: React.ReactNode}) {
 
 const s = StyleSheet.create({
   overlay: {flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center'},
-  card: {backgroundColor: '#0F1F2E', borderRadius: 20, padding: 28, marginHorizontal: 32, alignItems: 'center', width: '85%', maxWidth: 340},
+  card: {backgroundColor: '#081544', borderRadius: 20, padding: 28, marginHorizontal: 32, alignItems: 'center', width: '85%', maxWidth: 340},
   iconWrap: {width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 16},
   icon: {fontSize: 28},
   title: {fontSize: 20, fontWeight: '700', color: Colors.clareza, marginBottom: 8, textAlign: 'center'},
@@ -109,7 +109,7 @@ const s = StyleSheet.create({
   btn: {height: 48, borderRadius: 10, alignItems: 'center', justifyContent: 'center', minWidth: 100},
   btnPrimary: {backgroundColor: Colors.pulso},
   btnPrimaryText: {color: Colors.matriz, fontWeight: '700', fontSize: 15},
-  btnCancel: {backgroundColor: '#162433', borderWidth: 1, borderColor: '#1E3448'},
+  btnCancel: {backgroundColor: '#102255', borderWidth: 1, borderColor: '#1E3A6B'},
   btnCancelText: {color: Colors.clareza, fontWeight: '600', fontSize: 15},
   btnDanger: {backgroundColor: '#EF4444'},
   btnDangerText: {color: '#FFF', fontWeight: '700', fontSize: 15},

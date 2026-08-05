@@ -31,7 +31,7 @@ const navItems = [
   { to: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle },
 ];
 
-const COLLAPSE_KEY = 'narota_admin_sidebar_collapsed';
+const COLLAPSE_KEY = 'uniktransporte_admin_sidebar_collapsed';
 
 function AdminTopHeader() {
   const { title, subtitle } = usePageHeader();

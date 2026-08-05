@@ -1,6 +1,6 @@
 // Para teste local, troque para seu IP local
-// Produção: https://narota.norum.app
-const API_URL = 'https://narota.norum.app';
+// Produção: https://transporte.unikcrm.com
+const API_URL = 'https://transporte.unikcrm.com';
 
 // Token de autenticação (gerenciado pelo AuthContext)
 let authToken: string | null = null;

@@ -6,7 +6,7 @@ import { maskCnpj } from '@/lib/mask';
 import { cn } from '@/lib/utils';
 import LogoMark from '@/components/empresa/LogoMark';
 
-const LEMBRAR_KEY = 'narota_lembrar_doc';
+const LEMBRAR_KEY = 'uniktransporte_lembrar_doc';
 
 export default function LoginPage() {
   const { token, login } = useEmpresaAuth();
@@ -59,7 +59,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2.5 pt-4">
           <LogoMark />
-          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Na Rota</h1>
+          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Transporte</h1>
           <p className="text-xs font-medium uppercase tracking-[3px] text-pulso">Fácil Transporte</p>
         </div>
 

@@ -1,7 +1,7 @@
 import type { AdminData } from '@/types/admin';
 
-const TOKEN_KEY = 'narota_admin_token';
-const ADMIN_KEY = 'narota_admin_data';
+const TOKEN_KEY = 'uniktransporte_admin_token';
+const ADMIN_KEY = 'uniktransporte_admin_data';
 
 export function getAdminToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);

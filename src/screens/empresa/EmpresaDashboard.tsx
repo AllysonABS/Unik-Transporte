@@ -109,7 +109,7 @@ export default function EmpresaDashboard() {
       <View style={s.header}>
         <View>
           <Text style={s.greeting} accessibilityRole="text">{getGreeting()}</Text>
-          <Text style={s.company} accessibilityRole="header">{empresa?.nome_empresa || 'Na Rota Transportes'}</Text>
+          <Text style={s.company} accessibilityRole="header">{empresa?.nome_empresa || 'Unik Transporte'}</Text>
         </View>
         <TouchableOpacity
           style={s.notifBtn}
@@ -252,12 +252,12 @@ const s = StyleSheet.create({
   statLabel:   {fontSize: 12, color: Colors.gray, fontWeight: '500'},
   section:     {fontSize: 13, color: Colors.gray, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: '600', marginBottom: 12, marginTop: 8},
   statusRow:   {flexDirection: 'row', gap: 10, marginBottom: 20},
-  statusCard:  {flex: 1, backgroundColor: '#162433', borderRadius: 10, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1E3448', gap: 4},
+  statusCard:  {flex: 1, backgroundColor: '#102255', borderRadius: 10, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1E3A6B', gap: 4},
   statusTopRow:{flexDirection: 'row', alignItems: 'center', gap: 8},
   statusValor: {fontSize: 22, fontWeight: '800'},
   statusLabel:   {fontSize: 11, color: Colors.gray, fontWeight: '600', textAlign: 'center'},
   statusLabelSm: {fontSize: 10, color: Colors.gray, fontWeight: '600', textAlign: 'center'},
-  pedidoCard:  {backgroundColor: '#162433', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10, borderWidth: 1, borderColor: '#1E3448'},
+  pedidoCard:  {backgroundColor: '#102255', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10, borderWidth: 1, borderColor: '#1E3A6B'},
   dot:         {width: 10, height: 10, borderRadius: 5},
   pedidoInfo:  {flex: 1},
   pedidoId:    {fontSize: 14, fontWeight: '700', color: Colors.clareza},
@@ -266,20 +266,20 @@ const s = StyleSheet.create({
   emptyWrap:    {alignItems: 'center', paddingVertical: 40, gap: 10},
   emptyText:    {fontSize: 14, color: Colors.gray, textAlign: 'center'},
   overlay:      {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end'},
-  sheet:        {backgroundColor: '#0F1F2E', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '90%'},
+  sheet:        {backgroundColor: '#081544', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 28, paddingBottom: 40, maxHeight: '90%'},
   sheetHeader:  {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20},
   sheetTitle:   {fontSize: 20, fontWeight: '700', color: Colors.clareza, flex: 1, marginRight: 8},
-  closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#162433', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3448'},
+  closeX:       {width: 32, height: 32, borderRadius: 16, backgroundColor: '#102255', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1E3A6B'},
   badge:        {borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4},
   badgeText:    {fontSize: 12, fontWeight: '700'},
-  detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3448'},
+  detRow:       {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3A6B'},
   detLabel:     {fontSize: 13, color: Colors.gray},
   detValue:     {fontSize: 13, fontWeight: '600', color: Colors.clareza, flex: 1, textAlign: 'right'},
   sectionTitle: {fontSize: 14, fontWeight: '700', color: Colors.pulso, marginTop: 20, marginBottom: 12},
   etapaRow:     {flexDirection: 'row', alignItems: 'center', marginBottom: 16, position: 'relative'},
-  etapaDot:     {width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#1E3448', backgroundColor: '#0F1F2E', marginRight: 10},
+  etapaDot:     {width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#1E3A6B', backgroundColor: '#081544', marginRight: 10},
   etapaDotDone: {backgroundColor: Colors.pulso, borderColor: Colors.pulso},
-  etapaLine:    {position: 'absolute', left: 6, top: 16, width: 2, height: 20, backgroundColor: '#1E3448'},
+  etapaLine:    {position: 'absolute', left: 6, top: 16, width: 2, height: 20, backgroundColor: '#1E3A6B'},
   etapaLineDone:{backgroundColor: Colors.pulso},
   etapaNome:    {fontSize: 14, color: Colors.gray},
   etapaNomeDone:{color: Colors.clareza, fontWeight: '600'},
