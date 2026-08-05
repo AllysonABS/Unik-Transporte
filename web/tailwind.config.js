@@ -5,17 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        matriz: '#0A1628',
-        pulso: '#00E676',
+        matriz: '#081544',
+        pulso: '#3B82F6',
         clareza: '#F1F5F9',
         gray: '#9CA3AF',
         grayLight: '#F5F5F5',
         grayBorder: '#E5E7EB',
         danger: '#EF4444',
-        success: '#86EFAC',
+        success: '#34D399',
         warning: '#F59E0B',
-        info: '#60A5FA',
-        purple: '#C084FC',
+        info: '#67E8F9',
+        purple: '#A78BFA',
+        indigo: '#818CF8',
         status: {
           aguardandoBg: '#451A03',
           emTransitoBg: '#052E16',

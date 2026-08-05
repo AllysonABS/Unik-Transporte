@@ -9,10 +9,8 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-pulso to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-pulso/20">
-              <span className="text-matriz font-black text-lg">N</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight">Na Rota</span>
+            <img src="/unik-icon.svg" alt="Unik Transporte" className="w-10 h-10 rounded-xl shadow-lg shadow-pulso/20" />
+            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -178,7 +176,7 @@ export default function LandingPage() {
           <div className="relative bg-white/[0.03] border border-white/[0.08] rounded-[28px] p-10 md:p-16 text-center backdrop-blur-sm">
             <h2 className="text-2xl md:text-4xl font-bold mb-4 tracking-tight">Pronto para simplificar sua gestão?</h2>
             <p className="text-gray-400 mb-8 text-sm md:text-base max-w-md mx-auto">
-              Empresas de transporte já estão economizando tempo e dinheiro com o Na Rota.
+              Empresas de transporte já estão economizando tempo e dinheiro com o Unik Transporte.
             </p>
             <button
               onClick={() => navigate('/cadastro')}
@@ -193,7 +191,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="px-5 md:px-16 py-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Norum Tecnologia. Todos os direitos reservados.</p>
+          <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
           <div className="flex items-center gap-6">
             <button onClick={() => navigate('/privacidade')} className="text-gray-500 text-sm hover:text-pulso transition">Privacidade</button>
             <button onClick={() => navigate('/termos')} className="text-gray-500 text-sm hover:text-pulso transition">Termos de Uso</button>

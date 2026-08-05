@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   StatusBar,
+  Image,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -27,40 +28,19 @@ type Props = {
 
 function LogoMark() {
   return (
-    <View style={logo.circle} accessibilityLabel="Logo Na Rota">
-      <View style={logo.card}>
-        <View style={logo.stripe} />
-      </View>
-    </View>
+    <Image
+      source={require('../../assets/Logo.png')}
+      style={logo.image}
+      accessibilityLabel="Logo Unik Transporte"
+    />
   );
 }
 
 const logo = StyleSheet.create({
-  circle: {
+  image: {
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.matriz,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#1E3448',
-  },
-  card: {
-    width: 48,
-    height: 34,
-    backgroundColor: Colors.pulso,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  stripe: {
-    position: 'absolute',
-    width: 70,
-    height: 10,
-    backgroundColor: Colors.matriz,
-    top: 12,
-    left: -12,
-    transform: [{rotate: '-35deg'}],
+    borderRadius: 20,
   },
 });
 
@@ -151,7 +131,7 @@ export default function LoginScreen({navigation}: Props) {
 
         <View style={styles.header}>
           <LogoMark />
-          <Text style={styles.appName}>Na Rota</Text>
+          <Text style={styles.appName}>Unik Transporte</Text>
           <Text style={styles.tagline}>Fácil Transporte</Text>
         </View>
 

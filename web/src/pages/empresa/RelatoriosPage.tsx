@@ -115,7 +115,7 @@ export default function RelatoriosPage() {
             <StatCard label="Total de despachos" value={totalPedidos} color="#F1F5F9" />
             <StatCard label="Entregues" value={entregues} color="#86EFAC" />
             <StatCard label="Aguardando" value={aguardando} color="#F59E0B" />
-            <StatCard label="Em trânsito" value={emTransito} color="#00E676" />
+            <StatCard label="Em trânsito" value={emTransito} color="#3B82F6" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

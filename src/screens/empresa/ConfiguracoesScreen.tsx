@@ -267,7 +267,7 @@ export default function ConfiguracoesScreen() {
                     <Switch
                       value={d.aberto}
                       onValueChange={() => toggleDiaAberto(index)}
-                      trackColor={{false: '#1E3448', true: Colors.pulso + '55'}}
+                      trackColor={{false: '#1E3A6B', true: Colors.pulso + '55'}}
                       thumbColor={d.aberto ? Colors.pulso : '#5C6B7A'}
                     />
                   </View>
@@ -329,16 +329,16 @@ const s = StyleSheet.create({
   content:      {padding: 24, paddingTop: 56, paddingBottom: 100},
   title:        {fontSize: 18, fontWeight: '700', color: Colors.clareza, marginBottom: 24},
   backText:     {color: Colors.pulso, fontSize: 14, fontWeight: '600', marginBottom: 12},
-  section:      {backgroundColor: '#162433', borderRadius: 12, padding: 20, borderWidth: 1, borderColor: '#1E3448', marginBottom: 20},
+  section:      {backgroundColor: '#102255', borderRadius: 12, padding: 20, borderWidth: 1, borderColor: '#1E3A6B', marginBottom: 20},
   sectionTitle: {fontSize: 15, fontWeight: '700', color: Colors.pulso, marginBottom: 8},
   label:        {fontSize: 13, fontWeight: '600', color: Colors.gray, marginBottom: 6, marginTop: 14},
-  input:        {height: 48, backgroundColor: '#0F1F2E', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 14, color: Colors.clareza, fontSize: 15},
+  input:        {height: 48, backgroundColor: '#081544', borderRadius: 8, borderWidth: 1, borderColor: '#1E3A6B', paddingHorizontal: 14, color: Colors.clareza, fontSize: 15},
   inputDisabled:{opacity: 0.5},
   row:          {flexDirection: 'row'},
   saveBtn:      {height: 52, backgroundColor: Colors.pulso, borderRadius: 8, alignItems: 'center', justifyContent: 'center'},
   saveBtnText:  {color: Colors.matriz, fontWeight: '700', fontSize: 16},
 
-  horarioBtn:      {minHeight: 48, backgroundColor: '#0F1F2E', borderRadius: 8, borderWidth: 1, borderColor: '#1E3448', paddingHorizontal: 14, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10},
+  horarioBtn:      {minHeight: 48, backgroundColor: '#081544', borderRadius: 8, borderWidth: 1, borderColor: '#1E3A6B', paddingHorizontal: 14, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10},
   horarioValue:    {flex: 1, color: Colors.clareza, fontSize: 14, fontWeight: '600'},
   horarioPlaceholder:{flex: 1, color: Colors.gray, fontSize: 14},
 

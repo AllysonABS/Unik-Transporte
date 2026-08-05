@@ -1,6 +1,6 @@
 import * as Keychain from 'react-native-keychain';
 
-const SERVICE_NAME = 'com.norum.narota';
+const SERVICE_NAME = 'com.uniktransporte';
 
 export async function saveCredentials(username: string, password: string): Promise<void> {
   await Keychain.setGenericPassword(username, password, {service: SERVICE_NAME});

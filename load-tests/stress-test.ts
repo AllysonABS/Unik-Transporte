@@ -1,5 +1,5 @@
 /**
- * Teste de Carga - Norum Transporte
+ * Teste de Carga - Unik Transporte
  * Simula: despachantes upload foto + clientes lendo + empresas operando
  * Usa IDs REAIS do banco para resultados válidos.
  *
@@ -9,7 +9,7 @@
  *   npx tsx stress-test.ts --users 4000 --duration 120
  */
 
-const BASE_URL = process.env.API_URL || 'https://narota.norum.app';
+const BASE_URL = process.env.API_URL || 'https://transporte.unikcrm.com';
 console.log(`\n🎯 Testando contra: ${BASE_URL}\n`);
 
 // Parse args
@@ -149,7 +149,7 @@ function percentile(arr: number[], p: number): number {
 
 function printReport() {
   console.log('\n' + '='.repeat(70));
-  console.log('  RELATÓRIO DE TESTE DE CARGA - NORUM TRANSPORTE');
+  console.log('  RELATÓRIO DE TESTE DE CARGA - UNIK TRANSPORTE');
   console.log('='.repeat(70));
   console.log(`  Usuários simulados: ${TOTAL_USERS} (${DESPACHANTES} desp | ${CLIENTES} cli | ${EMPRESAS} emp)`);
   console.log(`  Duração: ${DURATION_SEC}s`);

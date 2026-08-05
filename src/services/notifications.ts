@@ -1,7 +1,7 @@
 import {Platform, PermissionsAndroid} from 'react-native';
 import {getAuthToken} from './api';
 
-const API_URL = 'https://narota.norum.app';
+const API_URL = 'https://transporte.unikcrm.com';
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (Platform.OS !== 'android') return false;

@@ -40,7 +40,7 @@ export default function AdminLoginPage() {
           <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card">
             <ShieldCheck className="h-7 w-7 text-pulso" />
           </div>
-          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Na Rota Admin</h1>
+          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Transporte Admin</h1>
           <p className="text-xs font-medium uppercase tracking-[3px] text-pulso">Gestão da plataforma</p>
         </div>
 

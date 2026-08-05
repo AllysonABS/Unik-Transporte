@@ -186,7 +186,7 @@ const s = StyleSheet.create({
   reenviarText:{color: Colors.pulso, fontSize: 13, fontWeight: '600'},
   erro:       {color: '#EF4444', fontSize: 12, marginTop: 6},
   steps:      {flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 32},
-  stepDot:    {width: 8, height: 8, borderRadius: 4, backgroundColor: '#1E3448'},
+  stepDot:    {width: 8, height: 8, borderRadius: 4, backgroundColor: '#1E3A6B'},
   stepDotAtivo:{width: 24, backgroundColor: Colors.pulso},
   stepDotDone:{backgroundColor: Colors.pulso},
 });

@@ -5,6 +5,6 @@ extensions.configure(com.facebook.react.ReactSettingsExtension){ ex ->
         ['/usr/local/bin/npx', '@react-native-community/cli', 'config']
     )
 }
-rootProject.name = 'NorumTransporte'
+rootProject.name = "Unik Transporte"
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')

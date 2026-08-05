@@ -10,7 +10,7 @@ import type { NotificacaoData } from '@/types/empresa';
 
 const ICONS: Record<string, { icon: typeof Link2; color: string }> = {
   novo_vinculo: { icon: Link2, color: '#60A5FA' },
-  novo_pedido: { icon: Package, color: '#00E676' },
+  novo_pedido: { icon: Package, color: '#3B82F6' },
   alerta: { icon: AlertTriangle, color: '#F59E0B' },
 };
 
