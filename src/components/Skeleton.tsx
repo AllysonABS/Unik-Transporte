@@ -40,16 +40,16 @@ export function SkeletonCard() {
 }
 
 const s = StyleSheet.create({
-  base: {backgroundColor: '#1E3A6B'},
+  base: {backgroundColor: '#0B1E5A'},
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    backgroundColor: '#102255',
+    backgroundColor: '#081544',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#1E3A6B',
+    borderColor: '#0B1E5A',
     marginBottom: 10,
   },
   cardLines: {flex: 1, gap: 8},

@@ -8,7 +8,7 @@ export default function TermosPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/unik-icon.svg" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
+            <img src="/Logo.png" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
             <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
           </button>
         </div>

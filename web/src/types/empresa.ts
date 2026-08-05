@@ -36,6 +36,7 @@ export type PedidoStatus = 'aguardando' | 'em_transito' | 'entregue' | 'cancelad
 export interface PedidoData {
   id: string;
   numero?: number;
+  numero_pedido?: string | null;
   empresa_id: string;
   entregador_id: string | null;
   excursao_id: string | null;

@@ -167,7 +167,7 @@ export default function LoginScreen({navigation}: Props) {
               accessibilityState={{checked: lembrar}}
               accessibilityLabel="Lembrar credenciais">
               <View style={[styles.checkbox, lembrar && styles.checkboxOn]}>
-                {lembrar && <Icon name="check" size={14} color={Colors.matriz} />}
+                {lembrar && <Icon name="check" size={14} color={Colors.clareza} />}
               </View>
               <Text style={styles.lembrarText}>Lembrar-se</Text>
             </TouchableOpacity>
@@ -188,7 +188,7 @@ export default function LoginScreen({navigation}: Props) {
             accessibilityLabel="Entrar"
             accessibilityState={{disabled: loading}}>
             {loading ? (
-              <ActivityIndicator color={Colors.matriz} />
+              <ActivityIndicator color={Colors.clareza} />
             ) : (
               <Text style={styles.loginButtonText}>Entrar</Text>
             )}
@@ -228,35 +228,37 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   card: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 20,
     padding: 28,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
     elevation: 10,
   },
-  cardTitle: {fontSize: 18, fontWeight: '700', color: Colors.matriz, marginBottom: 24},
+  cardTitle: {fontSize: 18, fontWeight: '700', color: Colors.clareza, marginBottom: 24},
   inputWrapper: {marginBottom: 16},
-  label: {fontSize: 13, fontWeight: '600', color: Colors.matriz, marginBottom: 6},
+  label: {fontSize: 13, fontWeight: '600', color: Colors.clareza, marginBottom: 6},
   input: {
     height: 50,
-    borderWidth: 1.5,
-    borderColor: Colors.grayBorder,
-    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 10,
     paddingHorizontal: 16,
     fontSize: 15,
-    color: Colors.matriz,
-    backgroundColor: Colors.grayLight,
+    color: Colors.clareza,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   passwordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: Colors.grayBorder,
-    borderRadius: 8,
-    backgroundColor: Colors.grayLight,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.05)',
     height: 50,
   },
   passwordInput: {
@@ -264,7 +266,7 @@ const styles = StyleSheet.create({
     height: 50,
     paddingHorizontal: 16,
     fontSize: 15,
-    color: Colors.matriz,
+    color: Colors.clareza,
   },
   eyeBtn: {paddingHorizontal: 14},
   optionsRow: {
@@ -278,14 +280,14 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 20,
     height: 20,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: Colors.grayBorder,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxOn: {backgroundColor: Colors.pulso, borderColor: Colors.pulso},
-  lembrarText: {fontSize: 13, color: Colors.matriz, fontWeight: '500'},
+  lembrarText: {fontSize: 13, color: Colors.clareza, fontWeight: '500'},
   forgotText: {fontSize: 13, color: Colors.pulso, fontWeight: '600'},
   loginButton: {
     height: 52,
@@ -301,7 +303,7 @@ const styles = StyleSheet.create({
   },
   loginButtonDisabled: {opacity: 0.7},
   loginButtonText: {
-    color: Colors.matriz,
+    color: Colors.clareza,
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,

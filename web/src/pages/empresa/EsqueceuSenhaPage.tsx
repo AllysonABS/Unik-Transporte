@@ -125,19 +125,19 @@ export default function EsqueceuSenhaPage() {
         <div className="rounded-xl bg-white p-7 shadow-2xl shadow-black/30">
           {etapa === 'documento' && (
             <>
-              <label className="block text-xs font-semibold text-matriz mb-1.5">CPF ou CNPJ</label>
+              <label className="block text-xs font-semibold text-transicao mb-1.5">CPF ou CNPJ</label>
               <input
                 value={documento}
                 onChange={e => setDocumento(maskCpfCnpj(e.target.value))}
                 placeholder="CPF ou CNPJ"
                 inputMode="numeric"
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-matriz placeholder:text-gray outline-none focus:border-pulso"
+                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
               />
               {erro && <p className="mt-2 text-xs font-medium text-danger">{erro}</p>}
               <button
                 onClick={enviarCodigo}
                 disabled={loading}
-                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-matriz shadow-lg shadow-pulso/40 disabled:opacity-70"
+                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Enviar código'}
               </button>
@@ -146,7 +146,7 @@ export default function EsqueceuSenhaPage() {
 
           {etapa === 'codigo' && (
             <>
-              <label className="block text-xs font-semibold text-matriz mb-1.5">
+              <label className="block text-xs font-semibold text-transicao mb-1.5">
                 Código de verificação
               </label>
               <input
@@ -155,13 +155,13 @@ export default function EsqueceuSenhaPage() {
                 placeholder="000000"
                 inputMode="numeric"
                 maxLength={6}
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-center text-2xl font-bold tracking-[8px] text-matriz placeholder:text-gray outline-none focus:border-pulso"
+                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-center text-2xl font-bold tracking-[8px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
               />
               {erro && <p className="mt-2 text-xs font-medium text-danger">{erro}</p>}
               <button
                 onClick={verificarCodigo}
                 disabled={loading}
-                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-matriz shadow-lg shadow-pulso/40 disabled:opacity-70"
+                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Verificar'}
               </button>
@@ -179,15 +179,15 @@ export default function EsqueceuSenhaPage() {
 
           {etapa === 'novaSenha' && (
             <>
-              <label className="block text-xs font-semibold text-matriz mb-1.5">Nova senha</label>
+              <label className="block text-xs font-semibold text-transicao mb-1.5">Nova senha</label>
               <input
                 type="password"
                 value={novaSenha}
                 onChange={e => setNovaSenha(e.target.value)}
                 placeholder="••••••••"
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-matriz placeholder:text-gray outline-none focus:border-pulso"
+                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
               />
-              <label className="block text-xs font-semibold text-matriz mb-1.5 mt-4">
+              <label className="block text-xs font-semibold text-transicao mb-1.5 mt-4">
                 Confirmar senha
               </label>
               <input
@@ -195,7 +195,7 @@ export default function EsqueceuSenhaPage() {
                 value={confirmarSenha}
                 onChange={e => setConfirmarSenha(e.target.value)}
                 placeholder="••••••••"
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-matriz placeholder:text-gray outline-none focus:border-pulso"
+                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
               />
               {novaSenha && confirmarSenha && novaSenha !== confirmarSenha && (
                 <p className="mt-1.5 text-xs text-danger">As senhas não coincidem</p>
@@ -204,7 +204,7 @@ export default function EsqueceuSenhaPage() {
               <button
                 onClick={handleRedefinir}
                 disabled={loading}
-                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-matriz shadow-lg shadow-pulso/40 disabled:opacity-70"
+                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Redefinir senha'}
               </button>

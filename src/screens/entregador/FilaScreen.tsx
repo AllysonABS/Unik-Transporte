@@ -194,7 +194,7 @@ export default function FilaScreen() {
                 onPress={() => iniciarColeta(p)}
                 accessibilityRole="button"
                 accessibilityLabel={`Iniciar coleta do pedido de ${p.cliente_nome}`}>
-                <Icon name="play" size={14} color={Colors.matriz} />
+                <Icon name="play" size={14} color={Colors.clareza} />
                 <Text style={s.iniciarText}>Iniciar</Text>
               </TouchableOpacity>
             </View>
@@ -210,21 +210,21 @@ const s = StyleSheet.create({
   header:      {flexDirection: 'row', alignItems: 'center', padding: 24, paddingTop: 56, paddingBottom: 12, gap: 12},
   title:       {fontSize: 20, fontWeight: '700', color: Colors.clareza},
   badge:       {backgroundColor: Colors.pulso, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3},
-  badgeText:   {color: Colors.matriz, fontWeight: '800', fontSize: 14},
+  badgeText:   {color: Colors.clareza, fontWeight: '800', fontSize: 14},
   resumoRow:   {flexDirection: 'row', gap: 8, paddingHorizontal: 24, marginBottom: 12},
-  resumoCard:  {flex: 1, backgroundColor: '#102255', borderRadius: 10, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#1E3A6B', gap: 4},
+  resumoCard:  {flex: 1, backgroundColor: '#081544', borderRadius: 10, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#0B1E5A', gap: 4},
   resumoTopRow:{flexDirection: 'row', alignItems: 'center', gap: 6},
   resumoValor: {fontSize: 20, fontWeight: '800'},
   resumoLabel: {fontSize: 10, color: Colors.gray, fontWeight: '600'},
-  searchBox:   {flexDirection: 'row', alignItems: 'center', marginHorizontal: 24, marginBottom: 12, backgroundColor: '#102255', borderRadius: 10, borderWidth: 1, borderColor: '#1E3A6B', paddingHorizontal: 14, gap: 8},
+  searchBox:   {flexDirection: 'row', alignItems: 'center', marginHorizontal: 24, marginBottom: 12, backgroundColor: '#081544', borderRadius: 10, borderWidth: 1, borderColor: '#0B1E5A', paddingHorizontal: 14, gap: 8},
   searchInput: {flex: 1, height: 44, color: Colors.clareza, fontSize: 15},
   chipsScroll: {marginBottom: 12},
   chipsRow:    {flexDirection: 'row', gap: 8, paddingHorizontal: 24},
-  chip:        {flexDirection: 'row', alignItems: 'center', backgroundColor: '#102255', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: '#1E3A6B'},
+  chip:        {flexDirection: 'row', alignItems: 'center', backgroundColor: '#081544', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: '#0B1E5A'},
   chipAtivo:   {backgroundColor: Colors.pulso, borderColor: Colors.pulso},
   chipText:    {fontSize: 12, fontWeight: '600', color: Colors.gray, maxWidth: 160},
-  chipTextAtivo:{color: Colors.matriz},
-  card:        {backgroundColor: '#102255', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#1E3A6B'},
+  chipTextAtivo:{color: Colors.clareza},
+  card:        {backgroundColor: '#081544', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#0B1E5A'},
   cardContent: {flex: 1},
   empresaBadge:{flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4},
   empresaBadgeText:{fontSize: 11, fontWeight: '700', color: '#60A5FA'},
@@ -234,5 +234,5 @@ const s = StyleSheet.create({
   destino:     {fontSize: 12, color: Colors.gray},
   actions:     {alignItems: 'center', gap: 8},
   iniciarBtn:  {backgroundColor: Colors.pulso, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', gap: 6},
-  iniciarText: {color: Colors.matriz, fontWeight: '700', fontSize: 13},
+  iniciarText: {color: Colors.clareza, fontWeight: '700', fontSize: 13},
 });

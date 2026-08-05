@@ -192,7 +192,7 @@ export default function ChecklistScreen({route, navigation}: Props) {
               accessibilityState={{checked: pedidoConferido}}
               accessibilityLabel="Pedido conferido">
               <View style={[s.checkbox, pedidoConferido && s.checkboxOn]}>
-                {pedidoConferido && <Icon name="check" size={14} color={Colors.matriz} />}
+                {pedidoConferido && <Icon name="check" size={14} color={Colors.clareza} />}
               </View>
               <Text style={[s.checkLabel, pedidoConferido && s.checkLabelDone]}>Pedido Conferido</Text>
             </TouchableOpacity>
@@ -204,7 +204,7 @@ export default function ChecklistScreen({route, navigation}: Props) {
               accessibilityState={{checked: volumesConferidos}}
               accessibilityLabel="Volumes conferidos">
               <View style={[s.checkbox, volumesConferidos && s.checkboxOn]}>
-                {volumesConferidos && <Icon name="check" size={14} color={Colors.matriz} />}
+                {volumesConferidos && <Icon name="check" size={14} color={Colors.clareza} />}
               </View>
               <Text style={[s.checkLabel, volumesConferidos && s.checkLabelDone]}>
                 Volumes Conferidos{volumes != null ? ` (${volumes} vol.)` : ''}
@@ -221,7 +221,7 @@ export default function ChecklistScreen({route, navigation}: Props) {
               accessibilityState={{checked: pedidoConferidoExcursao}}
               accessibilityLabel="Pedido conferido pela excursão">
               <View style={[s.checkbox, pedidoConferidoExcursao && s.checkboxOn]}>
-                {pedidoConferidoExcursao && <Icon name="check" size={14} color={Colors.matriz} />}
+                {pedidoConferidoExcursao && <Icon name="check" size={14} color={Colors.clareza} />}
               </View>
               <Text style={[s.checkLabel, pedidoConferidoExcursao && s.checkLabelDone]}>
                 Pedido Conferido pela Excursão
@@ -235,7 +235,7 @@ export default function ChecklistScreen({route, navigation}: Props) {
               accessibilityState={{checked: entregaRealizada}}
               accessibilityLabel="Entrega realizada">
               <View style={[s.checkbox, entregaRealizada && s.checkboxOn]}>
-                {entregaRealizada && <Icon name="check" size={14} color={Colors.matriz} />}
+                {entregaRealizada && <Icon name="check" size={14} color={Colors.clareza} />}
               </View>
               <Text style={[s.checkLabel, entregaRealizada && s.checkLabelDone]}>Entrega Realizada</Text>
             </TouchableOpacity>
@@ -294,7 +294,7 @@ export default function ChecklistScreen({route, navigation}: Props) {
           accessibilityLabel={isColeta ? 'Ir para próxima etapa' : 'Confirmar entrega'}
           accessibilityState={{disabled: loading || (isColeta ? !confirmadoColeta : !checklistEntregaOk || fotos.length === 0)}}>
           {loading
-            ? <ActivityIndicator color={Colors.matriz} />
+            ? <ActivityIndicator color={Colors.clareza} />
             : <Text style={s.concluirText}>
                 {isColeta ? 'Ir para Próxima Etapa' : 'Confirmar Entrega'}
               </Text>}
@@ -306,7 +306,7 @@ export default function ChecklistScreen({route, navigation}: Props) {
 
 const s = StyleSheet.create({
   container:       {flex: 1, backgroundColor: Colors.matriz},
-  topBar:          {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 56, borderBottomWidth: 1, borderBottomColor: '#1E3A6B'},
+  topBar:          {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 56, borderBottomWidth: 1, borderBottomColor: '#0B1E5A'},
   backBtn:         {flexDirection: 'row', alignItems: 'center', gap: 6},
   backText:        {color: Colors.pulso, fontSize: 15, fontWeight: '600'},
   content:         {padding: 24, paddingBottom: 40},
@@ -314,20 +314,20 @@ const s = StyleSheet.create({
   etapaIconWrap:   {width: 48, height: 48, borderRadius: 24, backgroundColor: Colors.pulso + '15', alignItems: 'center', justifyContent: 'center'},
   etapaTitulo:     {fontSize: 18, fontWeight: '700', color: Colors.clareza},
   etapaSub:        {fontSize: 13, color: Colors.gray, marginTop: 2},
-  progressBg:      {height: 6, backgroundColor: '#1E3A6B', borderRadius: 3, overflow: 'hidden', marginBottom: 28},
+  progressBg:      {height: 6, backgroundColor: '#0B1E5A', borderRadius: 3, overflow: 'hidden', marginBottom: 28},
   progressFill:    {height: 6, backgroundColor: Colors.pulso, borderRadius: 3},
   section:         {fontSize: 13, color: Colors.gray, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: '600', marginBottom: 12, marginTop: 8},
-  checkItem:       {flexDirection: 'row', gap: 14, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1E3A6B'},
-  checkbox:        {width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: '#1E3A6B', alignItems: 'center', justifyContent: 'center'},
+  checkItem:       {flexDirection: 'row', gap: 14, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#0B1E5A'},
+  checkbox:        {width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: '#0B1E5A', alignItems: 'center', justifyContent: 'center'},
   checkboxOn:      {backgroundColor: Colors.pulso, borderColor: Colors.pulso},
   checkLabel:      {flex: 1, fontSize: 15, color: Colors.clareza},
   checkLabelDone:  {color: Colors.gray, textDecorationLine: 'line-through'},
   fotosRow:        {flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20},
   foto:            {width: 90, height: 90, borderRadius: 10},
-  addFoto:         {width: 90, height: 90, borderRadius: 10, backgroundColor: '#102255', borderWidth: 1, borderColor: '#1E3A6B', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4},
+  addFoto:         {width: 90, height: 90, borderRadius: 10, backgroundColor: '#081544', borderWidth: 1, borderColor: '#0B1E5A', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4},
   addFotoText:     {fontSize: 11, color: Colors.gray, fontWeight: '600'},
-  obsInput:        {height: 80, backgroundColor: '#102255', borderRadius: 10, borderWidth: 1, borderColor: '#1E3A6B', paddingHorizontal: 14, paddingTop: 12, color: Colors.clareza, fontSize: 14, textAlignVertical: 'top', marginBottom: 20},
+  obsInput:        {height: 80, backgroundColor: '#081544', borderRadius: 10, borderWidth: 1, borderColor: '#0B1E5A', paddingHorizontal: 14, paddingTop: 12, color: Colors.clareza, fontSize: 14, textAlignVertical: 'top', marginBottom: 20},
   concluirBtn:     {height: 56, backgroundColor: Colors.pulso, borderRadius: 10, alignItems: 'center', justifyContent: 'center'},
   concluirDisabled:{opacity: 0.5},
-  concluirText:    {color: Colors.matriz, fontWeight: '800', fontSize: 16},
+  concluirText:    {color: Colors.clareza, fontWeight: '800', fontSize: 16},
 });

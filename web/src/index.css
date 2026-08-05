@@ -4,24 +4,26 @@
 
 @layer base {
   :root {
-    --background: 227 79% 15%;
+    /* Escala oficial Unik: bordaProfunda(#02081F) -> principal(#040D30) ->
+       transição(#081544) -> iluminado(#0B1E5A) */
+    --background: 228 85% 10%; /* #040D30 — cor principal */
     --foreground: 210 40% 96%;
-    --card: 225 55% 19%;
+    --card: 227 79% 15%; /* #081544 — transição */
     --card-foreground: 210 40% 96%;
-    --popover: 225 55% 19%;
+    --popover: 227 79% 15%; /* #081544 — transição */
     --popover-foreground: 210 40% 96%;
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 225 55% 19%;
+    --secondary: 227 79% 15%; /* #081544 — transição */
     --secondary-foreground: 210 40% 96%;
-    --muted: 225 55% 19%;
+    --muted: 227 79% 15%; /* #081544 — transição */
     --muted-foreground: 218 11% 65%;
-    --accent: 222 41% 20%;
+    --accent: 226 78% 20%; /* #0B1E5A — iluminado */
     --accent-foreground: 210 40% 96%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 96%;
-    --border: 222 41% 20%;
-    --input: 222 41% 20%;
+    --border: 226 78% 20%; /* #0B1E5A — iluminado */
+    --input: 226 78% 20%; /* #0B1E5A — iluminado */
     --ring: 217 91% 60%;
     --radius: 0.5rem;
   }
@@ -43,12 +45,12 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #081544;
+  background: #040D30;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E3A6B;
+  background: #0B1E5A;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2E4A8C;
+  background: #0B1E5A;
 }

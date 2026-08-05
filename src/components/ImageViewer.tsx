@@ -85,9 +85,9 @@ export default function ImageViewer({visible, url, onClose}: Props) {
 const s = StyleSheet.create({
   container: {flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center'},
   topBar: {position: 'absolute', top: Platform.OS === 'ios' ? 56 : 40, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, zIndex: 10},
-  closeBtn: {width: 40, height: 40, borderRadius: 20, backgroundColor: '#102255', alignItems: 'center', justifyContent: 'center'},
+  closeBtn: {width: 40, height: 40, borderRadius: 20, backgroundColor: '#081544', alignItems: 'center', justifyContent: 'center'},
   closeText: {color: Colors.clareza, fontSize: 18, fontWeight: '700'},
   downloadBtn: {backgroundColor: Colors.pulso, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10},
-  downloadText: {color: Colors.matriz, fontWeight: '700', fontSize: 14},
+  downloadText: {color: Colors.clareza, fontWeight: '700', fontSize: 14},
   image: {width: width - 32, height: height * 0.7, borderRadius: 10},
 });

@@ -8,6 +8,7 @@ import CadastroPage from './pages/CadastroPage';
 import PrivacidadePage from './pages/PrivacidadePage';
 import TermosPage from './pages/TermosPage';
 import ExclusaoDadosPage from './pages/ExclusaoDadosPage';
+import ManualBlingPage from './pages/ManualBlingPage';
 import { queryClient } from './lib/queryClient';
 import { EmpresaAuthProvider } from './context/EmpresaAuthContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -19,6 +20,7 @@ import LoginPage from './pages/empresa/LoginPage';
 import EsqueceuSenhaPage from './pages/empresa/EsqueceuSenhaPage';
 import DashboardPage from './pages/empresa/DashboardPage';
 import PedidosPage from './pages/empresa/PedidosPage';
+import PedidosImportadosPage from './pages/empresa/PedidosImportadosPage';
 import ClientesPage from './pages/empresa/ClientesPage';
 import EntregadoresPage from './pages/empresa/EntregadoresPage';
 import ExcursoesPage from './pages/empresa/ExcursoesPage';
@@ -47,6 +49,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/privacidade" element={<PrivacidadePage />} />
               <Route path="/termos" element={<TermosPage />} />
               <Route path="/exclusao-de-dados" element={<ExclusaoDadosPage />} />
+              <Route path="/manual-bling" element={<ManualBlingPage />} />
 
               <Route path="/empresa/login" element={<LoginPage />} />
               <Route path="/empresa/esqueceu-senha" element={<EsqueceuSenhaPage />} />
@@ -54,6 +57,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <Route element={<DashboardLayout />}>
                   <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="despachos" element={<PedidosPage />} />
+                  <Route path="pedidos-importados" element={<PedidosImportadosPage />} />
                   <Route path="clientes" element={<ClientesPage />} />
                   <Route path="entregadores" element={<EntregadoresPage />} />
                   <Route path="excursoes" element={<ExcursoesPage />} />

@@ -4,11 +4,12 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {useAuth} from '../context/AuthContext';
 import {hapticWarning} from '../utils/haptics';
+import {desregistrarPushToken} from '../services/push';
 
 export function useLogout() {
   const {show} = useAlert();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const {logout} = useAuth();
+  const {entregador, logout} = useAuth();
 
   const doLogout = () => {
     hapticWarning();
@@ -22,6 +23,10 @@ export function useLogout() {
           text: 'Sair',
           style: 'destructive',
           onPress: async () => {
+            // Tira o token do banco antes de limpar a sessão local — senão
+            // o entregador continua recebendo push nesse aparelho mesmo
+            // deslogado.
+            if (entregador?.id) await desregistrarPushToken(entregador.id);
             await logout();
             navigation.replace('Login');
           },

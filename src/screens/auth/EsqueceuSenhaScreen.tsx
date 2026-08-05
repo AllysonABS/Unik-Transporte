@@ -114,7 +114,7 @@ export default function EsqueceuSenhaScreen({navigation}: Props) {
               <Text style={s.label}>CPF</Text>
               <TextInput style={s.input} placeholder="000.000.000-00" placeholderTextColor={Colors.gray} value={cpf} onChangeText={v => setCpf(maskCpf(v))} keyboardType="numeric" />
               <TouchableOpacity style={[s.btn, loading && s.btnDisabled]} onPress={enviarCodigo} disabled={loading} activeOpacity={0.85}>
-                {loading ? <ActivityIndicator color={Colors.matriz} /> : <Text style={s.btnText}>Enviar código</Text>}
+                {loading ? <ActivityIndicator color={Colors.clareza} /> : <Text style={s.btnText}>Enviar código</Text>}
               </TouchableOpacity>
             </>
           )}
@@ -124,7 +124,7 @@ export default function EsqueceuSenhaScreen({navigation}: Props) {
               <Text style={s.label}>Código de verificação</Text>
               <TextInput style={[s.input, s.inputCodigo]} placeholder="000000" placeholderTextColor={Colors.gray} value={codigo} onChangeText={setCodigo} keyboardType="numeric" maxLength={6} />
               <TouchableOpacity style={[s.btn, loading && s.btnDisabled]} onPress={verificarCodigo} disabled={loading} activeOpacity={0.85}>
-                {loading ? <ActivityIndicator color={Colors.matriz} /> : <Text style={s.btnText}>Verificar</Text>}
+                {loading ? <ActivityIndicator color={Colors.clareza} /> : <Text style={s.btnText}>Verificar</Text>}
               </TouchableOpacity>
               <TouchableOpacity onPress={() => { setCodigo(''); enviarCodigo(); }} style={s.reenviar}>
                 <Text style={s.reenviarText}>Reenviar código</Text>
@@ -142,7 +142,7 @@ export default function EsqueceuSenhaScreen({navigation}: Props) {
                 <Text style={s.erro}>As senhas não coincidem</Text>
               )}
               <TouchableOpacity style={[s.btn, loading && s.btnDisabled]} onPress={handleRedefinir} disabled={loading} activeOpacity={0.85}>
-                {loading ? <ActivityIndicator color={Colors.matriz} /> : <Text style={s.btnText}>Redefinir senha</Text>}
+                {loading ? <ActivityIndicator color={Colors.clareza} /> : <Text style={s.btnText}>Redefinir senha</Text>}
               </TouchableOpacity>
             </>
           )}
@@ -168,18 +168,38 @@ const s = StyleSheet.create({
   icon:       {fontSize: 40, marginBottom: 16},
   title:      {fontSize: 24, fontWeight: '700', color: Colors.clareza, marginBottom: 8},
   subtitle:   {fontSize: 14, color: Colors.gray, textAlign: 'center', lineHeight: 20},
-  card:       {backgroundColor: Colors.white, borderRadius: 12, padding: 28, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.2, shadowRadius: 16, elevation: 10},
-  label:      {fontSize: 13, fontWeight: '600', color: Colors.matriz, marginBottom: 6, marginTop: 12},
-  input:      {height: 50, borderWidth: 1.5, borderColor: Colors.grayBorder, borderRadius: 8, paddingHorizontal: 16, fontSize: 15, color: Colors.matriz, backgroundColor: Colors.grayLight},
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 20,
+    padding: 28,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  label:      {fontSize: 13, fontWeight: '600', color: Colors.clareza, marginBottom: 6, marginTop: 12},
+  input:      {
+    height: 50,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: Colors.clareza,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
   inputCodigo:{textAlign: 'center', fontSize: 24, letterSpacing: 8, fontWeight: '700'},
   btn:        {height: 52, backgroundColor: Colors.pulso, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 24, shadowColor: Colors.pulso, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.4, shadowRadius: 10, elevation: 6},
   btnDisabled:{opacity: 0.7},
-  btnText:    {color: Colors.matriz, fontSize: 16, fontWeight: '700'},
+  btnText:    {color: Colors.clareza, fontSize: 16, fontWeight: '700'},
   reenviar:   {alignSelf: 'center', marginTop: 16},
   reenviarText:{color: Colors.pulso, fontSize: 13, fontWeight: '600'},
   erro:       {color: '#EF4444', fontSize: 12, marginTop: 6},
   steps:      {flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 32},
-  stepDot:    {width: 8, height: 8, borderRadius: 4, backgroundColor: '#1E3A6B'},
+  stepDot:    {width: 8, height: 8, borderRadius: 4, backgroundColor: '#0B1E5A'},
   stepDotAtivo:{width: 24, backgroundColor: Colors.pulso},
   stepDotDone:{backgroundColor: Colors.pulso},
 });

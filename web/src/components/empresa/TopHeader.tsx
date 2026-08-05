@@ -52,7 +52,7 @@ export default function TopHeader() {
   }, [open, empresa?.id, notificacoes]);
 
   return (
-    <header className="flex items-center justify-between border-b border-border bg-card px-6 h-14">
+    <header className="flex items-center justify-between border-b border-border bg-card px-6 h-14 shrink-0">
       <div>
         <h1 className="text-xl font-bold text-clareza leading-tight">{title}</h1>
         {subtitle && <p className="text-xs text-gray mt-0.5">{subtitle}</p>}

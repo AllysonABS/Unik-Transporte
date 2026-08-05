@@ -22,6 +22,12 @@ const maskPhone = (v: string) => v.replace(/\D/g, '').slice(0, 11)
 const maskCEP = (v: string) => v.replace(/\D/g, '').slice(0, 8)
   .replace(/^(\d{5})(\d)/, '$1-$2');
 
+const maskCartaoNumero = (v: string) => v.replace(/\D/g, '').slice(0, 16)
+  .replace(/(\d{4})(?=\d)/g, '$1 ');
+
+const maskCartaoValidade = (v: string) => v.replace(/\D/g, '').slice(0, 6)
+  .replace(/^(\d{2})(\d)/, '$1/$2');
+
 type DocTipo = 'cnpj' | 'cpf';
 type Etapa = 'dados' | 'endereco' | 'acesso';
 
@@ -53,7 +59,11 @@ export default function CadastroPage() {
     bairro: '',
     cidade: '',
     estado: '',
-    cep: ''
+    cep: '',
+    cartao_numero: '',
+    cartao_nome: '',
+    cartao_validade: '',
+    cartao_cvv: ''
   });
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
@@ -109,6 +119,15 @@ export default function CadastroPage() {
     if (form.senha.length < 8) return 'A senha deve ter pelo menos 8 caracteres.';
     if (!/[A-Z]/.test(form.senha)) return 'A senha deve conter ao menos uma letra maiúscula.';
     if (!/[0-9]/.test(form.senha)) return 'A senha deve conter ao menos um número.';
+    const cartaoDigits = form.cartao_numero.replace(/\D/g, '');
+    if (!cartaoDigits || !form.cartao_nome || !form.cartao_validade || !form.cartao_cvv) {
+      return 'Preencha os dados do cartão de crédito. A cobrança é feita na hora do cadastro — não trabalhamos com período grátis.';
+    }
+    if (cartaoDigits.length < 13) return 'Número do cartão inválido.';
+    const [mes, ano] = form.cartao_validade.split('/');
+    if (!mes || !ano || mes.length !== 2 || ano.length !== 4) return 'Validade do cartão inválida. Use o formato MM/AAAA.';
+    if (Number(mes) < 1 || Number(mes) > 12) return 'Mês de validade inválido.';
+    if (form.cartao_cvv.length < 3) return 'CVV inválido.';
     return null;
   }
 
@@ -132,12 +151,21 @@ export default function CadastroPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Proteção contra submit acidental fora da última etapa (ex.: toque que
+    // acerta o botão "Continuar" bem no instante em que ele vira "Finalizar
+    // cadastro" na troca de etapa) — sem isso a validação da senha/cartão
+    // roda antes da hora e mostra erro num formulário que o usuário nem
+    // preencheu ainda.
+    if (etapa !== 'acesso') return;
+
     setErro('');
 
     const msgAcesso = validarEtapaAcesso();
     if (msgAcesso) { setErro(msgAcesso); return; }
 
     const docDigits = form.doc.replace(/\D/g, '');
+    const [cartao_mes, cartao_ano] = form.cartao_validade.split('/');
     setLoading(true);
     try {
       const res = await fetch('/api/cadastro', {
@@ -157,6 +185,11 @@ export default function CadastroPage() {
           cep: form.cep,
           cnpj: docTipo === 'cnpj' ? docDigits : '',
           cpf: docTipo === 'cpf' ? docDigits : '',
+          cartao_numero: form.cartao_numero.replace(/\s/g, ''),
+          cartao_nome: form.cartao_nome,
+          cartao_mes,
+          cartao_ano,
+          cartao_cvv: form.cartao_cvv,
         }),
       });
       const data = await res.json();
@@ -171,11 +204,11 @@ export default function CadastroPage() {
   if (sucesso) {
     return (
       <div className="min-h-screen bg-matriz flex items-center justify-center px-5">
-        <div className="bg-[#102255] border border-[#1E3A6B] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
+        <div className="bg-[#081544] border border-[#0B1E5A] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
           <span className="text-5xl mb-6 block">🎉</span>
           <h1 className="text-2xl font-bold text-clareza mb-4">Cadastro realizado!</h1>
           <p className="text-gray-400 mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Unik Transporte.</p>
-          <button onClick={() => navigate('/')} className="w-full bg-pulso text-matriz font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-95 transition-transform">
+          <button onClick={() => navigate('/')} className="w-full bg-pulso text-clareza font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-95 transition-transform">
             Voltar para o início
           </button>
         </div>
@@ -183,7 +216,7 @@ export default function CadastroPage() {
     );
   }
 
-  const inputClass = "w-full h-12 bg-[#081544] border border-[#1E3A6B] rounded-lg px-4 text-clareza focus:border-pulso focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
+  const inputClass = "w-full h-12 bg-[#081544] border border-[#0B1E5A] rounded-lg px-4 text-clareza focus:border-pulso focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
 
   return (
     <div className="min-h-screen bg-matriz py-8 md:py-12 px-5">
@@ -202,17 +235,17 @@ export default function CadastroPage() {
           {STEPS.map((s, i) => (
             <div key={s.key} className="flex items-center gap-2">
               <div className={`flex items-center gap-2 ${i <= stepIndex ? 'text-pulso' : 'text-gray-600'}`}>
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i <= stepIndex ? 'bg-pulso text-matriz' : 'bg-[#1E3A6B] text-gray-400'}`}>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i <= stepIndex ? 'bg-pulso text-clareza' : 'bg-[#0B1E5A] text-gray-400'}`}>
                   {i + 1}
                 </span>
                 <span className="text-xs font-semibold hidden sm:inline">{s.label}</span>
               </div>
-              {i < STEPS.length - 1 && <span className="w-6 md:w-10 h-px bg-[#1E3A6B]" />}
+              {i < STEPS.length - 1 && <span className="w-6 md:w-10 h-px bg-[#0B1E5A]" />}
             </div>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#102255] border border-[#1E3A6B] rounded-2xl p-6 md:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-[#081544] border border-[#0B1E5A] rounded-2xl p-6 md:p-8 space-y-6">
           {/* Etapa 1: Dados */}
           {etapa === 'dados' && (
             <>
@@ -226,8 +259,8 @@ export default function CadastroPage() {
                     onClick={() => { setDocTipo(tipo); update('doc', ''); }}
                     className={`flex-1 h-10 rounded-lg text-sm font-semibold border transition ${
                       docTipo === tipo
-                        ? 'bg-pulso text-matriz border-pulso'
-                        : 'bg-[#081544] text-gray-400 border-[#1E3A6B]'
+                        ? 'bg-pulso text-clareza border-pulso'
+                        : 'bg-[#081544] text-gray-400 border-[#0B1E5A]'
                     }`}
                   >
                     Tenho {tipo.toUpperCase()}
@@ -413,12 +446,69 @@ export default function CadastroPage() {
               </div>
 
               <h2 className="text-pulso font-bold text-xs uppercase tracking-wider pt-2">Pagamento</h2>
-              <div className="bg-[#081544] border border-[#1E3A6B] rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-[#081544] border border-[#0B1E5A] rounded-xl p-4 flex items-center justify-between">
                 <div>
                   <p className="text-clareza font-semibold text-sm">Plano Mensal</p>
                   <p className="text-gray-400 text-xs">Acesso completo ao sistema</p>
                 </div>
                 <p className="text-pulso font-black text-xl">R$69,90</p>
+              </div>
+
+              <p className="text-gray-500 text-[11px] -mt-2">
+                A cobrança é feita agora, no cartão informado abaixo. Trabalhamos só com cartão de crédito — sem período grátis.
+              </p>
+
+              <div>
+                <label className="text-gray-400 text-xs font-medium block mb-1.5">Número do cartão *</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="cc-number"
+                  value={form.cartao_numero}
+                  onChange={e => update('cartao_numero', maskCartaoNumero(e.target.value))}
+                  placeholder="0000 0000 0000 0000"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-400 text-xs font-medium block mb-1.5">Nome impresso no cartão *</label>
+                <input
+                  type="text"
+                  autoComplete="cc-name"
+                  value={form.cartao_nome}
+                  onChange={e => update('cartao_nome', e.target.value.toUpperCase())}
+                  maxLength={80}
+                  placeholder="Como está no cartão"
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Validade (MM/AAAA) *</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
+                    value={form.cartao_validade}
+                    onChange={e => update('cartao_validade', maskCartaoValidade(e.target.value))}
+                    placeholder="MM/AAAA"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-400 text-xs font-medium block mb-1.5">CVV *</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="cc-csc"
+                    value={form.cartao_cvv}
+                    onChange={e => update('cartao_cvv', e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="000"
+                    className={inputClass}
+                  />
+                </div>
               </div>
             </>
           )}
@@ -436,24 +526,26 @@ export default function CadastroPage() {
               <button
                 type="button"
                 onClick={voltarEtapa}
-                className="h-14 px-6 border border-[#1E3A6B] text-clareza font-bold rounded-xl hover:bg-[#1E3A6B]/30 transition-colors"
+                className="h-14 px-6 border border-[#0B1E5A] text-clareza font-bold rounded-xl hover:bg-[#0B1E5A]/30 transition-colors"
               >
                 Voltar
               </button>
             )}
             {etapa !== 'acesso' ? (
               <button
+                key="continuar"
                 type="button"
                 onClick={irParaProximaEtapa}
-                className="flex-1 h-14 bg-pulso text-matriz font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform"
+                className="flex-1 h-14 bg-pulso text-clareza font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform"
               >
                 Continuar
               </button>
             ) : (
               <button
+                key="finalizar"
                 type="submit"
                 disabled={loading}
-                className="flex-1 h-14 bg-pulso text-matriz font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform disabled:opacity-60 disabled:pointer-events-none"
+                className="flex-1 h-14 bg-pulso text-clareza font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform disabled:opacity-60 disabled:pointer-events-none"
               >
                 {loading ? 'Cadastrando...' : 'Finalizar cadastro'}
               </button>

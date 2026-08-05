@@ -53,7 +53,9 @@ export default function PedidosPage() {
         !termo ||
         p.cliente_nome?.toLowerCase().includes(termo) ||
         p.entregador_nome?.toLowerCase().includes(termo) ||
-        p.excursao_nome?.toLowerCase().includes(termo);
+        p.excursao_nome?.toLowerCase().includes(termo) ||
+        p.numero_pedido?.toLowerCase().includes(termo) ||
+        String(p.numero ?? '').includes(termo);
       return passaStatus && passaBusca;
     });
   }, [pedidos, busca, status]);
@@ -99,6 +101,7 @@ export default function PedidosPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Nº</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Entregador</TableHead>
                 <TableHead>Excursão</TableHead>
@@ -109,7 +112,7 @@ export default function PedidosPage() {
             <TableBody>
               {filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray py-8">
+                  <TableCell colSpan={6} className="text-center text-gray py-8">
                     Nenhum despacho encontrado.
                   </TableCell>
                 </TableRow>
@@ -120,6 +123,7 @@ export default function PedidosPage() {
                     className="cursor-pointer hover:bg-accent/40"
                     onClick={() => setDetalheId(p.id)}
                   >
+                    <TableCell className="font-mono text-gray">{p.numero_pedido || `#${p.numero}`}</TableCell>
                     <TableCell className="font-medium text-clareza">{p.cliente_nome}</TableCell>
                     <TableCell>{p.entregador_nome}</TableCell>
                     <TableCell>{p.excursao_nome}</TableCell>

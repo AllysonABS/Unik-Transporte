@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 
 const CONTATO_EMAIL = 'suporte.unikcrm@gmail.com';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [faqAberta, setFaqAberta] = useState<number | null>(null);
 
   return (
     <div className="min-h-screen bg-matriz text-clareza overflow-x-hidden">
@@ -11,8 +14,10 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
-            <img src="/unik-icon.svg" alt="Unik Transporte" className="w-10 h-10 rounded-xl shadow-lg shadow-pulso/20" />
-            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
+            <img src="/Logo.png" alt="Unik Transporte" className="w-10 h-10 rounded-xl shadow-lg shadow-pulso/20" />
+            <span className="text-xl font-bold tracking-tight">
+              Unik <span className="text-gray-400">Transporte</span>
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -23,9 +28,9 @@ export default function LandingPage() {
             </button>
             <button
               onClick={() => navigate('/cadastro')}
-              className="bg-white/10 border border-white/10 text-clareza font-semibold px-5 py-2.5 rounded-full hover:bg-pulso hover:text-matriz hover:border-pulso transition-all duration-300 text-sm"
+              className="bg-[linear-gradient(135deg,#3B82F6,#0B1E5A)] text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-[0_0_40px_rgba(59,130,246,0.5),0_4px_20px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-100 transition-all duration-300"
             >
-              Testar grátis
+              Criar conta
             </button>
           </div>
         </div>
@@ -37,141 +42,47 @@ export default function LandingPage() {
         <div className="absolute top-32 right-0 w-[300px] h-[300px] bg-indigo/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="relative text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-5 py-2 mb-8">
-            <span className="w-2 h-2 bg-pulso rounded-full animate-pulse" />
-            <span className="text-gray-300 text-xs md:text-sm font-medium">Feito pra loja que vende pra quem tá de passagem</span>
-          </div>
-
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.12] mb-7 tracking-tight">
-            Seu cliente compra.{' '}
+            A forma mais rápida de{' '}
             <span className="bg-gradient-to-r from-pulso via-emerald-300 to-teal-400 bg-clip-text text-transparent">
-              O entregador entrega
-            </span>
-            <br />no ônibus certo, antes dele partir.
+              enviar os comprovantes
+            </span>{' '}
+            após
+            <br />cada entrega.
           </h1>
 
           <p className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Chega de correr atrás do entregador no WhatsApp torcendo pra excursão não sair sem a encomenda.
-            O Unik Transporte organiza o pedido, avisa o entregador certo e te dá a <strong className="text-clareza font-semibold">foto provando que a entrega aconteceu</strong> — tudo em tempo real.
+            O Unik Transporte centraliza todo o processo, aciona o entregador certo e <strong className="text-clareza font-semibold">confirma cada entrega com foto</strong>, tudo em tempo real.
+            Chega de pedir comprovante de entrega e torcer pra ninguém esquecer de mandar.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
             <button
               onClick={() => navigate('/cadastro')}
-              className="w-full sm:w-auto bg-gradient-to-r from-pulso to-emerald-400 text-matriz font-bold text-base px-10 py-4 rounded-full hover:shadow-xl hover:shadow-pulso/25 hover:scale-105 active:scale-95 transition-all duration-300"
+              className="w-full sm:w-auto bg-[linear-gradient(135deg,#3B82F6,#0B1E5A)] text-white font-bold text-base px-10 py-4 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.5),0_4px_20px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-100 transition-all duration-300"
             >
               Criar minha conta →
             </button>
-          </div>
-          <p className="text-gray-500 text-xs md:text-sm mb-14">R$69,90/mês · sem taxa por entregador · cancele quando quiser</p>
-
-          {/* Mockup do pedido — representação real do produto */}
-          <div className="relative max-w-lg mx-auto text-left">
-            <div className="absolute inset-x-8 -bottom-4 h-16 bg-pulso/10 blur-2xl rounded-full" />
-            <div className="relative bg-[#0d1e30]/90 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm shadow-2xl shadow-black/40">
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/[0.02]">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-pulso" />
-                  <span className="text-xs font-semibold text-gray-300">Pedido #128</span>
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wide text-pulso bg-pulso/10 border border-pulso/20 px-2 py-1 rounded-full">
-                  Entregue
-                </span>
-              </div>
-              <div className="px-5 py-4 space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Cliente</span>
-                  <span className="text-clareza font-medium">Maria Fernandes</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Entregador</span>
-                  <span className="text-clareza font-medium">João · Excursão Ciudad del Este</span>
-                </div>
-                <div className="pt-2 space-y-2.5">
-                  {[
-                    { label: 'Pedido recebido', done: true },
-                    { label: 'Conferido pelo entregador', done: true },
-                    { label: 'Entregue na excursão · foto anexada', done: true },
-                  ].map((etapa, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-pulso/15 border border-pulso/40 flex items-center justify-center flex-shrink-0">
-                        <span className="text-pulso text-[10px] font-bold">✓</span>
-                      </div>
-                      <span className="text-sm text-gray-300">{etapa.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
       {/* Como funciona */}
       <section className="px-5 md:px-16 py-20 md:py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0d1e30] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#081544] to-transparent pointer-events-none" />
         <div className="relative max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Como funciona</span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 tracking-tight">
-              Da venda ao ônibus, em 4 passos
+              Seu envio sem burocracia
             </h2>
           </div>
 
-          {/* Cena animada */}
-          <div className="lp-scene relative h-24 md:h-28 max-w-2xl mx-auto mb-14 md:mb-16">
-            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-px bg-white/10" />
-
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5">
-              <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl md:text-2xl">🏬</div>
-              <span className="text-[10px] text-gray-500">Sua loja</span>
-            </div>
-
-            <div className="lp-bus absolute right-0 top-1/2 flex flex-col items-center gap-1.5">
-              <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl md:text-2xl">🚌</div>
-              <span className="text-[10px] text-gray-500">Excursão</span>
-            </div>
-
-            <div className="lp-order absolute left-1 top-0">
-              <div className="w-7 h-7 rounded-full bg-pulso/15 border border-pulso/40 flex items-center justify-center text-xs">📱</div>
-            </div>
-
-            <div className="lp-scooter absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5">
-              <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-pulso/15 border border-pulso/40 flex items-center justify-center text-lg">🛵</div>
-            </div>
-          </div>
-
-          <style>{`
-            @keyframes lp-order-pulse {
-              0%, 8% { opacity: 0; transform: scale(0.7); }
-              12%, 26% { opacity: 1; transform: scale(1); }
-              32%, 100% { opacity: 0; transform: scale(0.7); }
-            }
-            @keyframes lp-scooter-move {
-              0%, 26% { left: 0%; opacity: 0; }
-              32% { opacity: 1; }
-              68% { left: calc(100% - 2.5rem); opacity: 1; }
-              76%, 100% { left: calc(100% - 2.5rem); opacity: 0; }
-            }
-            @keyframes lp-bus-leave {
-              0%, 74% { transform: translateY(-50%) translateX(0); opacity: 1; }
-              90% { transform: translateY(-50%) translateX(24px); opacity: 0.15; }
-              96%, 100% { transform: translateY(-50%) translateX(-16px); opacity: 0; }
-            }
-            .lp-order { animation: lp-order-pulse 7s ease-in-out infinite; }
-            .lp-scooter { animation: lp-scooter-move 7s ease-in-out infinite; }
-            .lp-bus { animation: lp-bus-leave 7s ease-in-out infinite; }
-            @media (prefers-reduced-motion: reduce) {
-              .lp-order, .lp-scooter, .lp-bus { animation: none; }
-            }
-          `}</style>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { n: '1', title: 'Cliente faz o pedido', desc: 'Ele tá de passagem numa excursão e escolhe receber a entrega antes de partir.' },
-              { n: '2', title: 'Você cria o pedido', desc: 'Escolhe o entregador disponível e a excursão de destino. Leva segundos.' },
-              { n: '3', title: 'Entregador confere e leva', desc: 'Ele recebe no próprio app, confirma o pedido e segue até o ônibus.' },
-              { n: '4', title: 'Entrega com foto provada', desc: 'Confirmação com foto na hora. Você e o cliente sabem que chegou.' },
+              { n: '1', title: 'Entrada do pedido', desc: 'O cliente faz o pedido no sistema ou a sua empresa cadastra diretamente na plataforma em segundos.' },
+              { n: '2', title: 'Coleta e conferência', desc: 'O entregador recebe a notificação no app, confere os itens no local e aceita a corrida.' },
+              { n: '3', title: 'Entrega com comprovante', desc: 'O pedido é entregue na excursão e o cliente recebe a confirmação com o comprovante no WhatsApp.' },
             ].map(step => (
               <div key={step.n} className="relative bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6">
                 <span className="text-4xl font-black text-pulso/25">{step.n}</span>
@@ -193,10 +104,10 @@ export default function LandingPage() {
             </h2>
             <div className="space-y-4">
               {[
-                'O ônibus não espera — se atrasar, o cliente vai embora sem a encomenda.',
-                '"Não recebi nada" e você não tem como provar o contrário.',
+                'A excursão não espera se atrasar, o cliente vai embora sem a encomenda.',
+                'Comprovante não chega a tempo e o cliente diz "não recebi nada".',
                 'Entregador avulso, combinado por telefone, sem histórico de nada.',
-                'Cliente errado, ônibus errado — e a culpa sempre cai na loja.',
+                'Cliente errado, excursão errada e a culpa sempre cai na loja.',
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <span className="mt-1 w-5 h-5 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center flex-shrink-0">
@@ -207,13 +118,13 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-          <div className="bg-gradient-to-br from-pulso/10 to-emerald-400/5 border border-pulso/20 rounded-2xl p-8">
+          <div className="bg-gradient-to-br from-pulso/25 to-pulso/5 border border-pulso/40 rounded-2xl p-8">
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Com o Unik Transporte</span>
             <div className="space-y-4 mt-6">
               {[
-                'Pedido, entregador e excursão organizados num só lugar.',
-                'Foto de confirmação em cada entrega — prova pra você e pro cliente.',
-                'Cada entregador com histórico, desempenho e disponibilidade visíveis.',
+                'Pedido feito, entregador acionado, pedido enviado e registrado em um só lugar.',
+                'Foto de confirmação em cada entrega, segurança para você e seu cliente.',
+                'Tenha o histórico do entregador, desempenho e disponibilidade visíveis.',
                 'Cliente avisado automaticamente por WhatsApp quando a entrega acontece.',
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
@@ -230,7 +141,7 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="px-5 md:px-16 py-20 md:py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0d1e30] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#081544] to-transparent pointer-events-none" />
         <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-14 md:mb-16">
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Funcionalidades</span>
@@ -241,12 +152,12 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             {[
-              { icon: '📦', title: 'Gestão de pedidos', desc: 'Crie o pedido em segundos e acompanhe a timeline completa até a entrega.' },
-              { icon: '🧾', title: 'Foto de confirmação', desc: 'Toda entrega fecha com uma foto anexada ao pedido. Prova pra sempre.' },
-              { icon: '🛵', title: 'Rede de entregadores', desc: 'Entregadores autônomos criam a própria conta no app — você só vincula pelo CPF, sem contratar ninguém.' },
+              { icon: '📦', title: 'Gestão de pedidos', desc: 'Crie o pedido em segundos e acompanhe a linha do tempo completa até a entrega.' },
+              { icon: '🧾', title: 'Foto de confirmação', desc: 'Toda entrega fecha com uma foto anexada ao pedido.' },
+              { icon: '🛵', title: 'Rede de entregadores', desc: 'Entregadores autônomos criam a própria conta no app você só vincula pelo CPF, sem contratar ninguém.' },
               { icon: '🗺️', title: 'Excursões e rotas', desc: 'Organize setor, vaga e responsável de cada excursão que passa pela sua loja.' },
-              { icon: '💬', title: 'Aviso automático no WhatsApp', desc: 'O cliente recebe a confirmação de entrega direto no WhatsApp, sem você fazer nada.' },
-              { icon: '📊', title: 'Relatórios', desc: 'Taxa de entrega, tempo médio e ranking de entregador — pra saber quem entrega bem.' },
+              { icon: '💬', title: 'Aviso automático no WhatsApp', desc: 'O cliente recebe a confirmação de entrega direto no WhatsApp.' },
+              { icon: '📊', title: 'Relatórios', desc: 'Taxa de entrega, tempo médio e ranking de entregador.' },
             ].map(f => (
               <div key={f.title} className="group relative bg-white/[0.03] border border-white/[0.06] rounded-2xl p-7 hover:bg-white/[0.06] hover:border-pulso/20 transition-all duration-300">
                 <div className="w-12 h-12 bg-gradient-to-br from-pulso/20 to-pulso/5 border border-pulso/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
@@ -269,7 +180,7 @@ export default function LandingPage() {
               Seus entregadores já podem estar no app
             </h2>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-5">
-              O entregador cria a própria conta no app — de graça, sozinho, quando quiser. Você não cadastra senha
+              O entregador cria a própria conta no app de graça, sozinho, quando quiser. Você não cadastra senha
               de ninguém: só busca o CPF que ele te passou e vincula à sua loja. Um mesmo entregador pode atender
               várias lojas ao mesmo tempo.
             </p>
@@ -285,7 +196,7 @@ export default function LandingPage() {
               { n: '01', label: 'Entregador baixa o app e cria a conta' },
               { n: '02', label: 'Passa o CPF pra você, por WhatsApp ou pessoalmente' },
               { n: '03', label: 'Você busca o CPF no painel e vincula' },
-              { n: '04', label: 'Pronto — ele já vê os pedidos da sua loja na fila dele' },
+              { n: '04', label: 'Pronto ele já vê os pedidos da sua loja na fila dele' },
             ].map(s => (
               <div key={s.n} className="flex items-center gap-4 bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-3.5">
                 <span className="text-pulso font-black text-sm">{s.n}</span>
@@ -345,7 +256,7 @@ export default function LandingPage() {
 
               <button
                 onClick={() => navigate('/cadastro')}
-                className="w-full bg-gradient-to-r from-pulso to-emerald-400 text-matriz font-bold text-base py-4 rounded-full hover:shadow-lg hover:shadow-pulso/25 hover:scale-[1.02] active:scale-95 transition-all duration-300"
+                className="w-full bg-[linear-gradient(135deg,#3B82F6,#0B1E5A)] text-white font-bold text-base py-4 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.5),0_4px_20px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-100 transition-all duration-300"
               >
                 Começar agora
               </button>
@@ -371,7 +282,7 @@ export default function LandingPage() {
               },
               {
                 q: 'Preciso ter CNPJ pra usar?',
-                a: 'Não. Aceitamos cadastro tanto com CNPJ quanto com CPF — se você ainda não formalizou sua loja, pode começar mesmo assim.',
+                a: 'Não. Aceitamos cadastro tanto com CNPJ quanto com CPF se você ainda não formalizou sua loja, pode começar mesmo assim.',
               },
               {
                 q: 'O entregador precisa ser meu funcionário?',
@@ -379,41 +290,41 @@ export default function LandingPage() {
               },
               {
                 q: 'Como funciona a foto de confirmação?',
-                a: 'Quando o entregador marca a entrega como concluída, o app pede uma foto na hora. Ela fica anexada ao pedido pra sempre, como prova.',
+                a: 'Quando o entregador marca a entrega como concluída, o app pede uma foto na hora. Ela fica anexada ao pedido.',
               },
               {
                 q: 'O cliente final precisa instalar algum app?',
-                a: 'Não. O cliente não acessa nada — o cadastro dele é feito por você, e ele só recebe um aviso no WhatsApp quando a entrega acontece.',
+                a: 'Não. O cliente não acessa nada o cadastro dele é feito por você, e ele só recebe um aviso no WhatsApp quando a entrega acontece.',
               },
               {
                 q: 'Posso cancelar quando quiser?',
                 a: 'Sim, a qualquer momento, sem multa. Você paga no cartão de crédito mês a mês.',
               },
-            ].map((faq, i) => (
-              <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6">
-                <p className="text-clareza font-semibold text-sm md:text-base mb-2">{faq.q}</p>
-                <p className="text-gray-400 text-sm leading-relaxed">{faq.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Final */}
-      <section className="px-5 md:px-16 py-16 md:py-24">
-        <div className="max-w-4xl mx-auto relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-pulso/5 to-blue-500/5 rounded-[32px] blur-xl pointer-events-none" />
-          <div className="relative bg-white/[0.03] border border-white/[0.08] rounded-[28px] p-10 md:p-16 text-center backdrop-blur-sm">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 tracking-tight">Pare de torcer pra encomenda chegar a tempo</h2>
-            <p className="text-gray-400 mb-8 text-sm md:text-base max-w-md mx-auto">
-              Comece hoje e mande sua primeira entrega organizada, com entregador avisado e prova em foto.
-            </p>
-            <button
-              onClick={() => navigate('/cadastro')}
-              className="bg-gradient-to-r from-pulso to-emerald-400 text-matriz font-bold text-base px-10 py-4 rounded-full hover:shadow-xl hover:shadow-pulso/25 hover:scale-105 active:scale-95 transition-all duration-300"
-            >
-              Criar minha conta grátis →
-            </button>
+            ].map((faq, i) => {
+              const aberta = faqAberta === i;
+              return (
+                <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setFaqAberta(aberta ? null : i)}
+                    aria-expanded={aberta}
+                    className="w-full flex items-center justify-between gap-4 text-left p-6"
+                  >
+                    <span className="text-clareza font-semibold text-sm md:text-base">{faq.q}</span>
+                    <ChevronDown
+                      className={`h-5 w-5 text-gray-500 shrink-0 transition-transform duration-300 ${aberta ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  <div
+                    className={`grid transition-all duration-300 ease-in-out ${aberta ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="text-gray-400 text-sm leading-relaxed px-6 pb-6">{faq.a}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

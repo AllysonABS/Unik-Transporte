@@ -24,6 +24,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const data = await res.json().catch(() => ({}));
 
+  if (res.status === 402) {
+    // Assinatura inativa — o middleware `auth` barra qualquer rota fora de
+    // /cobranca e /logout nesse caso. Avisa a UI pra redirecionar a empresa
+    // pra tela de cobrança em vez de deixar a página quebrada.
+    window.dispatchEvent(new CustomEvent('assinatura-inativa', { detail: { status_assinatura: data.status_assinatura } }));
+  }
+
   if (!res.ok) {
     throw new ApiError(res.status, data.error || 'Erro inesperado. Tente novamente.');
   }

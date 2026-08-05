@@ -154,7 +154,7 @@ export default function PerfilScreen() {
                   <Text style={s.cancelBtnText}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={s.saveBtn} onPress={salvarPerfil} disabled={salvando} accessibilityRole="button" accessibilityLabel="Salvar alterações">
-                  {salvando ? <ActivityIndicator color={Colors.matriz} size="small" /> : <Text style={s.saveBtnText}>Salvar</Text>}
+                  {salvando ? <ActivityIndicator color={Colors.clareza} size="small" /> : <Text style={s.saveBtnText}>Salvar</Text>}
                 </TouchableOpacity>
               </View>
             </>
@@ -234,27 +234,27 @@ const s = StyleSheet.create({
   container:   {flex: 1, backgroundColor: Colors.matriz},
   header:      {padding: 24, paddingTop: 56, paddingBottom: 12},
   title:       {fontSize: 20, fontWeight: '700', color: Colors.clareza},
-  card:        {backgroundColor: '#102255', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#1E3A6B', marginBottom: 20},
+  card:        {backgroundColor: '#081544', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#0B1E5A', marginBottom: 20},
   cardHeaderRow:{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8},
   cardTitle:   {fontSize: 14, fontWeight: '700', color: Colors.clareza},
   editBtn:     {flexDirection: 'row', alignItems: 'center', gap: 4},
   editBtnText: {fontSize: 12, fontWeight: '700', color: Colors.pulso},
-  dadoRow:     {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E3A6B'},
+  dadoRow:     {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#0B1E5A'},
   dadoLabel:   {fontSize: 13, color: Colors.gray},
   dadoValue:   {fontSize: 13, fontWeight: '600', color: Colors.clareza},
   inputWrapper:{marginTop: 10},
   label:       {fontSize: 12, fontWeight: '600', color: Colors.gray, marginBottom: 6},
-  input:       {height: 44, borderWidth: 1, borderColor: '#1E3A6B', borderRadius: 8, paddingHorizontal: 12, fontSize: 14, color: Colors.clareza, backgroundColor: '#081544'},
+  input:       {height: 44, borderWidth: 1, borderColor: '#0B1E5A', borderRadius: 8, paddingHorizontal: 12, fontSize: 14, color: Colors.clareza, backgroundColor: '#081544'},
   editActions: {flexDirection: 'row', gap: 10, marginTop: 16},
-  cancelBtn:   {flex: 1, height: 44, borderRadius: 8, borderWidth: 1, borderColor: '#1E3A6B', alignItems: 'center', justifyContent: 'center'},
+  cancelBtn:   {flex: 1, height: 44, borderRadius: 8, borderWidth: 1, borderColor: '#0B1E5A', alignItems: 'center', justifyContent: 'center'},
   cancelBtnText:{color: Colors.gray, fontWeight: '700', fontSize: 13},
   saveBtn:     {flex: 1, height: 44, borderRadius: 8, backgroundColor: Colors.pulso, alignItems: 'center', justifyContent: 'center'},
-  saveBtnText: {color: Colors.matriz, fontWeight: '700', fontSize: 13},
+  saveBtnText: {color: Colors.clareza, fontWeight: '700', fontSize: 13},
   sectionHeaderRow:{flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10},
   sectionTitle:{fontSize: 14, fontWeight: '700', color: Colors.clareza},
   badge:       {backgroundColor: Colors.pulso, borderRadius: 12, paddingHorizontal: 9, paddingVertical: 2},
-  badgeText:   {color: Colors.matriz, fontWeight: '800', fontSize: 12},
-  empCard:     {backgroundColor: '#102255', borderRadius: 12, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: '#1E3A6B'},
+  badgeText:   {color: Colors.clareza, fontWeight: '800', fontSize: 12},
+  empCard:     {backgroundColor: '#081544', borderRadius: 12, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: '#0B1E5A'},
   empInfo:     {flex: 1},
   empTopRow:   {flexDirection: 'row', alignItems: 'center', gap: 8},
   empNome:     {flex: 1, fontSize: 14, fontWeight: '700', color: Colors.clareza},

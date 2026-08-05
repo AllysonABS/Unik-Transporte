@@ -72,6 +72,34 @@ export async function atualizarEntregador(entregadorId: string, dados: {nome: st
   }
 }
 
+// === PUSH NOTIFICATIONS (FCM) ===
+
+export async function salvarFcmToken(entregadorId: string, token: string): Promise<{success: boolean; error?: string}> {
+  try {
+    const res = await fetch(`${API_URL}/api/entregador/${entregadorId}/fcm-token`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({token}),
+    });
+    return await res.json();
+  } catch {
+    return {success: false, error: 'Erro de conexão com o servidor.'};
+  }
+}
+
+export async function removerFcmToken(entregadorId: string, token: string): Promise<{success: boolean; error?: string}> {
+  try {
+    const res = await fetch(`${API_URL}/api/entregador/${entregadorId}/fcm-token`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+      body: JSON.stringify({token}),
+    });
+    return await res.json();
+  } catch {
+    return {success: false, error: 'Erro de conexão com o servidor.'};
+  }
+}
+
 // === EMPRESAS QUE O ENTREGADOR ATENDE ===
 
 export type EmpresaVinculada = {

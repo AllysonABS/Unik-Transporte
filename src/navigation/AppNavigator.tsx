@@ -2,6 +2,7 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Colors} from '../theme/colors';
+import {navigationRef} from './navigationRef';
 
 import LoginScreen from '../screens/auth/LoginScreen';
 import EsqueceuSenhaScreen from '../screens/auth/EsqueceuSenhaScreen';
@@ -19,7 +20,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         id="root"
         initialRouteName="Login"

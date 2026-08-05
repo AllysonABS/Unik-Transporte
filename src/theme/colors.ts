@@ -1,5 +1,10 @@
+// Escala oficial de azuis da Unik (do mais escuro ao mais claro):
+// bordaProfunda -> matriz -> transicao -> iluminado
 export const Colors = {
-  matriz: '#081544',
+  matriz: '#040D30', // cor principal — fundo base do app
+  transicao: '#081544', // superfícies elevadas (cards, inputs, modais)
+  iluminado: '#0B1E5A', // azul marinho iluminado — bordas e destaques
+  bordaProfunda: '#02081F', // quase preto — tab bar e elementos mais profundos
   pulso: '#3B82F6',
   clareza: '#EAEBEB',
   white: '#FFFFFF',

@@ -5,7 +5,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        matriz: '#081544',
+        matriz: '#040D30', // cor principal
+        transicao: '#081544', // superfícies elevadas (cards, inputs)
+        iluminado: '#0B1E5A', // azul marinho iluminado — bordas/destaques
+        bordaProfunda: '#02081F', // quase preto — bordas mais profundas
         pulso: '#3B82F6',
         clareza: '#F1F5F9',
         gray: '#9CA3AF',

@@ -34,22 +34,26 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-matriz flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-sm flex flex-col gap-6">
+    <div className="min-h-screen bg-matriz flex items-center justify-center px-6 py-10 relative overflow-hidden">
+      {/* Blobs decorativos — é o que o glass "refrata" por trás */}
+      <div className="absolute -top-24 -left-24 w-[420px] h-[420px] bg-pulso/25 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-[420px] h-[420px] bg-emerald-400/15 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative w-full max-w-sm flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2.5 pt-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.07] backdrop-blur-2xl">
             <ShieldCheck className="h-7 w-7 text-pulso" />
           </div>
           <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Transporte Admin</h1>
           <p className="text-xs font-medium uppercase tracking-[3px] text-pulso">Gestão da plataforma</p>
         </div>
 
-        <div className="rounded-xl bg-white p-7 shadow-2xl shadow-black/30">
-          <h2 className="text-lg font-bold text-matriz mb-6">Entrar como administrador</h2>
+        <div className="rounded-2xl bg-white/[0.07] backdrop-blur-2xl border border-white/10 p-7 shadow-2xl shadow-black/40">
+          <h2 className="text-lg font-bold text-clareza mb-6">Entrar como administrador</h2>
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-xs font-semibold text-matriz mb-1.5">
+              <label htmlFor="email" className="block text-xs font-semibold text-clareza/80 mb-1.5">
                 E-mail
               </label>
               <input
@@ -59,15 +63,15 @@ export default function AdminLoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="voce@exemplo.com"
                 autoComplete="username"
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-matriz placeholder:text-gray outline-none focus:border-pulso"
+                className="h-[50px] w-full rounded-xl border border-white/10 bg-white/5 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso/70 focus:bg-white/[0.07] transition-colors"
               />
             </div>
 
             <div className="mb-4">
-              <label htmlFor="senha" className="block text-xs font-semibold text-matriz mb-1.5">
+              <label htmlFor="senha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
                 Senha
               </label>
-              <div className="flex h-[50px] items-center rounded-lg border-[1.5px] border-grayBorder bg-grayLight">
+              <div className="flex h-[50px] items-center rounded-xl border border-white/10 bg-white/5 focus-within:border-pulso/70 focus-within:bg-white/[0.07] transition-colors">
                 <input
                   id="senha"
                   type={showPassword ? 'text' : 'password'}
@@ -75,7 +79,7 @@ export default function AdminLoginPage() {
                   onChange={e => setSenha(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="h-full flex-1 bg-transparent px-4 text-[15px] text-matriz placeholder:text-gray outline-none"
+                  className="h-full flex-1 bg-transparent px-4 text-[15px] text-clareza placeholder:text-gray outline-none"
                 />
                 <button
                   type="button"
@@ -93,7 +97,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-matriz shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
+              className="flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Entrar'}
             </button>

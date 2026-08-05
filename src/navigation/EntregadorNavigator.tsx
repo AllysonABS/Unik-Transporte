@@ -12,6 +12,8 @@ import HistoricoScreen from '../screens/entregador/HistoricoScreen';
 import PerfilScreen from '../screens/entregador/PerfilScreen';
 import ChecklistScreen from '../screens/entregador/ChecklistScreen';
 import {startSyncListener, stopSyncListener} from '../services/syncManager';
+import {registrarPushToken, ouvirRenovacaoToken, ouvirToqueNotificacao} from '../services/push';
+import {useAuth} from '../context/AuthContext';
 
 export type EntregadorTabParamList = {
   Fila: undefined;
@@ -62,7 +64,7 @@ function DespaTabBar({state, descriptors, navigation}: MaterialTopTabBarProps) {
 }
 
 const tb = StyleSheet.create({
-  bar:       {flexDirection: 'row', backgroundColor: '#02081F', borderTopWidth: 1, borderTopColor: '#1E3A6B'},
+  bar:       {flexDirection: 'row', backgroundColor: '#02081F', borderTopWidth: 1, borderTopColor: '#0B1E5A'},
   tab:       {flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3, position: 'relative'},
   indicator: {position: 'absolute', top: 0, left: 8, right: 8, height: 3, backgroundColor: Colors.pulso, borderRadius: 2},
   label:     {fontSize: 11, fontWeight: '600'},
@@ -87,10 +89,23 @@ function Tabs() {
 }
 
 export default function EntregadorNavigator() {
+  const {entregador} = useAuth();
+
   useEffect(() => {
     startSyncListener();
     return () => stopSyncListener();
   }, []);
+
+  useEffect(() => {
+    if (!entregador?.id) return;
+    registrarPushToken(entregador.id);
+    const unsubscribeRefresh = ouvirRenovacaoToken(entregador.id);
+    const unsubscribeToque = ouvirToqueNotificacao();
+    return () => {
+      unsubscribeRefresh();
+      unsubscribeToque();
+    };
+  }, [entregador?.id]);
 
   return (
     <Stack.Navigator id="entregadorStack" screenOptions={{headerShown: false}}>

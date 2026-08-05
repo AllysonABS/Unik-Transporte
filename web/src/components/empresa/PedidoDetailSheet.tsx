@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -5,8 +9,13 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/empresa/StatusBadge';
+import ConfirmDialog from '@/components/empresa/ConfirmDialog';
+import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
+import { excluirPedido } from '@/services/pedidos';
 import { formatHora } from '@/lib/format';
+import { ApiError } from '@/lib/apiClient';
 import type { PedidoData } from '@/types/empresa';
 
 interface Props {
@@ -15,6 +24,25 @@ interface Props {
 }
 
 export default function PedidoDetailSheet({ pedido, onOpenChange }: Props) {
+  const { empresa } = useEmpresaAuth();
+  const queryClient = useQueryClient();
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+
+  const excluirMutation = useMutation({
+    mutationFn: () => excluirPedido(empresa!.id, pedido!.id),
+    onSuccess: () => {
+      toast.success('Pedido excluído.');
+      queryClient.invalidateQueries({ queryKey: ['pedidos', empresa?.id] });
+      queryClient.invalidateQueries({ queryKey: ['pedidos-importados', empresa?.id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', empresa?.id] });
+      setConfirmandoExclusao(false);
+      onOpenChange(false);
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao excluir pedido.');
+    },
+  });
+
   return (
     <Sheet open={!!pedido} onOpenChange={onOpenChange}>
       <SheetContent className="overflow-y-auto bg-card border-border">
@@ -90,9 +118,30 @@ export default function PedidoDetailSheet({ pedido, onOpenChange }: Props) {
                 <p className="text-sm text-clareza leading-relaxed">{pedido.observacao}</p>
               </>
             )}
+
+            <Separator className="my-6" />
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-destructive hover:text-destructive w-full justify-start"
+              onClick={() => setConfirmandoExclusao(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Excluir pedido
+            </Button>
           </>
         )}
       </SheetContent>
+
+      <ConfirmDialog
+        open={confirmandoExclusao}
+        onOpenChange={setConfirmandoExclusao}
+        title="Excluir pedido"
+        description={`Isso remove o pedido de ${pedido?.cliente_nome ?? ''} e todo o histórico (etapas, fotos) de forma permanente. Se ele veio de uma importação do Bling, volta pra fila de pedidos importados como pendente. Tem certeza?`}
+        confirmLabel="Excluir"
+        destructive
+        onConfirm={() => excluirMutation.mutate()}
+      />
     </Sheet>
   );
 }

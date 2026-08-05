@@ -104,7 +104,7 @@ export default function CadastroEntregadorScreen({navigation}: Props) {
 
         <TouchableOpacity style={s.btn} onPress={handleCadastro} disabled={loading}>
           {loading ? (
-            <ActivityIndicator color={Colors.matriz} />
+            <ActivityIndicator color={Colors.clareza} />
           ) : (
             <Text style={s.btnText}>Cadastrar</Text>
           )}
@@ -120,10 +120,31 @@ const s = StyleSheet.create({
   backText: {color: Colors.pulso, fontSize: 14, fontWeight: '600', marginBottom: 12},
   title: {fontSize: 24, fontWeight: '700', color: Colors.clareza},
   subtitle: {fontSize: 14, color: Colors.gray, marginBottom: 24},
-  card: {backgroundColor: '#102255', borderRadius: 12, padding: 20, borderWidth: 1, borderColor: '#1E3A6B', marginBottom: 16},
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    elevation: 10,
+  },
   label: {fontSize: 13, fontWeight: '600', color: Colors.gray, marginBottom: 6, marginTop: 14},
   hint: {fontSize: 11, color: Colors.gray, marginTop: 4},
-  input: {height: 48, backgroundColor: '#081544', borderRadius: 8, borderWidth: 1, borderColor: '#1E3A6B', paddingHorizontal: 14, color: Colors.clareza, fontSize: 15},
+  input: {
+    height: 48,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    paddingHorizontal: 14,
+    color: Colors.clareza,
+    fontSize: 15,
+  },
   btn: {height: 52, backgroundColor: Colors.pulso, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 8},
-  btnText: {color: Colors.matriz, fontWeight: '700', fontSize: 16},
+  btnText: {color: Colors.clareza, fontWeight: '700', fontSize: 16},
 });

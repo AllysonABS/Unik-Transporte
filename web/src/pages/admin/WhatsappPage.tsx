@@ -28,7 +28,7 @@ function qrSrc(qrcode: string) {
 export default function AdminWhatsappPage() {
   useSetPageHeader('WhatsApp', 'Conecte o número da plataforma para notificar clientes na entrega');
   const queryClient = useQueryClient();
-  const [instanceName, setInstanceName] = useState('na-rota');
+  const [instanceName, setInstanceName] = useState('Unik Transporte');
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-whatsapp-status'],

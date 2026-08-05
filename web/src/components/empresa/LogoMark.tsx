@@ -7,7 +7,7 @@ export default function LogoMark({ size = 'lg' }: Props) {
 
   return (
     <img
-      src="/unik-icon.svg"
+      src="/Logo.png"
       alt="Unik Transporte"
       className={`${dimension} shrink-0 rounded-2xl`}
     />

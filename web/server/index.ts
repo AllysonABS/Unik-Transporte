@@ -16,19 +16,26 @@ import crypto from 'crypto';
 import cluster from 'cluster';
 import os from 'os';
 import nodemailer from 'nodemailer';
+import { blingConfigurado, montarUrlAutorizacao, conectarEmpresa, sincronizarEmpresa, sincronizarTodasEmpresas, iniciarLoopSincronizacaoBling } from './bling.js';
+import { asaasConfigurado, criarClienteAsaas, criarAssinaturaComCartao, trocarCartao, cancelarAssinatura, buscarAssinatura } from './asaas.js';
+import { salvarTokenEntregador, removerTokenEntregador, enviarPushEntregador } from './push.js';
 
 // === CLUSTER MODE ===
 const NUM_WORKERS = parseInt(process.env.WORKERS || '') || Math.min(os.cpus().length, 4);
 
-if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
-  const primaryPool = new Pool({
+function poolConfigDoAmbiente() {
+  return {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT || '5432'),
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     ssl: process.env.DB_SSL === 'true',
-  });
+  };
+}
+
+if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
+  const primaryPool = new Pool(poolConfigDoAmbiente());
   runMigrations(primaryPool)
     .then(() => {
       console.log('[MIGRATION] Todas as migrations aplicadas.');
@@ -44,8 +51,19 @@ if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
     console.log(`[CLUSTER] Worker ${worker.process.pid} died, restarting...`);
     cluster.fork();
   });
+
+  // Loop de sincronização do Bling — só na primary, nunca um por worker
+  // (senão N processos duplicariam as chamadas na API do Bling).
+  iniciarLoopSincronizacaoBling(new Pool(poolConfigDoAmbiente()));
 } else {
   startServer();
+  // Em dev não existe cluster (cluster.isPrimary é true por padrão, sem
+  // ter feito fork nenhum) — roda o loop aqui pra dar pra testar localmente.
+  // Em produção, cada worker cai neste `else` também, mas com
+  // cluster.isPrimary=false, então não duplica o loop da primary acima.
+  if (cluster.isPrimary) {
+    iniciarLoopSincronizacaoBling(new Pool(poolConfigDoAmbiente()));
+  }
 }
 
 function startServer() {
@@ -192,13 +210,32 @@ function gerarToken(payload: TokenPayload): string {
 }
 
 // Middleware de autenticação
-function auth(req: express.Request, res: express.Response, next: express.NextFunction) {
+// Rotas que uma empresa com assinatura inativa ainda pode acessar — sem
+// isso ela ficaria trancada sem conseguir nem consertar o próprio cartão.
+const ROTAS_LIVRES_SEM_ASSINATURA_ATIVA = ['/cobranca', '/logout'];
+
+async function auth(req: express.Request, res: express.Response, next: express.NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Token não fornecido.' });
   }
   try {
     const decoded = jwt.verify(header.slice(7), JWT_SECRET!) as TokenPayload;
+
+    // Empresa só passa se a assinatura estiver de fato paga — token válido
+    // não basta, senão bastaria não renovar o pagamento pra continuar usando
+    // o sistema de graça.
+    if (decoded.tipo === 'empresa' && !ROTAS_LIVRES_SEM_ASSINATURA_ATIVA.some(sufixo => req.path.includes(sufixo))) {
+      const r = await pool.query('SELECT status_assinatura, data_vencimento FROM empresas WHERE id=$1', [decoded.id]);
+      if (r.rows.length === 0) return res.status(401).json({ error: 'Conta não encontrada.' });
+      const { status_assinatura, data_vencimento } = r.rows[0];
+      const dentroDoPeriodoPago = !!data_vencimento && new Date(data_vencimento) > new Date();
+      const liberado = status_assinatura === 'ativa' || (status_assinatura === 'cancelada' && dentroDoPeriodoPago);
+      if (!liberado) {
+        return res.status(402).json({ error: 'Assinatura inativa. Regularize o pagamento pra continuar usando o sistema.', status_assinatura });
+      }
+    }
+
     (req as any).user = decoded;
     next();
   } catch {
@@ -224,6 +261,15 @@ function requireAdmin(req: express.Request, res: express.Response, next: express
 function sanitize(value: any): any {
   if (typeof value !== 'string') return value;
   return value.trim();
+}
+
+// Usado pra nomear pastas no R2 (empresa/cliente) de forma legível no
+// dashboard do Cloudflare — sem acento, sem caractere especial que quebre URL.
+const REGEX_ACENTOS = new RegExp(String.fromCharCode(91) + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + String.fromCharCode(93), 'g');
+function slugify(value: string, fallback = 'sem-nome'): string {
+  const semAcento = (value || '').normalize('NFD').replace(REGEX_ACENTOS, '');
+  const slug = semAcento.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  return slug || fallback;
 }
 
 function sanitizeObj(obj: Record<string, any>): Record<string, any> {
@@ -374,11 +420,14 @@ const pool = new Pool({
 });
 
 // Cadastro de empresa
+const VALOR_PLANO = 69.90;
+
 app.post('/api/cadastro', async (req, res) => {
   try {
     const { nome_empresa, nome_responsavel, email, telefone, senha, endereco, numero, bairro, cidade, estado, cep } = req.body;
     const cnpj = (req.body.cnpj || '').replace(/\D/g, '');
     const cpf = (req.body.cpf || '').replace(/\D/g, '');
+    const { cartao_numero, cartao_nome, cartao_mes, cartao_ano, cartao_cvv } = req.body;
 
     if (!nome_empresa || (!cnpj && !cpf) || !nome_responsavel || !email || !telefone || !senha) {
       return res.status(400).json({ error: 'Campos obrigatórios não preenchidos.' });
@@ -396,6 +445,12 @@ app.post('/api/cadastro', async (req, res) => {
     if (!senhaCheck.valid) {
       return res.status(400).json({ error: senhaCheck.message });
     }
+    if (!cartao_numero || !cartao_nome || !cartao_mes || !cartao_ano || !cartao_cvv) {
+      return res.status(400).json({ error: 'Preencha os dados do cartão de crédito. Não trabalhamos com período grátis — a cobrança é feita na hora do cadastro.' });
+    }
+    if (!asaasConfigurado()) {
+      return res.status(503).json({ error: 'Cobrança temporariamente indisponível. Tente novamente em instantes.' });
+    }
 
     // Verificar duplicidade
     const existe = await pool.query(
@@ -407,26 +462,52 @@ app.post('/api/cadastro', async (req, res) => {
       return res.status(409).json({ error: 'E-mail, CNPJ ou CPF já cadastrado.' });
     }
 
+    // Cobra o cartão ANTES de criar a conta — sem pagamento confirmado, a
+    // empresa não é criada. Não guardamos nenhum dado do cartão em disco;
+    // ele só passa pela memória desta requisição a caminho do Asaas.
+    let assinatura;
+    let asaasCustomerId = '';
+    try {
+      asaasCustomerId = await criarClienteAsaas({
+        name: nome_empresa,
+        cpfCnpj: cnpj || cpf,
+        email,
+        mobilePhone: telefone.replace(/\D/g, ''),
+      });
+      assinatura = await criarAssinaturaComCartao(
+        asaasCustomerId,
+        VALOR_PLANO,
+        { holderName: cartao_nome, number: cartao_numero.replace(/\s/g, ''), expiryMonth: cartao_mes, expiryYear: cartao_ano, ccv: cartao_cvv },
+        { name: nome_responsavel, email, cpfCnpj: cpf || cnpj, postalCode: (cep || '').replace(/\D/g, ''), addressNumber: numero || 'S/N', phone: telefone.replace(/\D/g, '') },
+        req.ip || '0.0.0.0'
+      );
+      if (!assinatura.pagamentoConfirmado) {
+        await cancelarAssinatura(assinatura.subscriptionId).catch(() => {});
+        return res.status(402).json({ error: 'Cartão recusado. Confira os dados e tente novamente.' });
+      }
+    } catch (err: any) {
+      console.error('Erro ao processar cobrança do cadastro:', err.message);
+      return res.status(402).json({ error: err.message || 'Não foi possível processar o cartão.' });
+    }
+
     // Hash da senha
     const senha_hash = await bcrypt.hash(senha, 10);
+    const data_vencimento = new Date(assinatura.proximoVencimento);
 
-    // Calcular vencimento (30 dias)
-    const data_vencimento = new Date();
-    data_vencimento.setDate(data_vencimento.getDate() + 30);
-
-    // Inserir empresa
+    // Inserir empresa já ativa (cobrança confirmada)
     const result = await pool.query(
-      `INSERT INTO empresas (nome_empresa, cnpj, cpf, nome_responsavel, email, telefone, senha_hash, endereco, numero, bairro, cidade, estado, cep, data_vencimento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id, email`,
-      [nome_empresa, cnpj || null, cpf || null, nome_responsavel, email, telefone, senha_hash, endereco || null, numero || null, bairro || null, cidade, estado, cep, data_vencimento]
+      `INSERT INTO empresas (nome_empresa, cnpj, cpf, nome_responsavel, email, telefone, senha_hash, endereco, numero, bairro, cidade, estado, cep,
+         data_vencimento, status_assinatura, asaas_customer_id, asaas_subscription_id, cartao_final, cartao_bandeira)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'ativa', $15, $16, $17, $18) RETURNING id, email`,
+      [nome_empresa, cnpj || null, cpf || null, nome_responsavel, email, telefone, senha_hash, endereco || null, numero || null, bairro || null, cidade, estado, cep,
+        data_vencimento, asaasCustomerId, assinatura.subscriptionId, assinatura.cartaoFinal, assinatura.cartaoBandeira]
     );
 
     const empresaId = result.rows[0].id;
 
-    // Criar assinatura
     await pool.query(
-      `INSERT INTO assinaturas (empresa_id, data_vencimento) VALUES ($1, $2)`,
-      [empresaId, data_vencimento]
+      `INSERT INTO assinaturas (empresa_id, status, valor, data_vencimento) VALUES ($1, 'ativa', $2, $3)`,
+      [empresaId, VALOR_PLANO, data_vencimento]
     );
 
     res.status(201).json({ success: true, empresa_id: empresaId });
@@ -456,10 +537,10 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
-    // Verificar assinatura
-    if (empresa.status_assinatura !== 'ativa') {
-      return res.status(403).json({ error: 'Assinatura inativa.' });
-    }
+    // O login sempre libera entrada (credenciais corretas = login válido) —
+    // quem barra de verdade é o middleware `auth` nas rotas do dashboard.
+    // Se bloqueássemos aqui, uma empresa inadimplente nunca conseguiria nem
+    // logar pra acessar a tela de Cobrança e resolver o problema.
 
     const token = gerarToken({ id: empresa.id, tipo: 'empresa' });
     res.json({
@@ -924,6 +1005,40 @@ app.put('/api/entregador/:entregadorId', auth, async (req, res) => {
   }
 });
 
+// Salvar FCM token do entregador (app mobile) — chamado no login e sempre
+// que o app abre, pra manter o token em dia mesmo se o Firebase rotacionar.
+app.put('/api/entregador/:entregadorId/fcm-token', auth, async (req, res) => {
+  try {
+    const {entregadorId} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'entregador' || user.id !== entregadorId) return res.status(403).json({error: 'Sem permissão.'});
+    const {token} = req.body;
+    if (!token) return res.status(400).json({error: 'Token obrigatório.'});
+    await salvarTokenEntregador(pool, entregadorId, token);
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao salvar FCM token do entregador:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Remove o token no logout, pra não continuar mandando push pra um
+// aparelho em que o entregador já saiu da conta.
+app.delete('/api/entregador/:entregadorId/fcm-token', auth, async (req, res) => {
+  try {
+    const {entregadorId} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'entregador' || user.id !== entregadorId) return res.status(403).json({error: 'Sem permissão.'});
+    const {token} = req.body;
+    if (!token) return res.status(400).json({error: 'Token obrigatório.'});
+    await removerTokenEntregador(pool, entregadorId, token);
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao remover FCM token do entregador:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
 // Login entregador \u2014 funciona mesmo sem nenhuma empresa vinculada ainda
 // (o entregador cria a conta primeiro, a empresa vincula depois)
 app.post('/api/login-entregador', async (req, res) => {
@@ -963,14 +1078,14 @@ app.post('/api/empresa/:empresaId/pedidos', auth, async (req, res) => {
     if (user.tipo !== 'empresa' || user.id !== empresaId) {
       return res.status(403).json({error: 'Sem permissão.'});
     }
-    const {entregador_id, excursao_id, cliente_nome, entregador_nome, excursao_nome, cliente_telefone, volumes, descricao} = req.body;
+    const {entregador_id, excursao_id, cliente_nome, entregador_nome, excursao_nome, cliente_telefone, volumes, descricao, numero_pedido} = req.body;
     if (!cliente_nome || !entregador_nome || !excursao_nome) {
       return res.status(400).json({error: 'Preencha cliente, entregador e excurs\u00e3o.'});
     }
     const result = await pool.query(
-      `INSERT INTO pedidos (empresa_id, entregador_id, excursao_id, cliente_nome, entregador_nome, excursao_nome, cliente_telefone, volumes, descricao)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
-      [empresaId, entregador_id || null, excursao_id || null, cliente_nome, entregador_nome, excursao_nome, cliente_telefone || null, volumes || 1, descricao || null]
+      `INSERT INTO pedidos (empresa_id, entregador_id, excursao_id, cliente_nome, entregador_nome, excursao_nome, cliente_telefone, volumes, descricao, numero_pedido)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
+      [empresaId, entregador_id || null, excursao_id || null, cliente_nome, entregador_nome, excursao_nome, cliente_telefone || null, volumes || 1, descricao || null, numero_pedido || null]
     );
     const pedidoId = result.rows[0].id;
     // Busca o numero sequencial
@@ -986,6 +1101,19 @@ app.post('/api/empresa/:empresaId/pedidos', auth, async (req, res) => {
         [pedidoId, etapas[i], concluida, hora, i]
       );
     }
+
+    // Avisa o entregador no celular \u2014 n\u00e3o trava a resposta por causa disso.
+    if (entregador_id) {
+      pool.query('SELECT nome_empresa FROM empresas WHERE id=$1', [empresaId])
+        .then(r => enviarPushEntregador(
+          pool, entregador_id,
+          'Novo pedido pra entregar',
+          `${r.rows[0]?.nome_empresa || 'Empresa'} \u2022 ${cliente_nome} \u2022 ${excursao_nome}`,
+          { tipo: 'novo_pedido', pedido_id: String(pedidoId), numero: String(numeroPedido) }
+        ))
+        .catch(err => console.error('Erro ao notificar entregador do novo pedido:', err.message));
+    }
+
     res.status(201).json({success: true, pedido_id: pedidoId, numero: numeroPedido});
   } catch (err: any) {
     console.error('Erro ao criar pedido:', err);
@@ -1013,6 +1141,413 @@ app.get('/api/empresa/:empresaId/pedidos', auth, async (req, res) => {
     res.json({success: true, pedidos: result.rows});
   } catch (err: any) {
     console.error('Erro ao listar pedidos:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Excluir um pedido (ex.: cadastrado manualmente por engano). Se ele veio da
+// fila de importação do Bling, devolve o registro pra lá como pendente em
+// vez de deixar órfão, permitindo completar de novo.
+app.delete('/api/empresa/:empresaId/pedidos/:pedidoId', auth, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const {empresaId, pedidoId} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== empresaId) {
+      return res.status(403).json({error: 'Sem permissão.'});
+    }
+    const existe = await pool.query('SELECT id FROM pedidos WHERE id=$1 AND empresa_id=$2', [pedidoId, empresaId]);
+    if (existe.rows.length === 0) return res.status(404).json({error: 'Pedido não encontrado.'});
+
+    await client.query('BEGIN');
+    await client.query(
+      "UPDATE pedidos_importados SET status='pendente', pedido_id=NULL, finalizado_em=NULL WHERE pedido_id=$1",
+      [pedidoId]
+    );
+    await client.query('DELETE FROM pedidos WHERE id=$1 AND empresa_id=$2', [pedidoId, empresaId]);
+    await client.query('COMMIT');
+
+    res.json({success: true});
+  } catch (err: any) {
+    await client.query('ROLLBACK');
+    console.error('Erro ao excluir pedido:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  } finally {
+    client.release();
+  }
+});
+
+// === COBRANÇA (ASAAS) ===
+// Essas rotas ficam liberadas mesmo com assinatura inativa (ver
+// ROTAS_LIVRES_SEM_ASSINATURA_ATIVA no middleware `auth`) — senão a empresa
+// fica trancada sem conseguir nem trocar o cartão pra voltar a usar.
+
+app.get('/api/empresa/:id/cobranca', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    const r = await pool.query(
+      'SELECT status_assinatura, data_vencimento, cartao_final, cartao_bandeira, cancelado_em FROM empresas WHERE id=$1',
+      [id]
+    );
+    if (r.rows.length === 0) return res.status(404).json({error: 'Empresa não encontrada.'});
+    res.json({success: true, ...r.rows[0], valor_plano: VALOR_PLANO});
+  } catch (err: any) {
+    console.error('Erro ao buscar cobrança:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+app.put('/api/empresa/:id/cobranca/cartao', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    const {cartao_numero, cartao_nome, cartao_mes, cartao_ano, cartao_cvv} = req.body;
+    if (!cartao_numero || !cartao_nome || !cartao_mes || !cartao_ano || !cartao_cvv) {
+      return res.status(400).json({error: 'Preencha todos os dados do cartão.'});
+    }
+
+    const empRes = await pool.query(
+      'SELECT nome_responsavel, email, cnpj, cpf, cep, numero, telefone, asaas_subscription_id FROM empresas WHERE id=$1',
+      [id]
+    );
+    if (empRes.rows.length === 0) return res.status(404).json({error: 'Empresa não encontrada.'});
+    const emp = empRes.rows[0];
+    if (!emp.asaas_subscription_id) return res.status(400).json({error: 'Essa empresa não tem assinatura ativa no sistema de cobrança.'});
+
+    const novoCartao = await trocarCartao(
+      emp.asaas_subscription_id,
+      {holderName: cartao_nome, number: cartao_numero.replace(/\s/g, ''), expiryMonth: cartao_mes, expiryYear: cartao_ano, ccv: cartao_cvv},
+      {name: emp.nome_responsavel, email: emp.email, cpfCnpj: emp.cpf || emp.cnpj, postalCode: (emp.cep || '').replace(/\D/g, ''), addressNumber: emp.numero || 'S/N', phone: (emp.telefone || '').replace(/\D/g, '')},
+      req.ip || '0.0.0.0'
+    );
+
+    await pool.query('UPDATE empresas SET cartao_final=$1, cartao_bandeira=$2 WHERE id=$3', [novoCartao.cartaoFinal, novoCartao.cartaoBandeira, id]);
+    res.json({success: true, cartao_final: novoCartao.cartaoFinal, cartao_bandeira: novoCartao.cartaoBandeira});
+  } catch (err: any) {
+    console.error('Erro ao trocar cartão:', err.message);
+    res.status(400).json({error: err.message || 'Não foi possível trocar o cartão. Confira os dados.'});
+  }
+});
+
+app.post('/api/empresa/:id/cobranca/cancelar', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+
+    const empRes = await pool.query('SELECT asaas_subscription_id, data_vencimento FROM empresas WHERE id=$1', [id]);
+    if (empRes.rows.length === 0) return res.status(404).json({error: 'Empresa não encontrada.'});
+    const emp = empRes.rows[0];
+    if (!emp.asaas_subscription_id) return res.status(400).json({error: 'Essa empresa não tem assinatura ativa no sistema de cobrança.'});
+
+    await cancelarAssinatura(emp.asaas_subscription_id);
+    await pool.query("UPDATE empresas SET status_assinatura='cancelada', cancelado_em=NOW() WHERE id=$1", [id]);
+    await pool.query("UPDATE assinaturas SET status='cancelada' WHERE empresa_id=$1", [id]);
+
+    res.json({success: true, acesso_ate: emp.data_vencimento});
+  } catch (err: any) {
+    console.error('Erro ao cancelar assinatura:', err.message);
+    res.status(500).json({error: err.message || 'Erro ao cancelar assinatura.'});
+  }
+});
+
+// Webhook do Asaas — sem `auth` (vem direto do Asaas, não do nosso
+// frontend), autenticado pelo token compartilhado configurado no painel
+// deles em Integrações > Webhooks.
+app.post('/api/webhooks/asaas', async (req, res) => {
+  try {
+    const tokenRecebido = req.headers['asaas-access-token'];
+    if (process.env.ASAAS_WEBHOOK_TOKEN && tokenRecebido !== process.env.ASAAS_WEBHOOK_TOKEN) {
+      return res.status(401).json({error: 'Token inválido.'});
+    }
+
+    const {event, payment} = req.body;
+    const eventoRes = await pool.query(
+      'INSERT INTO asaas_webhook_eventos (evento, asaas_payment_id, asaas_subscription_id, payload) VALUES ($1,$2,$3,$4) RETURNING id',
+      [event, payment?.id || null, payment?.subscription || null, JSON.stringify(req.body)]
+    );
+    const eventoId = eventoRes.rows[0].id;
+
+    // Só reage a eventos de pedidos vinculados a uma assinatura (é sempre o
+    // nosso caso — não vendemos cobrança avulsa).
+    if (payment?.subscription) {
+      const empRes = await pool.query('SELECT id FROM empresas WHERE asaas_subscription_id=$1', [payment.subscription]);
+      if (empRes.rows.length > 0) {
+        const empresaId = empRes.rows[0].id;
+
+        if (event === 'PAYMENT_CONFIRMED' || event === 'PAYMENT_RECEIVED') {
+          // payment.dueDate é a data DESSE ciclo que acabou de ser pago —
+          // não a próxima cobrança. Busca o nextDueDate real na assinatura,
+          // senão a empresa ficaria com o vencimento igual a hoje a cada
+          // renovação e seria bloqueada por engano.
+          const subAtualizada = await buscarAssinatura(payment.subscription);
+          const proximoVencimento = subAtualizada.nextDueDate;
+          await pool.query(
+            "UPDATE empresas SET status_assinatura='ativa', data_vencimento=$1 WHERE id=$2",
+            [proximoVencimento, empresaId]
+          );
+          await pool.query("UPDATE assinaturas SET status='ativa', data_vencimento=$1 WHERE empresa_id=$2", [proximoVencimento, empresaId]);
+        } else if (event === 'PAYMENT_OVERDUE' || event === 'PAYMENT_REFUSED' || event === 'PAYMENT_DELETED') {
+          await pool.query("UPDATE empresas SET status_assinatura='inadimplente' WHERE id=$1", [empresaId]);
+          await pool.query("UPDATE assinaturas SET status='inadimplente' WHERE empresa_id=$1", [empresaId]);
+        }
+      }
+    }
+
+    await pool.query('UPDATE asaas_webhook_eventos SET processado=true WHERE id=$1', [eventoId]);
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao processar webhook do Asaas:', err.message);
+    await pool.query(
+      'INSERT INTO asaas_webhook_eventos (evento, payload, erro) VALUES ($1,$2,$3)',
+      [req.body?.event || 'desconhecido', JSON.stringify(req.body), err.message]
+    ).catch(() => {});
+    res.status(500).json({error: 'Erro interno.'});
+  }
+});
+
+// === INTEGRAÇÃO BLING ===
+
+// Status da conexão da empresa com o Bling
+app.get('/api/empresa/:id/integracoes/bling', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    const result = await pool.query(
+      'SELECT ativo, ultima_sincronizacao, ultimo_erro FROM bling_integracoes WHERE empresa_id=$1', [id]
+    );
+    if (result.rows.length === 0) {
+      return res.json({success: true, conectado: false});
+    }
+    res.json({success: true, conectado: result.rows[0].ativo, ...result.rows[0]});
+  } catch (err: any) {
+    console.error('Erro ao consultar integração Bling:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Gera a URL de autorização do Bling pra essa empresa conectar a conta dela
+app.get('/api/empresa/:id/integracoes/bling/conectar', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    if (!blingConfigurado()) {
+      return res.status(503).json({error: 'Integração com o Bling ainda não está configurada no servidor.'});
+    }
+    const state = jwt.sign({empresaId: id}, JWT_SECRET!, {expiresIn: '10m'});
+    res.json({success: true, url: montarUrlAutorizacao(state)});
+  } catch (err: any) {
+    console.error('Erro ao gerar URL de autorização Bling:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Callback do OAuth do Bling — o navegador da empresa é redirecionado pra cá
+// direto pelo Bling (sem header de Authorization), por isso o "auth" daqui é
+// o `state` assinado, não o middleware `auth` normal.
+app.get('/api/integracoes/bling/callback', async (req, res) => {
+  const frontendBase = ALLOWED_ORIGINS[0];
+  try {
+    const {code, state, error: erroBling} = req.query as {code?: string; state?: string; error?: string};
+    if (erroBling) {
+      return res.redirect(`${frontendBase}/empresa/configuracoes?bling=erro&motivo=${encodeURIComponent(erroBling)}`);
+    }
+    if (!code || !state) {
+      return res.redirect(`${frontendBase}/empresa/configuracoes?bling=erro&motivo=parametros_ausentes`);
+    }
+    let empresaId: string;
+    try {
+      const decoded = jwt.verify(state, JWT_SECRET!) as {empresaId: string};
+      empresaId = decoded.empresaId;
+    } catch {
+      return res.redirect(`${frontendBase}/empresa/configuracoes?bling=erro&motivo=state_invalido`);
+    }
+    await conectarEmpresa(pool, empresaId, code);
+    res.redirect(`${frontendBase}/empresa/configuracoes?bling=conectado`);
+  } catch (err: any) {
+    console.error('Erro no callback do Bling:', err.message);
+    res.redirect(`${frontendBase}/empresa/configuracoes?bling=erro&motivo=falha_conexao`);
+  }
+});
+
+// Webhook do Bling (evento de Pedidos de Venda) — exigido pela validação de
+// dados do app antes de liberar "Solicitar revisão". O Bling chama essa URL
+// direto (sem Authorization nosso), então não passa pelo middleware `auth`.
+//
+// Não confiamos no payload pra decidir o que mudou (o formato exato do
+// evento não foi validado ainda) — só usamos o webhook como um "empurrão"
+// pra rodar a sincronização de todas as empresas imediatamente, em vez de
+// esperar o próximo ciclo do loop de 5min. sincronizarEmpresa já é
+// idempotente (UNIQUE em origem_pedido_id), então rodar de mais não duplica
+// nada — só reprocessa sem custo.
+app.post('/api/integracoes/bling/webhook', async (req, res) => {
+  console.log('[BLING] Webhook recebido:', JSON.stringify(req.body).slice(0, 1000));
+  res.status(200).json({ ok: true });
+  sincronizarTodasEmpresas(pool).catch(err => console.error('[BLING] Erro ao sincronizar via webhook:', err.message));
+});
+
+// Desconecta a empresa do Bling
+app.delete('/api/empresa/:id/integracoes/bling', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    await pool.query('DELETE FROM bling_integracoes WHERE empresa_id=$1', [id]);
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao desconectar Bling:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Força uma sincronização agora (além do loop automático a cada 5min)
+app.post('/api/empresa/:id/integracoes/bling/sincronizar', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    const {novos} = await sincronizarEmpresa(pool, id);
+    res.json({success: true, novos});
+  } catch (err: any) {
+    console.error('Erro ao sincronizar Bling:', err.message);
+    res.status(500).json({error: err.message || 'Erro ao sincronizar com o Bling.'});
+  }
+});
+
+// === FILA DE PEDIDOS IMPORTADOS (Bling e futuras integrações) ===
+
+// Lista os pedidos importados pendentes de finalização (escolher entregador/excursão)
+// status: 'pendente' (falta completar) | 'em_andamento' (completado, aguardando
+// entrega) | 'entregue' | 'ignorado' | 'todos'. mes: 'YYYY-MM', padrão mês atual.
+app.get('/api/empresa/:id/pedidos-importados', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+
+    const status = (req.query.status as string) || 'pendente';
+    const mes = (req.query.mes as string) || new Date().toISOString().slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(mes)) return res.status(400).json({error: 'Mês inválido. Use o formato AAAA-MM.'});
+
+    const condicoes = ['pi.empresa_id=$1', "to_char(pi.data_pedido, 'YYYY-MM') = $2"];
+    const params: any[] = [id, mes];
+
+    if (status === 'pendente') condicoes.push("pi.status = 'pendente'");
+    else if (status === 'ignorado') condicoes.push("pi.status = 'ignorado'");
+    else if (status === 'em_andamento') condicoes.push("pi.status = 'finalizado' AND COALESCE(p.status, 'aguardando') NOT IN ('entregue', 'cancelado')");
+    else if (status === 'entregue') condicoes.push("pi.status = 'finalizado' AND p.status = 'entregue'");
+    // status === 'todos' -> sem filtro extra
+
+    const result = await pool.query(
+      `SELECT pi.*, ce.nome as cliente_empresa_nome, p.status as pedido_status
+       FROM pedidos_importados pi
+       LEFT JOIN cliente_empresa ce ON ce.id = pi.cliente_empresa_id
+       LEFT JOIN pedidos p ON p.id = pi.pedido_id
+       WHERE ${condicoes.join(' AND ')}
+       ORDER BY pi.data_pedido DESC NULLS LAST, pi.criado_em DESC`,
+      params
+    );
+    res.json({success: true, pedidos_importados: result.rows});
+  } catch (err: any) {
+    console.error('Erro ao listar pedidos importados:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Finaliza um pedido importado: escolhe entregador/excursão e cria o pedido de verdade
+app.post('/api/empresa/:id/pedidos-importados/:importadoId/finalizar', auth, async (req, res) => {
+  try {
+    const {id, importadoId} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+
+    const {entregador_id, excursao_id, volumes, descricao, cliente_telefone} = req.body;
+    if (!entregador_id || !excursao_id) {
+      return res.status(400).json({error: 'Escolha o entregador e a excursão.'});
+    }
+
+    const importadoRes = await pool.query(
+      'SELECT * FROM pedidos_importados WHERE id=$1 AND empresa_id=$2 AND status=$3',
+      [importadoId, id, 'pendente']
+    );
+    if (importadoRes.rows.length === 0) {
+      return res.status(404).json({error: 'Pedido importado não encontrado ou já finalizado.'});
+    }
+    const importado = importadoRes.rows[0];
+    const telefoneFinal = (importado.cliente_telefone || cliente_telefone || '').trim();
+    if (!telefoneFinal) {
+      return res.status(400).json({error: 'Esse cliente não tem telefone cadastrado. Informe o telefone antes de completar o pedido.', falta_telefone: true});
+    }
+
+    const [entregadorRes, excursaoRes, empresaRes] = await Promise.all([
+      pool.query('SELECT nome FROM entregadores WHERE id=$1', [entregador_id]),
+      pool.query('SELECT nome FROM excursoes WHERE id=$1 AND empresa_id=$2', [excursao_id, id]),
+      pool.query('SELECT nome_empresa FROM empresas WHERE id=$1', [id]),
+    ]);
+    if (entregadorRes.rows.length === 0) return res.status(404).json({error: 'Entregador não encontrado.'});
+    if (excursaoRes.rows.length === 0) return res.status(404).json({error: 'Excursão não encontrada.'});
+
+    // Se o telefone veio agora (não estava salvo antes), atualiza o cadastro
+    // do cliente também, pra não pedir de novo no próximo pedido dele.
+    if (!importado.cliente_telefone && cliente_telefone && importado.cliente_empresa_id) {
+      await pool.query('UPDATE cliente_empresa SET telefone=$1 WHERE id=$2 AND telefone IS NULL', [telefoneFinal, importado.cliente_empresa_id]);
+    }
+
+    const pedidoRes = await pool.query(
+      `INSERT INTO pedidos (empresa_id, entregador_id, excursao_id, cliente_nome, entregador_nome, excursao_nome, cliente_telefone, volumes, descricao, numero_pedido)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
+      [id, entregador_id, excursao_id, importado.cliente_nome, entregadorRes.rows[0].nome, excursaoRes.rows[0].nome,
+        telefoneFinal, volumes || importado.volumes, descricao || null, importado.numero_pedido]
+    );
+    const pedidoId = pedidoRes.rows[0].id;
+
+    const etapas = ['Pedido recebido', 'Pedido Conferido', 'Entregue na excursão'];
+    for (let i = 0; i < etapas.length; i++) {
+      await pool.query(
+        'INSERT INTO pedido_etapas (pedido_id, nome, concluida, hora, ordem) VALUES ($1,$2,$3,$4,$5)',
+        [pedidoId, etapas[i], i === 0, i === 0 ? new Date() : null, i]
+      );
+    }
+
+    await pool.query(
+      "UPDATE pedidos_importados SET status='finalizado', pedido_id=$1, finalizado_em=NOW() WHERE id=$2",
+      [pedidoId, importadoId]
+    );
+
+    // Avisa o entregador no celular — não trava a resposta por causa disso.
+    enviarPushEntregador(
+      pool, entregador_id,
+      'Novo pedido pra entregar',
+      `${empresaRes.rows[0]?.nome_empresa || 'Empresa'} • ${importado.cliente_nome} • ${excursaoRes.rows[0].nome}`,
+      { tipo: 'novo_pedido', pedido_id: String(pedidoId), numero: String(importado.numero_pedido || '') }
+    ).catch(err => console.error('Erro ao notificar entregador do pedido importado:', err.message));
+
+    res.status(201).json({success: true, pedido_id: pedidoId});
+  } catch (err: any) {
+    console.error('Erro ao finalizar pedido importado:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
+// Ignora um pedido importado (não vira pedido — ex: duplicado, cancelado no Bling)
+app.post('/api/empresa/:id/pedidos-importados/:importadoId/ignorar', auth, async (req, res) => {
+  try {
+    const {id, importadoId} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    const result = await pool.query(
+      "UPDATE pedidos_importados SET status='ignorado' WHERE id=$1 AND empresa_id=$2 AND status='pendente' RETURNING id",
+      [importadoId, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({error: 'Pedido importado não encontrado ou já processado.'});
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao ignorar pedido importado:', err.message);
     res.status(500).json({error: 'Erro interno do servidor.'});
   }
 });
@@ -1176,14 +1711,19 @@ app.post('/api/pedidos/:pedidoId/upload-url', auth, async (req, res) => {
       return res.status(400).json({error: 'Extensão de arquivo não permitida.'});
     }
 
-    const pedidoRes = await pool.query('SELECT empresa_id, entregador_id, cliente_nome FROM pedidos WHERE id=$1', [pedidoId]);
+    const pedidoRes = await pool.query(
+      `SELECT p.empresa_id, p.entregador_id, p.cliente_nome, p.numero, p.numero_pedido, e.nome_empresa
+       FROM pedidos p JOIN empresas e ON e.id = p.empresa_id WHERE p.id=$1`, [pedidoId]
+    );
     if (pedidoRes.rows.length === 0) return res.status(404).json({error: 'Pedido não encontrado.'});
-    const {empresa_id, entregador_id, cliente_nome} = pedidoRes.rows[0];
+    const {empresa_id, entregador_id, cliente_nome, numero, numero_pedido, nome_empresa} = pedidoRes.rows[0];
     if (user.tipo === 'empresa' && empresa_id !== user.id) return res.status(403).json({error: 'Sem permissão.'});
     if (user.tipo === 'entregador' && entregador_id !== user.id) return res.status(403).json({error: 'Sem permissão.'});
-    const clienteSlug = (cliente_nome || 'sem-cliente').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+    const empresaSlug = slugify(nome_empresa, 'sem-empresa');
+    const clienteSlug = slugify(cliente_nome, 'sem-cliente');
+    const numeroLabel = numero_pedido || numero;
 
-    const key = `${empresa_id}/${clienteSlug}/${pedidoId}/${crypto.randomUUID()}.${ext || 'jpg'}`;
+    const key = `${empresaSlug}/${clienteSlug}/${numeroLabel}-${etapa || 'geral'}-${crypto.randomUUID()}.${ext || 'jpg'}`;
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET,
       Key: key,
@@ -1235,15 +1775,20 @@ app.post('/api/pedidos/:pedidoId/fotos', auth, upload.single('foto'), async (req
     const file = req.file;
     if (!file) return res.status(400).json({error: 'Nenhuma foto enviada.'});
 
-    const pedidoRes = await pool.query('SELECT empresa_id, entregador_id, cliente_nome FROM pedidos WHERE id=$1', [pedidoId]);
+    const pedidoRes = await pool.query(
+      `SELECT p.empresa_id, p.entregador_id, p.cliente_nome, p.numero, p.numero_pedido, e.nome_empresa
+       FROM pedidos p JOIN empresas e ON e.id = p.empresa_id WHERE p.id=$1`, [pedidoId]
+    );
     if (pedidoRes.rows.length === 0) return res.status(404).json({error: 'Pedido não encontrado.'});
-    const {empresa_id, entregador_id, cliente_nome} = pedidoRes.rows[0];
+    const {empresa_id, entregador_id, cliente_nome, numero, numero_pedido, nome_empresa} = pedidoRes.rows[0];
     if (user.tipo === 'empresa' && empresa_id !== user.id) return res.status(403).json({error: 'Sem permissão.'});
     if (user.tipo === 'entregador' && entregador_id !== user.id) return res.status(403).json({error: 'Sem permissão.'});
-    const clienteSlug = (cliente_nome || 'sem-cliente').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+    const empresaSlug = slugify(nome_empresa, 'sem-empresa');
+    const clienteSlug = slugify(cliente_nome, 'sem-cliente');
+    const numeroLabel = numero_pedido || numero;
 
     const ext = file.originalname.split('.').pop() || 'jpg';
-    const key = `${empresa_id}/${clienteSlug}/${pedidoId}/${crypto.randomUUID()}.${ext}`;
+    const key = `${empresaSlug}/${clienteSlug}/${numeroLabel}-${etapa}-${crypto.randomUUID()}.${ext}`;
 
     await r2.send(new PutObjectCommand({
       Bucket: R2_BUCKET,
@@ -1894,7 +2439,7 @@ app.post('/api/admin/whatsapp/instance', auth, requireAdmin, async (req, res) =>
       return res.status(409).json({error: 'Já existe uma instância configurada.'});
     }
     const {name} = req.body;
-    const instanceName = name || 'na-rota';
+    const instanceName = name || 'Unik Transporte';
     const data = await uazapiAdminRequest('/instance/init', 'POST', {name: instanceName});
     await pool.query(
       'INSERT INTO whatsapp_config (instance_id, instance_token, instance_name, status) VALUES ($1,$2,$3,$4)',

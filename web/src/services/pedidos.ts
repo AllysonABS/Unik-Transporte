@@ -27,3 +27,7 @@ export function criarPedido(empresaId: string, payload: CriarPedidoPayload) {
     payload,
   );
 }
+
+export function excluirPedido(empresaId: string, pedidoId: string) {
+  return api.delete<{ success: boolean }>(`/api/empresa/${empresaId}/pedidos/${pedidoId}`);
+}

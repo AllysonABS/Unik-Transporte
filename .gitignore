@@ -45,6 +45,9 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# Build output (gerado pelo Vite a cada deploy — não deve ser versionado)
+web/dist/
+
 # React Native bundle
 *.jsbundle
 
