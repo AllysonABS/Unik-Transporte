@@ -7,7 +7,7 @@ import type { EmpresaData } from '@/types/empresa';
 interface EmpresaAuthContextType {
   empresa: EmpresaData | null;
   token: string | null;
-  login: (cnpj: string, senha: string) => Promise<{ success: boolean; error?: string }>;
+  login: (doc: string, senha: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateEmpresa: (data: Partial<EmpresaData>) => void;
 }
@@ -18,9 +18,9 @@ export function EmpresaAuthProvider({ children }: { children: React.ReactNode })
   const [empresa, setEmpresa] = useState<EmpresaData | null>(() => getStoredEmpresa());
   const [token, setToken] = useState<string | null>(() => getToken());
 
-  const login = useCallback(async (cnpj: string, senha: string) => {
+  const login = useCallback(async (doc: string, senha: string) => {
     try {
-      const res = await loginEmpresa(cnpj, senha);
+      const res = await loginEmpresa(doc, senha);
       setAuth(res.token, res.empresa);
       setToken(res.token);
       setEmpresa(res.empresa);

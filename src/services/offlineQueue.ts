@@ -34,11 +34,11 @@ export async function clearQueue(): Promise<void> {
 
 // === CACHE DE PEDIDOS ===
 
-export async function cachePedidos(despachanteId: string, pedidos: any[]): Promise<void> {
-  await AsyncStorage.setItem(`${CACHE_KEY}_${despachanteId}`, JSON.stringify(pedidos));
+export async function cachePedidos(entregadorId: string, pedidos: any[]): Promise<void> {
+  await AsyncStorage.setItem(`${CACHE_KEY}_${entregadorId}`, JSON.stringify(pedidos));
 }
 
-export async function getCachedPedidos(despachanteId: string): Promise<any[] | null> {
-  const raw = await AsyncStorage.getItem(`${CACHE_KEY}_${despachanteId}`);
+export async function getCachedPedidos(entregadorId: string): Promise<any[] | null> {
+  const raw = await AsyncStorage.getItem(`${CACHE_KEY}_${entregadorId}`);
   return raw ? JSON.parse(raw) : null;
 }

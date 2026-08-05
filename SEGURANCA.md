@@ -30,8 +30,8 @@
 | 16 | Sem validação de CPF/CNPJ/email no backend | Validação algorítmica completa |
 | 20 | Web frontend aceita senha fraca (6 chars) | Atualizado para política forte (8+, maiúscula, número) |
 | 24 | Queries sem LIMIT (possível DoS) | Paginação com limit/offset (max 200) |
-| 26 | Senha de despachante sem política de força | `isStrongPassword()` aplicado |
-| 29 | Rotas de pedido sem ownership | Todas validam empresa_id ou despachante_id |
+| 26 | Senha de entregador sem política de força | `isStrongPassword()` aplicado |
+| 29 | Rotas de pedido sem ownership | Todas validam empresa_id ou entregador_id |
 | 31 | FCM token registrável por outro user | Ownership check adicionado |
 
 ### 🟡 Médias (15)
@@ -50,9 +50,9 @@
 | 22 | Upload aceita qualquer tipo de arquivo | Multer + presigned URL filtram apenas imagens |
 | 25 | ImageViewer faz download sem validar URL | Valida domínio antes de download |
 | 27 | Excursão editável/deletável por qualquer empresa | Ownership check adicionado |
-| 28 | Despachante editável por qualquer empresa | Vínculo verificado antes de alterar |
+| 28 | Entregador editável por qualquer empresa | Vínculo verificado antes de alterar |
 | 30 | Status do pedido aceita qualquer valor | Whitelist: `aguardando`, `em_transito`, `entregue` |
-| 32 | Notificações/clientes/despachantes/excursões listáveis por outra empresa | Ownership check em todos os GETs |
+| 32 | Notificações/clientes/entregadores/excursões listáveis por outra empresa | Ownership check em todos os GETs |
 | 33 | Vínculos editáveis/bloqueáveis/deletáveis por outra empresa | Ownership check adicionado |
 
 ---

@@ -5,10 +5,10 @@ import { MoreHorizontal, Plus, Search } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import {
-  listarDespachantes,
-  toggleDespachante,
-  excluirDespachante,
-} from '@/services/despachantes';
+  listarEntregadores,
+  toggleEntregador,
+  excluirEntregador,
+} from '@/services/entregadores';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,67 +27,56 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import DespachanteFormDialog from '@/components/empresa/DespachanteFormDialog';
+import EntregadorFormDialog from '@/components/empresa/EntregadorFormDialog';
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
 import { ApiError } from '@/lib/apiClient';
 import { maskCpf, maskTelefone } from '@/lib/mask';
-import type { DespachanteData } from '@/types/empresa';
+import type { EntregadorData } from '@/types/empresa';
 
-export default function DespachantesPage() {
+export default function EntregadoresPage() {
   const { empresa } = useEmpresaAuth();
-  useSetPageHeader('Despachantes', 'Gerencie seus despachantes');
+  useSetPageHeader('Entregadores', 'Gerencie seus entregadores');
   const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
   const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<DespachanteData | null>(null);
-  const [deleting, setDeleting] = useState<DespachanteData | null>(null);
+  const [deleting, setDeleting] = useState<EntregadorData | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['despachantes', empresa?.id],
-    queryFn: () => listarDespachantes(empresa!.id),
+    queryKey: ['entregadores', empresa?.id],
+    queryFn: () => listarEntregadores(empresa!.id),
     enabled: !!empresa?.id,
   });
 
-  const despachantes = data?.despachantes ?? [];
+  const entregadores = data?.entregadores ?? [];
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    if (!termo) return despachantes;
-    return despachantes.filter(
+    if (!termo) return entregadores;
+    return entregadores.filter(
       d => d.nome?.toLowerCase().includes(termo) || d.cpf?.includes(termo) || d.telefone?.includes(termo),
     );
-  }, [despachantes, busca]);
+  }, [entregadores, busca]);
 
   const toggleMutation = useMutation({
-    mutationFn: (despachanteId: string) => toggleDespachante(empresa!.id, despachanteId),
+    mutationFn: (entregadorId: string) => toggleEntregador(empresa!.id, entregadorId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['despachantes', empresa?.id] });
+      queryClient.invalidateQueries({ queryKey: ['entregadores', empresa?.id] });
     },
     onError: (err: unknown) => {
-      toast.error(err instanceof ApiError ? err.message : 'Erro ao atualizar despachante.');
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao atualizar entregador.');
     },
   });
 
   const excluirMutation = useMutation({
-    mutationFn: (despachanteId: string) => excluirDespachante(empresa!.id, despachanteId),
+    mutationFn: (entregadorId: string) => excluirEntregador(empresa!.id, entregadorId),
     onSuccess: () => {
-      toast.success('Despachante removido.');
-      queryClient.invalidateQueries({ queryKey: ['despachantes', empresa?.id] });
+      toast.success('Entregador removido.');
+      queryClient.invalidateQueries({ queryKey: ['entregadores', empresa?.id] });
     },
     onError: (err: unknown) => {
-      toast.error(err instanceof ApiError ? err.message : 'Erro ao excluir despachante.');
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao excluir entregador.');
     },
   });
-
-  function openCreate() {
-    setEditing(null);
-    setFormOpen(true);
-  }
-
-  function openEdit(d: DespachanteData) {
-    setEditing(d);
-    setFormOpen(true);
-  }
 
   return (
     <div className="space-y-6">
@@ -101,9 +90,9 @@ export default function DespachantesPage() {
             className="pl-9"
           />
         </div>
-        <Button onClick={openCreate}>
+        <Button onClick={() => setFormOpen(true)}>
           <Plus className="h-4 w-4" />
-          Novo despachante
+          Vincular entregador
         </Button>
       </div>
 
@@ -129,7 +118,7 @@ export default function DespachantesPage() {
               {filtrados.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-gray py-8">
-                    Nenhum despachante encontrado.
+                    Nenhum entregador encontrado.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -153,7 +142,6 @@ export default function DespachantesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-card border-border">
-                          <DropdownMenuItem onClick={() => openEdit(d)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => toggleMutation.mutate(d.id)}>
                             {d.ativo === false ? 'Ativar' : 'Desativar'}
                           </DropdownMenuItem>
@@ -171,12 +159,12 @@ export default function DespachantesPage() {
         </div>
       )}
 
-      <DespachanteFormDialog open={formOpen} onOpenChange={setFormOpen} despachante={editing} />
+      <EntregadorFormDialog open={formOpen} onOpenChange={setFormOpen} />
 
       <ConfirmDialog
         open={!!deleting}
         onOpenChange={open => !open && setDeleting(null)}
-        title="Excluir despachante"
+        title="Excluir entregador"
         description={`"${deleting?.nome}" será desvinculado da sua empresa. Deseja continuar?`}
         confirmLabel="Excluir"
         destructive

@@ -62,7 +62,7 @@ export default function PrivacidadePage() {
             <p>Seus dados pessoais podem ser compartilhados com:</p>
             <ul className="list-disc list-inside mt-3 space-y-2">
               <li><strong>Empresas de transporte:</strong> Quando você se vincula a uma loja, ela terá acesso ao seu nome, CPF/CNPJ, telefone e e-mail para gestão de pedidos.</li>
-              <li><strong>Despachantes:</strong> Acesso limitado a informações do pedido (nome do cliente, destino, volumes).</li>
+              <li><strong>Entregadores:</strong> Acesso limitado a informações do pedido (nome do cliente, destino, volumes).</li>
               <li><strong>Prestadores de serviço:</strong> Cloudflare (armazenamento de fotos), Google Firebase (notificações push), Gmail SMTP (envio de e-mails).</li>
             </ul>
             <p className="mt-3">Não vendemos, alugamos ou comercializamos seus dados pessoais com terceiros para fins de marketing.</p>

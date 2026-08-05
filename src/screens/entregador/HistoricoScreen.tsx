@@ -3,12 +3,12 @@ import {View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput, 
 import {useFocusEffect} from '@react-navigation/native';
 import {Colors} from '../../theme/colors';
 import {useAuth} from '../../context/AuthContext';
-import {listarPedidosDespachante, PedidoData} from '../../services/api';
+import {listarPedidosEntregador, PedidoData} from '../../services/api';
 import {formatHora, formatData} from '../../utils/date';
 import Icon from '../../components/Icon';
 
 export default function HistoricoScreen() {
-  const {despachante} = useAuth();
+  const {entregador} = useAuth();
   const [pedidos, setPedidos] = useState<PedidoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
@@ -18,8 +18,8 @@ export default function HistoricoScreen() {
   const jaCarregou = useRef(false);
 
   const carregar = async () => {
-    if (!despachante?.id) return;
-    const res = await listarPedidosDespachante(despachante.id);
+    if (!entregador?.id) return;
+    const res = await listarPedidosEntregador(entregador.id);
     if (res.success && res.pedidos) setPedidos(res.pedidos.filter(p => p.status === 'entregue'));
   };
 
@@ -30,16 +30,19 @@ export default function HistoricoScreen() {
     } else {
       carregar();
     }
-  }, [despachante?.id]));
+  }, [entregador?.id]));
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     carregar().finally(() => setRefreshing(false));
-  }, [despachante?.id]);
+  }, [entregador?.id]);
 
   const filtrados = pedidos.filter(p => {
     const q = busca.toLowerCase();
-    return !q || p.cliente_nome.toLowerCase().includes(q) || p.excursao_nome.toLowerCase().includes(q);
+    return !q
+      || p.cliente_nome.toLowerCase().includes(q)
+      || p.excursao_nome.toLowerCase().includes(q)
+      || (p.nome_empresa ?? '').toLowerCase().includes(q);
   });
 
   const totalVolumes = pedidos.reduce((a, p) => a + p.volumes, 0);
@@ -89,7 +92,8 @@ export default function HistoricoScreen() {
             </View>
             <View style={s.info}>
               <Text style={s.id}>{p.cliente_nome}</Text>
-              <Text style={s.empresa}>{p.volumes} vol.</Text>
+              {!!p.nome_empresa && <Text style={s.empresa} numberOfLines={1}>{p.nome_empresa}</Text>}
+              <Text style={s.detalhes}>{p.volumes} vol.</Text>
               <View style={{flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2}}>
                 <Icon name="map-pin" size={11} color={Colors.gray} />
                 <Text style={s.destino}>{p.excursao_nome}</Text>
@@ -114,6 +118,7 @@ export default function HistoricoScreen() {
                   <Icon name="x" size={18} color={Colors.gray} />
                 </TouchableOpacity>
               </View>
+              {!!detalhe?.nome_empresa && <View style={s.detRow}><Text style={s.detLabel}>Empresa</Text><Text style={s.detValue}>{detalhe.nome_empresa}</Text></View>}
               <View style={s.detRow}><Text style={s.detLabel}>Cliente</Text><Text style={s.detValue}>{detalhe?.cliente_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Destino</Text><Text style={s.detValue}>{detalhe?.excursao_nome}</Text></View>
               <View style={s.detRow}><Text style={s.detLabel}>Volumes</Text><Text style={s.detValue}>{detalhe?.volumes}</Text></View>
@@ -154,7 +159,8 @@ const s = StyleSheet.create({
   checkText:    {color: Colors.pulso, fontWeight: '800', fontSize: 14},
   info:         {flex: 1},
   id:           {fontSize: 14, fontWeight: '700', color: Colors.clareza},
-  empresa:      {fontSize: 12, color: '#60A5FA', marginTop: 2},
+  empresa:      {fontSize: 11, fontWeight: '700', color: '#60A5FA', marginTop: 2},
+  detalhes:     {fontSize: 12, color: Colors.gray, marginTop: 2},
   destino:      {fontSize: 12, color: Colors.gray, marginTop: 2},
   right:        {alignItems: 'flex-end'},
   data:         {fontSize: 12, color: Colors.gray},

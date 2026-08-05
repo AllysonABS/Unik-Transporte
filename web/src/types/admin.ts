@@ -7,7 +7,8 @@ export interface AdminData {
 export interface EmpresaAdmin {
   id: string;
   nome_empresa: string;
-  cnpj: string;
+  cnpj: string | null;
+  cpf: string | null;
   nome_responsavel: string;
   email: string;
   telefone: string;
@@ -36,11 +37,9 @@ export interface ClienteAdmin {
   estado: string | null;
   ativo: boolean;
   data_cadastro: string;
-  total_vinculos: number;
-  manual: boolean;
 }
 
-export interface DespachanteAdmin {
+export interface EntregadorAdmin {
   id: string;
   nome: string;
   cpf: string;
@@ -56,7 +55,7 @@ export interface PedidoAdmin {
   empresa_id: string;
   nome_empresa: string;
   cliente_nome: string;
-  despachante_nome: string;
+  entregador_nome: string;
   excursao_nome: string;
   volumes: number;
   status: string;
@@ -77,7 +76,7 @@ export interface AdminStats {
   total_empresas: number;
   empresas_ativas: number;
   total_clientes: number;
-  total_despachantes: number;
+  total_entregadores: number;
   total_pedidos: number;
   assinaturas_ativas: number;
 }

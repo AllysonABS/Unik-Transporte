@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:745962341193:android:b9a26ca79de4dc61aa5098",
+        "mobilesdk_app_id": "1:745962341193:android:d7a92d2d4fb4cfd1aa5098",
         "android_client_info": {
-          "package_name": "com.norumtransporte"
+          "package_name": "com.uniktransporte"
         }
       },
       "oauth_client": [],
