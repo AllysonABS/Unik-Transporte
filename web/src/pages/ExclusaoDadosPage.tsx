@@ -196,7 +196,7 @@ export default function ExclusaoDadosPage() {
         </form>
 
         <p className="text-gray-500 text-xs text-center mt-6">
-          Em caso de dúvidas, entre em contato: <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a>
+          Em caso de dúvidas, entre em contato: <a href="mailto:suporte.unikcrm@gmail.com" className="text-pulso hover:underline">suporte.unikcrm@gmail.com</a>
         </p>
       </main>
 

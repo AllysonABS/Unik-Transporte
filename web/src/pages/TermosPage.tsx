@@ -117,7 +117,7 @@ export default function TermosPage() {
             <p>
               Você pode solicitar a exclusão de seus dados a qualquer momento através do formulário disponível em{' '}
               <a href="/exclusao-de-dados" className="text-pulso hover:underline">transporte.unikcrm.com/exclusao-de-dados</a> ou
-              pelo e-mail <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a>.
+              pelo e-mail <a href="mailto:suporte.unikcrm@gmail.com" className="text-pulso hover:underline">suporte.unikcrm@gmail.com</a>.
               A exclusão será processada em até 30 dias.
             </p>
           </section>
@@ -145,7 +145,7 @@ export default function TermosPage() {
               CPF: 100.136.644-17<br />
               Rua Maria de Lourdes Case Porto, 51 — Sala 810<br />
               Mauricio de Nassau, Caruaru/PE — CEP: 55012-075<br />
-              E-mail: <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a>
+              E-mail: <a href="mailto:suporte.unikcrm@gmail.com" className="text-pulso hover:underline">suporte.unikcrm@gmail.com</a>
             </p>
           </section>
         </div>

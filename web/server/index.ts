@@ -1981,7 +1981,7 @@ app.post('/api/recuperar-senha/solicitar', resetRateLimit, async (req, res) => {
     if (email && smtpTransporter) {
       const emailMasked = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Unik Transporte" <noreply@norum.app>',
+        from: process.env.SMTP_FROM || '"Unik Transporte" <suporte.unikcrm@gmail.com>',
         to: email,
         subject: 'Código de recuperação de senha - Unik Transporte',
         html: `
@@ -2102,7 +2102,7 @@ app.post('/api/exclusao-dados', async (req, res) => {
     // Envia e-mail de confirmação para o usuário
     if (smtpTransporter) {
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Unik Transporte" <noreply@norum.app>',
+        from: process.env.SMTP_FROM || '"Unik Transporte" <suporte.unikcrm@gmail.com>',
         to: email,
         subject: 'Solicitação de exclusão de dados recebida - Unik Transporte',
         html: `
@@ -2116,7 +2116,7 @@ app.post('/api/exclusao-dados', async (req, res) => {
             </div>
             <p>Você receberá um e-mail de confirmação quando a exclusão for concluída.</p>
             <p style="color:#6B7280;font-size:13px;margin-top:20px">
-              Se você não solicitou esta exclusão, entre em contato imediatamente: norumtecnologia@gmail.com
+              Se você não solicitou esta exclusão, entre em contato imediatamente: suporte.unikcrm@gmail.com
             </p>
           </div>
         `,
@@ -2126,8 +2126,8 @@ app.post('/api/exclusao-dados', async (req, res) => {
     // Notifica o admin
     if (smtpTransporter) {
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Unik Transporte" <noreply@norum.app>',
-        to: process.env.SMTP_USER || 'norumtecnologia@gmail.com',
+        from: process.env.SMTP_FROM || '"Unik Transporte" <suporte.unikcrm@gmail.com>',
+        to: process.env.SMTP_USER || 'suporte.unikcrm@gmail.com',
         subject: `[LGPD] Solicitação de exclusão - ${nome}`,
         html: `<p><strong>Nome:</strong> ${nome}</p><p><strong>Doc:</strong> ${documento}</p><p><strong>Email:</strong> ${email}</p><p><strong>Motivo:</strong> ${motivo || 'Não informado'}</p>`,
       });

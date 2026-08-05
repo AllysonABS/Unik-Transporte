@@ -17,7 +17,7 @@ export default function ImageViewer({visible, url, onClose}: Props) {
   const {show} = useAlert();
 
   // Valida que a URL é do nosso domínio R2
-  const isValidUrl = url && (url.startsWith('https://') && (url.includes('.r2.dev') || url.includes('norum')));
+  const isValidUrl = url && url.startsWith('https://') && url.includes('.r2.dev');
 
   const download = async () => {
     if (!isValidUrl) {

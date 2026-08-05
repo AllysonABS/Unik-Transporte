@@ -93,7 +93,7 @@ export default function PrivacidadePage() {
             </ul>
             <p className="mt-3">
               Para exercer seus direitos, entre em contato pelo e-mail{' '}
-              <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a> ou
+              <a href="mailto:suporte.unikcrm@gmail.com" className="text-pulso hover:underline">suporte.unikcrm@gmail.com</a> ou
               utilize o formulário de exclusão de dados disponível em{' '}
               <a href="/exclusao-de-dados" className="text-pulso hover:underline">transporte.unikcrm.com/exclusao-de-dados</a>.
             </p>
@@ -131,7 +131,7 @@ export default function PrivacidadePage() {
               CPF: 100.136.644-17<br />
               Rua Maria de Lourdes Case Porto, 51 — Sala 810<br />
               Mauricio de Nassau, Caruaru/PE — CEP: 55012-075<br />
-              E-mail: <a href="mailto:norumtecnologia@gmail.com" className="text-pulso hover:underline">norumtecnologia@gmail.com</a>
+              E-mail: <a href="mailto:suporte.unikcrm@gmail.com" className="text-pulso hover:underline">suporte.unikcrm@gmail.com</a>
             </p>
           </section>
         </div>

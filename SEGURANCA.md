@@ -1,4 +1,4 @@
-# 🔒 Auditoria de Segurança — Na Rota (Norum Transporte)
+# 🔒 Auditoria de Segurança — Unik Transporte
 
 > Última atualização: Julho 2025  
 > Total: **33 vulnerabilidades identificadas e corrigidas**
@@ -175,13 +175,13 @@ DB_SSL=true
 JWT_SECRET=<gerar: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))">
 
 # === CORS ===
-CORS_ORIGINS=https://narota.norum.app
+CORS_ORIGINS=https://transporte.unikcrm.com
 
 # === CLOUDFLARE R2 ===
 R2_ENDPOINT=<endpoint>
 R2_ACCESS_KEY_ID=<key>
 R2_SECRET_ACCESS_KEY=<secret>
-R2_BUCKET=norumnarota
+R2_BUCKET=uniktransporte
 R2_PUBLIC_URL=<url_publica>
 
 # === FIREBASE ===
@@ -191,9 +191,9 @@ FIREBASE_SERVICE_ACCOUNT=<json_em_uma_linha>
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=norumtecnologia@gmail.com
+SMTP_USER=suporte.unikcrm@gmail.com
 SMTP_PASS=<senha_de_app>
-SMTP_FROM="Norum CRM <norumtecnologia@gmail.com>"
+SMTP_FROM="Unik CRM <suporte.unikcrm@gmail.com>"
 
 # === OUTROS ===
 NODE_ENV=production
