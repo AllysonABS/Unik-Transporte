@@ -2206,6 +2206,54 @@ app.get('/api/admin/empresas', auth, requireAdmin, async (_req, res) => {
   }
 });
 
+// Cria empresa direto pelo admin — sem passar pelo cartão/Asaas do /api/cadastro
+// público. Usado pra clientes que a gente decide liberar acesso sem cobrança
+// momentânea (parceiros, cortesia, etc.). Já entra com status_assinatura
+// 'ativa' e sem nenhum dado do Asaas; se um dia precisar cobrar essa empresa,
+// isso é feito depois trocando o cartão dela normalmente pela tela dela.
+app.post('/api/admin/empresas', auth, requireAdmin, async (req, res) => {
+  try {
+    const {nome_empresa, nome_responsavel, email, senha, endereco, numero, bairro, cidade, estado, cep} = req.body;
+    const telefone = (req.body.telefone || '').replace(/\D/g, '');
+    const cnpj = (req.body.cnpj || '').replace(/\D/g, '');
+    const cpf = (req.body.cpf || '').replace(/\D/g, '');
+    const plano = req.body.plano || 'Cortesia';
+    const valor_plano = req.body.valor_plano != null && req.body.valor_plano !== '' ? Number(req.body.valor_plano) : 0;
+    const data_vencimento = req.body.data_vencimento || null;
+
+    if (!nome_empresa || (!cnpj && !cpf) || !nome_responsavel || !email || !telefone || !senha) {
+      return res.status(400).json({error: 'Campos obrigatórios não preenchidos.'});
+    }
+    if (cnpj && !isValidCnpj(cnpj)) return res.status(400).json({error: 'CNPJ inválido.'});
+    if (cpf && !isValidCpf(cpf)) return res.status(400).json({error: 'CPF inválido.'});
+    if (!isValidEmail(email)) return res.status(400).json({error: 'E-mail inválido.'});
+    const senhaCheck = isStrongPassword(senha);
+    if (!senhaCheck.valid) return res.status(400).json({error: senhaCheck.message});
+
+    const existe = await pool.query(
+      `SELECT id FROM empresas WHERE email = $1
+       OR ($2::text IS NOT NULL AND cnpj = $2) OR ($3::text IS NOT NULL AND cpf = $3)`,
+      [email, cnpj || null, cpf || null]
+    );
+    if (existe.rows.length > 0) {
+      return res.status(409).json({error: 'E-mail, CNPJ ou CPF já cadastrado.'});
+    }
+
+    const senha_hash = await bcrypt.hash(senha, 10);
+    const result = await pool.query(
+      `INSERT INTO empresas (nome_empresa, cnpj, cpf, nome_responsavel, email, telefone, senha_hash, endereco, numero, bairro, cidade, estado, cep,
+         plano, valor_plano, status_assinatura, data_vencimento)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'ativa',$16) RETURNING id`,
+      [nome_empresa, cnpj || null, cpf || null, nome_responsavel, email, telefone, senha_hash, endereco || null, numero || null, bairro || null,
+        cidade || null, estado || null, cep || null, plano, valor_plano, data_vencimento]
+    );
+    res.status(201).json({success: true, id: result.rows[0].id});
+  } catch (err: any) {
+    console.error('Erro ao criar empresa (admin):', err);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
 app.put('/api/admin/empresas/:id', auth, requireAdmin, async (req, res) => {
   try {
     const {id} = req.params;

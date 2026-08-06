@@ -19,6 +19,10 @@ export function listarEmpresasAdmin() {
   return adminApi.get<{ success: boolean; empresas: EmpresaAdmin[] }>('/api/admin/empresas');
 }
 
+export function criarEmpresaAdmin(payload: Partial<EmpresaAdmin> & { senha: string }) {
+  return adminApi.post<{ success: boolean; id: string }>('/api/admin/empresas', payload);
+}
+
 export function atualizarEmpresaAdmin(id: string, payload: Partial<EmpresaAdmin>) {
   return adminApi.put<{ success: boolean }>(`/api/admin/empresas/${id}`, payload);
 }

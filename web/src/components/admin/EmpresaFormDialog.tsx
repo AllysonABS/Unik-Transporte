@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { atualizarEmpresaAdmin } from '@/services/admin';
+import { atualizarEmpresaAdmin, criarEmpresaAdmin } from '@/services/admin';
 import { ApiError } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,24 +25,36 @@ import type { EmpresaAdmin } from '@/types/admin';
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // null = criando uma empresa nova; um EmpresaAdmin = editando essa empresa.
   empresa: EmpresaAdmin | null;
+  modo: 'criar' | 'editar';
 }
 
-type FormState = Partial<EmpresaAdmin>;
+type FormState = Partial<EmpresaAdmin> & { senha?: string };
 
-export default function EmpresaFormDialog({ open, onOpenChange, empresa }: Props) {
+const FORM_VAZIO: FormState = {
+  status_assinatura: 'ativa',
+  ativa: true,
+  plano: 'Cortesia',
+  valor_plano: 0,
+};
+
+export default function EmpresaFormDialog({ open, onOpenChange, empresa, modo }: Props) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<FormState>({});
+  const [form, setForm] = useState<FormState>(FORM_VAZIO);
   const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open && empresa) {
+    if (!open) return;
+    if (empresa) {
       setForm({
         ...empresa,
         data_vencimento: empresa.data_vencimento ? empresa.data_vencimento.slice(0, 10) : '',
       });
-      setServerError(null);
+    } else {
+      setForm(FORM_VAZIO);
     }
+    setServerError(null);
   }, [open, empresa]);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -50,9 +62,9 @@ export default function EmpresaFormDialog({ open, onOpenChange, empresa }: Props
   }
 
   const mutation = useMutation({
-    mutationFn: () => atualizarEmpresaAdmin(empresa!.id, form),
+    mutationFn: () => (modo === 'criar' ? criarEmpresaAdmin(form as FormState & { senha: string }) : atualizarEmpresaAdmin(empresa!.id, form)),
     onSuccess: () => {
-      toast.success('Empresa atualizada.');
+      toast.success(modo === 'criar' ? 'Empresa criada — já com acesso liberado, sem cartão.' : 'Empresa atualizada.');
       queryClient.invalidateQueries({ queryKey: ['admin-empresas'] });
       onOpenChange(false);
     },
@@ -61,14 +73,20 @@ export default function EmpresaFormDialog({ open, onOpenChange, empresa }: Props
     },
   });
 
-  if (!empresa) return null;
+  if (modo === 'editar' && !empresa) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-clareza">Editar empresa</DialogTitle>
+          <DialogTitle className="text-clareza">{modo === 'criar' ? 'Criar empresa' : 'Editar empresa'}</DialogTitle>
         </DialogHeader>
+        {modo === 'criar' && (
+          <p className="text-xs text-gray -mt-2">
+            Cria a empresa já com acesso liberado (status "Ativa"), sem passar pelo cartão de crédito — pra clientes
+            que a gente decide não cobrar por enquanto. Cobrança pode ser configurada depois, se precisar.
+          </p>
+        )}
         <form
           className="space-y-4"
           onSubmit={e => {
@@ -106,6 +124,18 @@ export default function EmpresaFormDialog({ open, onOpenChange, empresa }: Props
               <Input value={form.telefone ?? ''} onChange={e => update('telefone', maskTelefone(e.target.value))} />
             </div>
           </div>
+          {modo === 'criar' && (
+            <div>
+              <label className="block text-sm font-medium text-clareza mb-1.5">Senha de acesso</label>
+              <Input
+                type="text"
+                placeholder="Mínimo 8 caracteres, 1 maiúscula, 1 número"
+                value={form.senha ?? ''}
+                onChange={e => update('senha', e.target.value)}
+              />
+              <p className="text-xs text-gray mt-1">Combine com o cliente e passe essa senha pra ele — dá pra trocar depois pela conta dele.</p>
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2">
               <label className="block text-sm font-medium text-clareza mb-1.5">Endereço</label>
@@ -165,32 +195,34 @@ export default function EmpresaFormDialog({ open, onOpenChange, empresa }: Props
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
                   <SelectItem value="ativa">Ativa</SelectItem>
-                  <SelectItem value="suspensa">Suspensa</SelectItem>
-                  <SelectItem value="vencida">Vencida</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="inadimplente">Inadimplente</SelectItem>
                   <SelectItem value="cancelada">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-clareza mb-1.5">Empresa ativa (login)</label>
-              <Select
-                value={form.ativa ? 'sim' : 'nao'}
-                onValueChange={v => update('ativa', v === 'sim')}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border">
-                  <SelectItem value="sim">Sim</SelectItem>
-                  <SelectItem value="nao">Não</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {modo === 'editar' && (
+              <div>
+                <label className="block text-sm font-medium text-clareza mb-1.5">Empresa ativa (login)</label>
+                <Select
+                  value={form.ativa ? 'sim' : 'nao'}
+                  onValueChange={v => update('ativa', v === 'sim')}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    <SelectItem value="sim">Sim</SelectItem>
+                    <SelectItem value="nao">Não</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           {serverError && <p className="text-sm font-medium text-destructive">{serverError}</p>}
           <DialogFooter>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Salvando...' : 'Salvar'}
+              {mutation.isPending ? 'Salvando...' : modo === 'criar' ? 'Criar empresa' : 'Salvar'}
             </Button>
           </DialogFooter>
         </form>

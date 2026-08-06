@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { MoreHorizontal, Search } from 'lucide-react';
+import { MoreHorizontal, Plus, Search } from 'lucide-react';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarEmpresasAdmin, excluirEmpresaAdmin } from '@/services/admin';
 import { formatData } from '@/lib/format';
@@ -35,6 +35,7 @@ export default function AdminEmpresasPage() {
   const [busca, setBusca] = useState('');
   const [editing, setEditing] = useState<EmpresaAdmin | null>(null);
   const [deleting, setDeleting] = useState<EmpresaAdmin | null>(null);
+  const [criando, setCriando] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-empresas'],
@@ -69,14 +70,20 @@ export default function AdminEmpresasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray" />
-        <Input
-          value={busca}
-          onChange={e => setBusca(e.target.value)}
-          placeholder="Buscar por nome, CNPJ ou cidade"
-          className="pl-9"
-        />
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative max-w-md flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray" />
+          <Input
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+            placeholder="Buscar por nome, CNPJ ou cidade"
+            className="pl-9"
+          />
+        </div>
+        <Button onClick={() => setCriando(true)} className="shrink-0">
+          <Plus className="h-4 w-4 mr-1.5" />
+          Criar empresa
+        </Button>
       </div>
 
       {isLoading ? (
@@ -144,7 +151,8 @@ export default function AdminEmpresasPage() {
         </div>
       )}
 
-      <EmpresaFormDialog open={!!editing} onOpenChange={open => !open && setEditing(null)} empresa={editing} />
+      <EmpresaFormDialog open={criando} onOpenChange={setCriando} empresa={null} modo="criar" />
+      <EmpresaFormDialog open={!!editing} onOpenChange={open => !open && setEditing(null)} empresa={editing} modo="editar" />
 
       <ConfirmDialog
         open={!!deleting}
