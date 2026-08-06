@@ -21,13 +21,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import SearchSelect from '@/components/ui/search-select';
 import {
   Form,
   FormControl,
@@ -181,20 +175,14 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
                       Novo entregador
                     </Button>
                   </div>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o entregador" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {entregadores.map(d => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <SearchSelect
+                      placeholder="Buscar entregador"
+                      value={field.value}
+                      onChange={field.onChange}
+                      items={entregadores.map(d => ({ id: d.id, label: d.nome, sublabel: d.telefone }))}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -217,20 +205,14 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
                       Nova excursão
                     </Button>
                   </div>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a excursão" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {excursoes.map(e => (
-                        <SelectItem key={e.id} value={e.id}>
-                          {e.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <SearchSelect
+                      placeholder="Buscar excursão"
+                      value={field.value}
+                      onChange={field.onChange}
+                      items={excursoes.map(e => ({ id: e.id, label: e.nome, sublabel: `${e.setor} · Vaga ${e.vaga}` }))}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
