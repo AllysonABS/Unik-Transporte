@@ -146,7 +146,11 @@ export default function ChecklistScreen({route, navigation}: Props) {
     hapticSuccess();
 
     if (isColeta) {
-      navigation.navigate('Checklist', {pedidoId, etapa: 'entrega', volumes});
+      // `replace` (em vez de `navigate`) porque Checklist é uma tela modal —
+      // navegar pra "ela mesma" com params novos não garante reaproveitar a
+      // instância; na prática, fechava o modal e voltava pra aba em vez de
+      // abrir direto o checklist de entrega.
+      navigation.replace('Checklist', {pedidoId, etapa: 'entrega', volumes});
     } else {
       const msgExtra = isOnline ? '' : '\nSerá sincronizado quando a internet voltar.';
       show({title: 'Entrega confirmada!', message: `Pedido finalizado com sucesso.${msgExtra}`, type: 'success', buttons: [
