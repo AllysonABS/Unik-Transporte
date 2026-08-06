@@ -214,14 +214,6 @@ export default function FilaScreen() {
           </>
         ) : filtrados.length === 0 ? (
           <EmptyState icon="inbox" title="Nenhum pedido na fila" subtitle="Novos pedidos aparecerão aqui quando forem criados" />
-        ) : grupos.length === 1 ? (
-          // Uma empresa só — cabeçalho fixo (sem seta, nada pra recolher).
-          <>
-            <GrupoHeader nome={grupos[0][0]} total={grupos[0][1].length} />
-            <View style={s.grupoLista}>
-              {grupos[0][1].map(p => <PedidoCard key={p.id} p={p} mostrarEmpresa={false} onIniciar={iniciarColeta} />)}
-            </View>
-          </>
         ) : (
           grupos.map(([nome, itens]) => {
             const aberto = buscaAtiva || gruposAbertos.has(nome);

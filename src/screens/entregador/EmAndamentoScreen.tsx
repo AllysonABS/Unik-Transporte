@@ -166,13 +166,6 @@ export default function EmAndamentoScreen() {
           <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
         ) : pedidos.length === 0 ? (
           <EmptyState icon="navigation" title="Nenhum pedido em andamento" subtitle="Inicie uma coleta na aba Fila para ver aqui" />
-        ) : grupos.length === 1 ? (
-          <>
-            <GrupoHeader nome={grupos[0][0]} total={grupos[0][1].length} />
-            <View style={s.grupoLista}>
-              {grupos[0][1].map(p => <PedidoEmAndamentoCard key={p.id} p={p} onEntregar={confirmarEntrega} onDetalhes={setDetalhe} />)}
-            </View>
-          </>
         ) : (
           grupos.map(([nome, itens]) => {
             const aberto = gruposAbertos.has(nome);
