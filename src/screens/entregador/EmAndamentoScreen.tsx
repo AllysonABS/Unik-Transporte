@@ -15,6 +15,27 @@ import OfflineBanner from '../../components/OfflineBanner';
 import {SkeletonCard} from '../../components/Skeleton';
 import {hapticLight} from '../../utils/haptics';
 
+// Cabeçalho do grupo de empresa — sempre visível (mesmo com 1 empresa só,
+// pra deixar claro de quem são os pedidos). Só fica clicável/com seta
+// quando existe mais de um grupo, já que com 1 não há o que recolher.
+function GrupoHeader({nome, total, aberto, onPress}: {nome: string; total: number; aberto?: boolean; onPress?: () => void}) {
+  return (
+    <TouchableOpacity
+      style={s.grupoHeader}
+      onPress={onPress}
+      disabled={!onPress}
+      activeOpacity={onPress ? 0.7 : 1}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityState={onPress ? {expanded: aberto} : undefined}
+      accessibilityLabel={`${nome}, ${total} pedido${total === 1 ? '' : 's'}`}>
+      <Icon name="briefcase" size={14} color="#60A5FA" />
+      <Text style={s.grupoNome} numberOfLines={1}>{nome}</Text>
+      <View style={s.grupoBadge}><Text style={s.grupoBadgeText}>{total}</Text></View>
+      {onPress && <Icon name={aberto ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.gray} />}
+    </TouchableOpacity>
+  );
+}
+
 function PedidoEmAndamentoCard({p, onEntregar, onDetalhes}: {p: PedidoData; onEntregar: (p: PedidoData) => void; onDetalhes: (p: PedidoData) => void}) {
   const etapaAtual = 'Em rota para a excursão';
   return (
@@ -146,24 +167,18 @@ export default function EmAndamentoScreen() {
         ) : pedidos.length === 0 ? (
           <EmptyState icon="navigation" title="Nenhum pedido em andamento" subtitle="Inicie uma coleta na aba Fila para ver aqui" />
         ) : grupos.length === 1 ? (
-          grupos[0][1].map(p => <PedidoEmAndamentoCard key={p.id} p={p} onEntregar={confirmarEntrega} onDetalhes={setDetalhe} />)
+          <>
+            <GrupoHeader nome={grupos[0][0]} total={grupos[0][1].length} />
+            <View style={s.grupoLista}>
+              {grupos[0][1].map(p => <PedidoEmAndamentoCard key={p.id} p={p} onEntregar={confirmarEntrega} onDetalhes={setDetalhe} />)}
+            </View>
+          </>
         ) : (
           grupos.map(([nome, itens]) => {
             const aberto = gruposAbertos.has(nome);
             return (
               <View key={nome}>
-                <TouchableOpacity
-                  style={s.grupoHeader}
-                  onPress={() => toggleGrupo(nome)}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityState={{expanded: aberto}}
-                  accessibilityLabel={`${nome}, ${itens.length} pedido${itens.length === 1 ? '' : 's'}`}>
-                  <Icon name="briefcase" size={14} color="#60A5FA" />
-                  <Text style={s.grupoNome} numberOfLines={1}>{nome}</Text>
-                  <View style={s.grupoBadge}><Text style={s.grupoBadgeText}>{itens.length}</Text></View>
-                  <Icon name={aberto ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.gray} />
-                </TouchableOpacity>
+                <GrupoHeader nome={nome} total={itens.length} aberto={aberto} onPress={() => toggleGrupo(nome)} />
                 {aberto && (
                   <View style={s.grupoLista}>
                     {itens.map(p => <PedidoEmAndamentoCard key={p.id} p={p} onEntregar={confirmarEntrega} onDetalhes={setDetalhe} />)}
