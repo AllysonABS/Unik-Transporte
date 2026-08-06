@@ -14,6 +14,37 @@ import {SkeletonCard} from '../../components/Skeleton';
 import OfflineBanner from '../../components/OfflineBanner';
 import {hapticLight} from '../../utils/haptics';
 
+function PedidoCard({p, mostrarEmpresa, onIniciar}: {p: PedidoData; mostrarEmpresa: boolean; onIniciar: (p: PedidoData) => void}) {
+  return (
+    <View style={s.card} accessibilityLabel={`Pedido de ${p.cliente_nome}, ${p.volumes} volumes, empresa ${p.nome_empresa ?? ''}`}>
+      <View style={s.cardContent}>
+        {mostrarEmpresa && !!p.nome_empresa && (
+          <View style={s.empresaBadge}>
+            <Icon name="briefcase" size={10} color="#60A5FA" />
+            <Text style={s.empresaBadgeText} numberOfLines={1}>{p.nome_empresa}</Text>
+          </View>
+        )}
+        <Text style={s.cliente}>{p.cliente_nome}</Text>
+        <Text style={s.detalhes}>{p.volumes} vol. · {p.descricao || 'Sem descrição'}</Text>
+        <View style={s.destinoRow}>
+          <Icon name="map-pin" size={12} color={Colors.gray} />
+          <Text style={s.destino}>{p.excursao_nome}</Text>
+        </View>
+      </View>
+      <View style={s.actions}>
+        <TouchableOpacity
+          style={s.iniciarBtn}
+          onPress={() => onIniciar(p)}
+          accessibilityRole="button"
+          accessibilityLabel={`Iniciar coleta do pedido de ${p.cliente_nome}`}>
+          <Icon name="play" size={14} color={Colors.clareza} />
+          <Text style={s.iniciarText}>Iniciar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 export default function FilaScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<EntregadorStackParamList>>();
   const {entregador} = useAuth();
@@ -21,7 +52,10 @@ export default function FilaScreen() {
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [empresaSelecionada, setEmpresaSelecionada] = useState<string | null>(null);
+  // Empresas com o grupo aberto (mostrando os pedidos). Fechado por padrão —
+  // é exatamente o que resolve o caso de um entregador com 200 pedidos de
+  // uma única empresa (ex.: Magefield) misturados na fila.
+  const [gruposAbertos, setGruposAbertos] = useState<Set<string>>(new Set());
 
   const isOnline = useNetworkStatus();
   const jaCarregou = useRef(false);
@@ -62,28 +96,45 @@ export default function FilaScreen() {
   const fila = pedidos.filter(p => p.status === 'aguardando');
   const emAndamento = pedidos.filter(p => p.status === 'em_transito');
 
-  // Empresas distintas com pedido na fila agora — só aparece a barra de filtro
-  // quando faz sentido (entregador vinculado a várias empresas ao mesmo tempo).
-  const empresas = useMemo(() => {
-    const nomes = new Set<string>();
-    fila.forEach(p => { if (p.nome_empresa) nomes.add(p.nome_empresa); });
-    return Array.from(nomes).sort((a, b) => a.localeCompare(b));
-  }, [fila]);
-
   const iniciarColeta = (p: PedidoData) => {
     hapticLight();
     navigation.navigate('Checklist', {pedidoId: p.id, etapa: 'coleta', volumes: p.volumes});
   };
 
-  const filtrados = fila.filter(p => {
-    const q = busca.toLowerCase();
-    const passaBusca = !q
-      || p.cliente_nome.toLowerCase().includes(q)
+  const filtrados = useMemo(() => {
+    const q = busca.trim().toLowerCase();
+    if (!q) return fila;
+    return fila.filter(p =>
+      p.cliente_nome.toLowerCase().includes(q)
       || p.excursao_nome.toLowerCase().includes(q)
-      || (p.nome_empresa ?? '').toLowerCase().includes(q);
-    const passaEmpresa = !empresaSelecionada || p.nome_empresa === empresaSelecionada;
-    return passaBusca && passaEmpresa;
-  });
+      || (p.nome_empresa ?? '').toLowerCase().includes(q),
+    );
+  }, [fila, busca]);
+
+  // Agrupa por empresa — pra um entregador que atende várias empresas (ou
+  // uma só com centenas de clientes, tipo a Magefield) não ficar tudo numa
+  // lista só. Mantém a ordem alfabética.
+  const grupos = useMemo(() => {
+    const mapa = new Map<string, PedidoData[]>();
+    filtrados.forEach(p => {
+      const chave = p.nome_empresa || 'Sem empresa';
+      if (!mapa.has(chave)) mapa.set(chave, []);
+      mapa.get(chave)!.push(p);
+    });
+    return Array.from(mapa.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [filtrados]);
+
+  const buscaAtiva = busca.trim().length > 0;
+
+  const toggleGrupo = (nome: string) => {
+    hapticLight();
+    setGruposAbertos(prev => {
+      const novo = new Set(prev);
+      if (novo.has(nome)) novo.delete(nome);
+      else novo.add(nome);
+      return novo;
+    });
+  };
 
   return (
     <View style={s.container}>
@@ -129,36 +180,6 @@ export default function FilaScreen() {
         />
       </View>
 
-      {empresas.length > 1 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={s.chipsRow}
-          style={s.chipsScroll}>
-          <TouchableOpacity
-            style={[s.chip, !empresaSelecionada && s.chipAtivo]}
-            onPress={() => setEmpresaSelecionada(null)}
-            accessibilityRole="button"
-            accessibilityLabel="Todas as empresas">
-            <Text style={[s.chipText, !empresaSelecionada && s.chipTextAtivo]}>Todas ({fila.length})</Text>
-          </TouchableOpacity>
-          {empresas.map(nome => {
-            const qtd = fila.filter(p => p.nome_empresa === nome).length;
-            const ativo = empresaSelecionada === nome;
-            return (
-              <TouchableOpacity
-                key={nome}
-                style={[s.chip, ativo && s.chipAtivo]}
-                onPress={() => setEmpresaSelecionada(ativo ? null : nome)}
-                accessibilityRole="button"
-                accessibilityLabel={`Filtrar por ${nome}`}>
-                <Text style={[s.chipText, ativo && s.chipTextAtivo]} numberOfLines={1}>{nome} ({qtd})</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      )}
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{padding: 24, paddingTop: 0, gap: 10}}
@@ -172,34 +193,35 @@ export default function FilaScreen() {
           </>
         ) : filtrados.length === 0 ? (
           <EmptyState icon="inbox" title="Nenhum pedido na fila" subtitle="Novos pedidos aparecerão aqui quando forem criados" />
-        ) : filtrados.map(p => (
-          <View key={p.id} style={s.card} accessibilityLabel={`Pedido de ${p.cliente_nome}, ${p.volumes} volumes, empresa ${p.nome_empresa ?? ''}`}>
-            <View style={s.cardContent}>
-              {!!p.nome_empresa && (
-                <View style={s.empresaBadge}>
-                  <Icon name="briefcase" size={10} color="#60A5FA" />
-                  <Text style={s.empresaBadgeText} numberOfLines={1}>{p.nome_empresa}</Text>
-                </View>
-              )}
-              <Text style={s.cliente}>{p.cliente_nome}</Text>
-              <Text style={s.detalhes}>{p.volumes} vol. · {p.descricao || 'Sem descrição'}</Text>
-              <View style={s.destinoRow}>
-                <Icon name="map-pin" size={12} color={Colors.gray} />
-                <Text style={s.destino}>{p.excursao_nome}</Text>
+        ) : grupos.length === 1 ? (
+          // Uma empresa só — mostra a lista direto, sem cabeçalho de grupo pra abrir.
+          grupos[0][1].map(p => <PedidoCard key={p.id} p={p} mostrarEmpresa={false} onIniciar={iniciarColeta} />)
+        ) : (
+          grupos.map(([nome, itens]) => {
+            const aberto = buscaAtiva || gruposAbertos.has(nome);
+            return (
+              <View key={nome}>
+                <TouchableOpacity
+                  style={s.grupoHeader}
+                  onPress={() => toggleGrupo(nome)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityState={{expanded: aberto}}
+                  accessibilityLabel={`${nome}, ${itens.length} pedido${itens.length === 1 ? '' : 's'}`}>
+                  <Icon name="briefcase" size={14} color="#60A5FA" />
+                  <Text style={s.grupoNome} numberOfLines={1}>{nome}</Text>
+                  <View style={s.grupoBadge}><Text style={s.grupoBadgeText}>{itens.length}</Text></View>
+                  <Icon name={aberto ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.gray} />
+                </TouchableOpacity>
+                {aberto && (
+                  <View style={s.grupoLista}>
+                    {itens.map(p => <PedidoCard key={p.id} p={p} mostrarEmpresa={false} onIniciar={iniciarColeta} />)}
+                  </View>
+                )}
               </View>
-            </View>
-            <View style={s.actions}>
-              <TouchableOpacity
-                style={s.iniciarBtn}
-                onPress={() => iniciarColeta(p)}
-                accessibilityRole="button"
-                accessibilityLabel={`Iniciar coleta do pedido de ${p.cliente_nome}`}>
-                <Icon name="play" size={14} color={Colors.clareza} />
-                <Text style={s.iniciarText}>Iniciar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
+            );
+          })
+        )}
       </ScrollView>
     </View>
   );
@@ -218,12 +240,11 @@ const s = StyleSheet.create({
   resumoLabel: {fontSize: 10, color: Colors.gray, fontWeight: '600'},
   searchBox:   {flexDirection: 'row', alignItems: 'center', marginHorizontal: 24, marginBottom: 12, backgroundColor: '#081544', borderRadius: 10, borderWidth: 1, borderColor: '#0B1E5A', paddingHorizontal: 14, gap: 8},
   searchInput: {flex: 1, height: 44, color: Colors.clareza, fontSize: 15},
-  chipsScroll: {marginBottom: 12},
-  chipsRow:    {flexDirection: 'row', gap: 8, paddingHorizontal: 24},
-  chip:        {flexDirection: 'row', alignItems: 'center', backgroundColor: '#081544', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: '#0B1E5A'},
-  chipAtivo:   {backgroundColor: Colors.pulso, borderColor: Colors.pulso},
-  chipText:    {fontSize: 12, fontWeight: '600', color: Colors.gray, maxWidth: 160},
-  chipTextAtivo:{color: Colors.clareza},
+  grupoHeader: {flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#081544', borderRadius: 10, borderWidth: 1, borderColor: '#0B1E5A', paddingHorizontal: 14, paddingVertical: 12, marginBottom: 4},
+  grupoNome:   {flex: 1, fontSize: 14, fontWeight: '700', color: Colors.clareza},
+  grupoBadge:  {backgroundColor: '#60A5FA20', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2},
+  grupoBadgeText:{color: '#60A5FA', fontWeight: '800', fontSize: 12},
+  grupoLista:  {gap: 10, marginTop: 8, marginBottom: 4},
   card:        {backgroundColor: '#081544', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#0B1E5A'},
   cardContent: {flex: 1},
   empresaBadge:{flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4},

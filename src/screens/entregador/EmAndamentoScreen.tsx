@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef, useMemo} from 'react';
 import {View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, RefreshControl, Pressable} from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -15,6 +15,49 @@ import OfflineBanner from '../../components/OfflineBanner';
 import {SkeletonCard} from '../../components/Skeleton';
 import {hapticLight} from '../../utils/haptics';
 
+function PedidoEmAndamentoCard({p, onEntregar, onDetalhes}: {p: PedidoData; onEntregar: (p: PedidoData) => void; onDetalhes: (p: PedidoData) => void}) {
+  const etapaAtual = 'Em rota para a excursão';
+  return (
+    <View style={s.card} accessibilityLabel={`Pedido de ${p.cliente_nome}, ${etapaAtual}`}>
+      <View style={s.cardLeft}>
+        <View style={s.pulse} />
+      </View>
+      <View style={s.info}>
+        <View style={s.cardTop}>
+          <Text style={s.id}>{p.cliente_nome}</Text>
+        </View>
+        <Text style={s.detalhes}>{p.volumes} vol.</Text>
+        <View style={s.etapaRow2}>
+          <Icon name="activity" size={12} color={Colors.pulso} />
+          <Text style={s.etapa}>{etapaAtual}</Text>
+        </View>
+        <View style={s.destinoRow}>
+          <Icon name="map-pin" size={12} color={Colors.gray} />
+          <Text style={s.destino}>{p.excursao_nome}</Text>
+        </View>
+      </View>
+      <View style={s.actions}>
+        <TouchableOpacity
+          style={s.entregarBtn}
+          onPress={() => onEntregar(p)}
+          accessibilityRole="button"
+          accessibilityLabel={`Entregar pedido de ${p.cliente_nome}`}>
+          <Icon name="check" size={14} color={Colors.pulso} />
+          <Text style={s.entregarText}>Entregar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={s.detalhesBtn}
+          onPress={() => onDetalhes(p)}
+          accessibilityRole="button"
+          accessibilityLabel={`Ver detalhes do pedido de ${p.cliente_nome}`}>
+          <Icon name="eye" size={14} color="#60A5FA" />
+          <Text style={s.detalhesText}>Detalhes</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 export default function EmAndamentoScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<EntregadorStackParamList>>();
   const {entregador} = useAuth();
@@ -22,6 +65,10 @@ export default function EmAndamentoScreen() {
   const [loading, setLoading] = useState(true);
   const [detalhe, setDetalhe] = useState<PedidoData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  // Mesma ideia da Fila: agrupado por empresa e fechado por padrão — pra não
+  // virar uma lista gigante quando o entregador atende empresa com muitos
+  // pedidos em andamento ao mesmo tempo.
+  const [gruposAbertos, setGruposAbertos] = useState<Set<string>>(new Set());
 
   const isOnline = useNetworkStatus();
   const jaCarregou = useRef(false);
@@ -61,6 +108,26 @@ export default function EmAndamentoScreen() {
     navigation.navigate('Checklist', {pedidoId: p.id, etapa: 'entrega'});
   };
 
+  const grupos = useMemo(() => {
+    const mapa = new Map<string, PedidoData[]>();
+    pedidos.forEach(p => {
+      const chave = p.nome_empresa || 'Sem empresa';
+      if (!mapa.has(chave)) mapa.set(chave, []);
+      mapa.get(chave)!.push(p);
+    });
+    return Array.from(mapa.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [pedidos]);
+
+  const toggleGrupo = (nome: string) => {
+    hapticLight();
+    setGruposAbertos(prev => {
+      const novo = new Set(prev);
+      if (novo.has(nome)) novo.delete(nome);
+      else novo.add(nome);
+      return novo;
+    });
+  };
+
   return (
     <View style={s.container}>
       <OfflineBanner />
@@ -78,49 +145,34 @@ export default function EmAndamentoScreen() {
           <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
         ) : pedidos.length === 0 ? (
           <EmptyState icon="navigation" title="Nenhum pedido em andamento" subtitle="Inicie uma coleta na aba Fila para ver aqui" />
-        ) : pedidos.map(p => {
-          const etapaAtual = 'Em rota para a excursão';
-          return (
-            <View key={p.id} style={s.card} accessibilityLabel={`Pedido de ${p.cliente_nome}, ${etapaAtual}`}>
-              <View style={s.cardLeft}>
-                <View style={s.pulse} />
-              </View>
-              <View style={s.info}>
-                <View style={s.cardTop}>
-                  <Text style={s.id}>{p.cliente_nome}</Text>
-                </View>
-                {!!p.nome_empresa && <Text style={s.empresa}>{p.nome_empresa}</Text>}
-                <Text style={s.detalhes}>{p.volumes} vol.</Text>
-                <View style={s.etapaRow2}>
-                  <Icon name="activity" size={12} color={Colors.pulso} />
-                  <Text style={s.etapa}>{etapaAtual}</Text>
-                </View>
-                <View style={s.destinoRow}>
-                  <Icon name="map-pin" size={12} color={Colors.gray} />
-                  <Text style={s.destino}>{p.excursao_nome}</Text>
-                </View>
-              </View>
-              <View style={s.actions}>
+        ) : grupos.length === 1 ? (
+          grupos[0][1].map(p => <PedidoEmAndamentoCard key={p.id} p={p} onEntregar={confirmarEntrega} onDetalhes={setDetalhe} />)
+        ) : (
+          grupos.map(([nome, itens]) => {
+            const aberto = gruposAbertos.has(nome);
+            return (
+              <View key={nome}>
                 <TouchableOpacity
-                  style={s.entregarBtn}
-                  onPress={() => confirmarEntrega(p)}
+                  style={s.grupoHeader}
+                  onPress={() => toggleGrupo(nome)}
+                  activeOpacity={0.7}
                   accessibilityRole="button"
-                  accessibilityLabel={`Entregar pedido de ${p.cliente_nome}`}>
-                  <Icon name="check" size={14} color={Colors.pulso} />
-                  <Text style={s.entregarText}>Entregar</Text>
+                  accessibilityState={{expanded: aberto}}
+                  accessibilityLabel={`${nome}, ${itens.length} pedido${itens.length === 1 ? '' : 's'}`}>
+                  <Icon name="briefcase" size={14} color="#60A5FA" />
+                  <Text style={s.grupoNome} numberOfLines={1}>{nome}</Text>
+                  <View style={s.grupoBadge}><Text style={s.grupoBadgeText}>{itens.length}</Text></View>
+                  <Icon name={aberto ? 'chevron-up' : 'chevron-down'} size={18} color={Colors.gray} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={s.detalhesBtn}
-                  onPress={() => setDetalhe(p)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Ver detalhes do pedido de ${p.cliente_nome}`}>
-                  <Icon name="eye" size={14} color="#60A5FA" />
-                  <Text style={s.detalhesText}>Detalhes</Text>
-                </TouchableOpacity>
+                {aberto && (
+                  <View style={s.grupoLista}>
+                    {itens.map(p => <PedidoEmAndamentoCard key={p.id} p={p} onEntregar={confirmarEntrega} onDetalhes={setDetalhe} />)}
+                  </View>
+                )}
               </View>
-            </View>
-          );
-        })}
+            );
+          })
+        )}
       </ScrollView>
 
       <Modal visible={!!detalhe} transparent animationType="slide">
@@ -163,13 +215,17 @@ const s = StyleSheet.create({
   title:       {fontSize: 22, fontWeight: '700', color: Colors.clareza},
   badge:       {backgroundColor: Colors.pulso, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3},
   badgeText:   {color: Colors.clareza, fontWeight: '800', fontSize: 14},
+  grupoHeader: {flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#081544', borderRadius: 10, borderWidth: 1, borderColor: '#0B1E5A', paddingHorizontal: 14, paddingVertical: 12, marginBottom: 4},
+  grupoNome:   {flex: 1, fontSize: 14, fontWeight: '700', color: Colors.clareza},
+  grupoBadge:  {backgroundColor: '#60A5FA20', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2},
+  grupoBadgeText:{color: '#60A5FA', fontWeight: '800', fontSize: 12},
+  grupoLista:  {gap: 10, marginTop: 8, marginBottom: 4},
   card:        {backgroundColor: '#081544', borderRadius: 12, padding: 16, flexDirection: 'row', gap: 12, borderWidth: 1, borderColor: '#0B1E5A'},
   cardLeft:    {paddingTop: 4},
   pulse:       {width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.pulso},
   info:        {flex: 1},
   cardTop:     {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'},
   id:          {fontSize: 14, fontWeight: '700', color: Colors.clareza},
-  empresa:     {fontSize: 11, fontWeight: '700', color: '#60A5FA', marginTop: 4},
   detalhes:    {fontSize: 13, color: Colors.gray, marginTop: 2},
   etapaRow2:   {flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2},
   etapa:       {fontSize: 13, color: Colors.pulso},
