@@ -137,7 +137,7 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border">
+      <DialogContent className="bg-card border-border" onOpenAutoFocus={e => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-clareza">Novo despacho</DialogTitle>
         </DialogHeader>
