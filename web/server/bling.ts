@@ -103,7 +103,12 @@ async function buscarDadosContaBling(accessToken: string): Promise<{ nome: strin
   try {
     const resp = await blingFetch(accessToken, '/empresas/me/dados-basicos');
     const dados = resp.data || resp;
-    return { nome: dados.nome || null, cnpj: dados.cnpj || null };
+    const nome = dados.nome || null;
+    // O formato ainda não tinha sido confirmado contra uma resposta real —
+    // se o mapeamento não achar "nome", loga o payload bruto (sem token
+    // nenhum nele) pra dar pra ajustar o mapeamento sem tentativa e erro.
+    if (!nome) console.error('[BLING] Resposta de /empresas/me/dados-basicos sem "nome" no formato esperado:', JSON.stringify(resp).slice(0, 500));
+    return { nome, cnpj: dados.cnpj || null };
   } catch (err: any) {
     console.error('[BLING] Erro ao buscar dados básicos da empresa:', err.message);
     return { nome: null, cnpj: null };
