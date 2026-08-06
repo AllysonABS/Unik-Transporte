@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import {
   solicitarRecuperacao,
   verificarCodigoRecuperacao,
@@ -9,24 +9,22 @@ import {
 import { maskCpfCnpj } from '@/lib/mask';
 import { ApiError } from '@/lib/apiClient';
 import { cn } from '@/lib/utils';
+import LogoMark from '@/components/empresa/LogoMark';
 
 type Etapa = 'documento' | 'codigo' | 'novaSenha';
 
 const STEPS: Etapa[] = ['documento', 'codigo', 'novaSenha'];
 
-const COPY: Record<Etapa, { icon: string; title: string; subtitle: (emailHint: string) => string }> = {
+const COPY: Record<Etapa, { title: string; subtitle: (emailHint: string) => string }> = {
   documento: {
-    icon: '🔑',
     title: 'Recuperar senha',
     subtitle: () => 'Informe o CPF ou CNPJ da sua empresa para receber o código de recuperação por e-mail.',
   },
   codigo: {
-    icon: '📩',
     title: 'Verificar código',
     subtitle: hint => `Digite o código de 6 dígitos enviado para ${hint || 'seu e-mail'}.`,
   },
   novaSenha: {
-    icon: '🔒',
     title: 'Nova senha',
     subtitle: () => 'Crie uma nova senha para sua conta.',
   },
@@ -41,6 +39,8 @@ export default function EsqueceuSenhaPage() {
   const [resetToken, setResetToken] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [showSenha, setShowSenha] = useState(false);
+  const [showConfirmar, setShowConfirmar] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -107,37 +107,50 @@ export default function EsqueceuSenhaPage() {
   const stepIndex = STEPS.indexOf(etapa);
 
   return (
-    <div className="min-h-screen bg-matriz flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-matriz flex items-center justify-center px-6 py-10 relative overflow-hidden">
+      {/* Blobs decorativos — mesmos do login, pra manter a identidade visual */}
+      <div className="absolute -top-24 -left-24 w-[420px] h-[420px] bg-pulso/25 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-[420px] h-[420px] bg-emerald-400/15 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative w-full max-w-sm flex flex-col gap-6">
         <button
+          type="button"
           onClick={() => navigate('/empresa/login')}
-          className="mb-6 text-sm font-semibold text-pulso"
+          className="self-start text-[13px] font-semibold text-pulso"
         >
           ← Voltar
         </button>
 
-        <div className="flex flex-col items-center text-center mb-8">
-          <span className="text-4xl mb-4">{copy.icon}</span>
-          <h1 className="text-2xl font-bold text-clareza mb-2">{copy.title}</h1>
-          <p className="text-sm text-gray leading-relaxed">{copy.subtitle(emailHint)}</p>
+        <div className="flex flex-col items-center gap-2.5">
+          <LogoMark />
+          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Transporte</h1>
         </div>
 
-        <div className="rounded-xl bg-white p-7 shadow-2xl shadow-black/30">
+        <div className="rounded-2xl bg-white/[0.07] backdrop-blur-2xl border border-white/10 p-7 shadow-2xl shadow-black/40">
+          <h2 className="text-lg font-bold text-clareza mb-1.5">{copy.title}</h2>
+          <p className="text-[13px] text-gray leading-relaxed mb-6">{copy.subtitle(emailHint)}</p>
+
           {etapa === 'documento' && (
             <>
-              <label className="block text-xs font-semibold text-transicao mb-1.5">CPF ou CNPJ</label>
-              <input
-                value={documento}
-                onChange={e => setDocumento(maskCpfCnpj(e.target.value))}
-                placeholder="CPF ou CNPJ"
-                inputMode="numeric"
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
-              />
-              {erro && <p className="mt-2 text-xs font-medium text-danger">{erro}</p>}
+              <div className="mb-4">
+                <label htmlFor="doc" className="block text-xs font-semibold text-clareza/80 mb-1.5">
+                  CPF ou CNPJ
+                </label>
+                <input
+                  id="doc"
+                  value={documento}
+                  onChange={e => setDocumento(maskCpfCnpj(e.target.value))}
+                  placeholder="CPF ou CNPJ"
+                  inputMode="numeric"
+                  autoComplete="username"
+                  className="h-[50px] w-full rounded-xl border border-white/10 bg-white/5 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso/70 focus:bg-white/[0.07] transition-colors"
+                />
+              </div>
+              {erro && <p className="mb-4 text-sm font-medium text-danger">{erro}</p>}
               <button
                 onClick={enviarCodigo}
                 disabled={loading}
-                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 disabled:opacity-70"
+                className="flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Enviar código'}
               </button>
@@ -146,22 +159,25 @@ export default function EsqueceuSenhaPage() {
 
           {etapa === 'codigo' && (
             <>
-              <label className="block text-xs font-semibold text-transicao mb-1.5">
-                Código de verificação
-              </label>
-              <input
-                value={codigo}
-                onChange={e => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="000000"
-                inputMode="numeric"
-                maxLength={6}
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-center text-2xl font-bold tracking-[8px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
-              />
-              {erro && <p className="mt-2 text-xs font-medium text-danger">{erro}</p>}
+              <div className="mb-4">
+                <label htmlFor="codigo" className="block text-xs font-semibold text-clareza/80 mb-1.5">
+                  Código de verificação
+                </label>
+                <input
+                  id="codigo"
+                  value={codigo}
+                  onChange={e => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  inputMode="numeric"
+                  maxLength={6}
+                  className="h-[50px] w-full rounded-xl border border-white/10 bg-white/5 px-4 text-center text-2xl font-bold tracking-[8px] text-clareza placeholder:text-gray outline-none focus:border-pulso/70 focus:bg-white/[0.07] transition-colors"
+                />
+              </div>
+              {erro && <p className="mb-4 text-sm font-medium text-danger">{erro}</p>}
               <button
                 onClick={verificarCodigo}
                 disabled={loading}
-                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 disabled:opacity-70"
+                className="flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Verificar'}
               </button>
@@ -179,32 +195,62 @@ export default function EsqueceuSenhaPage() {
 
           {etapa === 'novaSenha' && (
             <>
-              <label className="block text-xs font-semibold text-transicao mb-1.5">Nova senha</label>
-              <input
-                type="password"
-                value={novaSenha}
-                onChange={e => setNovaSenha(e.target.value)}
-                placeholder="••••••••"
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
-              />
-              <label className="block text-xs font-semibold text-transicao mb-1.5 mt-4">
-                Confirmar senha
-              </label>
-              <input
-                type="password"
-                value={confirmarSenha}
-                onChange={e => setConfirmarSenha(e.target.value)}
-                placeholder="••••••••"
-                className="h-[50px] w-full rounded-lg border-[1.5px] border-grayBorder bg-grayLight px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso"
-              />
+              <div className="mb-4">
+                <label htmlFor="novaSenha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
+                  Nova senha
+                </label>
+                <div className="flex h-[50px] items-center rounded-xl border border-white/10 bg-white/5 focus-within:border-pulso/70 focus-within:bg-white/[0.07] transition-colors">
+                  <input
+                    id="novaSenha"
+                    type={showSenha ? 'text' : 'password'}
+                    value={novaSenha}
+                    onChange={e => setNovaSenha(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    className="h-full flex-1 bg-transparent px-4 text-[15px] text-clareza placeholder:text-gray outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSenha(!showSenha)}
+                    className="px-3.5 text-gray"
+                    aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showSenha ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+              <div className="mb-2">
+                <label htmlFor="confirmarSenha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
+                  Confirmar senha
+                </label>
+                <div className="flex h-[50px] items-center rounded-xl border border-white/10 bg-white/5 focus-within:border-pulso/70 focus-within:bg-white/[0.07] transition-colors">
+                  <input
+                    id="confirmarSenha"
+                    type={showConfirmar ? 'text' : 'password'}
+                    value={confirmarSenha}
+                    onChange={e => setConfirmarSenha(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    className="h-full flex-1 bg-transparent px-4 text-[15px] text-clareza placeholder:text-gray outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmar(!showConfirmar)}
+                    className="px-3.5 text-gray"
+                    aria-label={showConfirmar ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showConfirmar ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
               {novaSenha && confirmarSenha && novaSenha !== confirmarSenha && (
-                <p className="mt-1.5 text-xs text-danger">As senhas não coincidem</p>
+                <p className="mb-2 text-xs text-danger">As senhas não coincidem</p>
               )}
-              {erro && <p className="mt-2 text-xs font-medium text-danger">{erro}</p>}
+              {erro && <p className="mb-4 text-sm font-medium text-danger">{erro}</p>}
               <button
                 onClick={handleRedefinir}
                 disabled={loading}
-                className="mt-6 flex h-[52px] w-full items-center justify-center rounded-lg bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 disabled:opacity-70"
+                className="mt-4 flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Redefinir senha'}
               </button>
@@ -212,13 +258,13 @@ export default function EsqueceuSenhaPage() {
           )}
         </div>
 
-        <div className="flex justify-center gap-2 mt-8">
+        <div className="flex justify-center gap-2 pb-2">
           {STEPS.map((s, i) => (
             <span
               key={s}
               className={cn(
-                'h-2 rounded-full bg-border',
-                i === stepIndex ? 'w-6 bg-pulso' : i < stepIndex ? 'w-2 bg-pulso' : 'w-2',
+                'h-1.5 rounded-full bg-white/15 transition-all',
+                i === stepIndex ? 'w-6 bg-pulso' : i < stepIndex ? 'w-1.5 bg-pulso' : 'w-1.5',
               )}
             />
           ))}
