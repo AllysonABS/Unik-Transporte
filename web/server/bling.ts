@@ -159,13 +159,26 @@ async function obterTokenValido(pool: Pool, empresaId: string): Promise<string |
   return tokens.access_token;
 }
 
-async function blingFetch(accessToken: string, caminho: string): Promise<any> {
+const BLING_MAX_TENTATIVAS_429 = 5;
+
+// O respiro de 400ms entre chamadas (ver esperar() nas outras funções) é
+// suficiente na maioria das vezes, mas quando o loop automático, um webhook
+// e uma importação manual calham de rodar ao mesmo tempo, o limite de 3
+// req/s do Bling estoura mesmo assim. Sem retry aqui, um único 429 no meio
+// de uma importação de período grande abortava a sincronização inteira —
+// exatamente o "não trouxe nada" de uma importação que já tinha, sim,
+// pedidos pra trazer.
+async function blingFetch(accessToken: string, caminho: string, tentativa = 1): Promise<any> {
   const res = await fetch(`${BLING_API_BASE}${caminho}`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'Accept': 'application/json',
     },
   });
+  if (res.status === 429 && tentativa <= BLING_MAX_TENTATIVAS_429) {
+    await esperar(600 * tentativa);
+    return blingFetch(accessToken, caminho, tentativa + 1);
+  }
   if (!res.ok) {
     const texto = await res.text().catch(() => '');
     throw new Error(`Bling API ${caminho} respondeu ${res.status}: ${texto}`);
