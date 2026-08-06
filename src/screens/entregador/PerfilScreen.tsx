@@ -37,7 +37,19 @@ export default function PerfilScreen() {
   const [editando, setEditando] = useState(false);
   const [nome, setNome] = useState(entregador?.nome ?? '');
   const [telefone, setTelefone] = useState(entregador?.telefone ?? '');
+  const [cpf, setCpf] = useState(entregador?.cpf ? maskCpf(entregador.cpf) : '');
+  const [senhaAtualCpf, setSenhaAtualCpf] = useState('');
   const [salvando, setSalvando] = useState(false);
+
+  const [senhaEditando, setSenhaEditando] = useState(false);
+  const [senhaAtual, setSenhaAtual] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState('');
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
+
+  // CPF e senha são as credenciais de login — trocar o CPF exige confirmar
+  // a senha atual, igual o servidor exige (ver PUT /api/entregador/:id).
+  const cpfMudou = cpf.replace(/\D/g, '') !== (entregador?.cpf ?? '');
 
   const jaCarregou = useRef(false);
 
@@ -64,6 +76,8 @@ export default function PerfilScreen() {
   const cancelarEdicao = () => {
     setNome(entregador?.nome ?? '');
     setTelefone(entregador?.telefone ?? '');
+    setCpf(entregador?.cpf ? maskCpf(entregador.cpf) : '');
+    setSenhaAtualCpf('');
     setEditando(false);
   };
 
@@ -73,16 +87,73 @@ export default function PerfilScreen() {
       show({title: 'Atenção', message: 'O nome não pode ficar em branco.', type: 'warning'});
       return;
     }
+    const cpfDigits = cpf.replace(/\D/g, '');
+    if (cpfMudou) {
+      if (cpfDigits.length !== 11) {
+        show({title: 'Atenção', message: 'CPF inválido.', type: 'warning'});
+        return;
+      }
+      if (!senhaAtualCpf) {
+        show({title: 'Atenção', message: 'Informe sua senha atual pra confirmar a troca do CPF.', type: 'warning'});
+        return;
+      }
+    }
     setSalvando(true);
-    const res = await atualizarEntregador(entregador.id, {nome: nome.trim(), telefone: telefone.trim() || undefined});
+    const res = await atualizarEntregador(entregador.id, {
+      nome: nome.trim(),
+      telefone: telefone.trim() || undefined,
+      cpf: cpfDigits,
+      senha_atual: cpfMudou ? senhaAtualCpf : undefined,
+    });
     setSalvando(false);
     if (res.success) {
       hapticSuccess();
-      setEntregador({...entregador, nome: nome.trim(), telefone: telefone.trim()});
+      setEntregador({...entregador, nome: nome.trim(), telefone: telefone.trim(), cpf: res.cpf ?? cpfDigits});
+      setSenhaAtualCpf('');
       setEditando(false);
     } else {
       hapticError();
       show({title: 'Erro', message: res.error || 'Não foi possível salvar.', type: 'error'});
+    }
+  };
+
+  const cancelarSenha = () => {
+    setSenhaAtual('');
+    setNovaSenha('');
+    setConfirmarNovaSenha('');
+    setSenhaEditando(false);
+  };
+
+  const salvarSenha = async () => {
+    if (!entregador?.id) return;
+    if (!senhaAtual) {
+      show({title: 'Atenção', message: 'Informe sua senha atual.', type: 'warning'});
+      return;
+    }
+    if (novaSenha.length < 8 || !/[A-Z]/.test(novaSenha) || !/[0-9]/.test(novaSenha)) {
+      show({title: 'Atenção', message: 'A nova senha deve ter no mínimo 8 caracteres, com 1 letra maiúscula e 1 número.', type: 'warning'});
+      return;
+    }
+    if (novaSenha !== confirmarNovaSenha) {
+      show({title: 'Atenção', message: 'As senhas não coincidem.', type: 'warning'});
+      return;
+    }
+    setSalvandoSenha(true);
+    const res = await atualizarEntregador(entregador.id, {
+      nome: entregador.nome,
+      telefone: entregador.telefone,
+      cpf: entregador.cpf,
+      senha_atual: senhaAtual,
+      nova_senha: novaSenha,
+    });
+    setSalvandoSenha(false);
+    if (res.success) {
+      hapticSuccess();
+      show({title: 'Senha alterada', message: 'Sua senha foi atualizada com sucesso.', type: 'success'});
+      cancelarSenha();
+    } else {
+      hapticError();
+      show({title: 'Erro', message: res.error || 'Não foi possível alterar a senha.', type: 'error'});
     }
   };
 
@@ -146,9 +217,34 @@ export default function PerfilScreen() {
                 <TextInput style={s.input} value={nome} onChangeText={setNome} placeholderTextColor={Colors.gray} accessibilityLabel="Nome" />
               </View>
               <View style={s.inputWrapper}>
+                <Text style={s.label}>CPF</Text>
+                <TextInput
+                  style={s.input}
+                  value={cpf}
+                  onChangeText={v => setCpf(maskCpf(v))}
+                  keyboardType="number-pad"
+                  maxLength={14}
+                  placeholderTextColor={Colors.gray}
+                  accessibilityLabel="CPF"
+                />
+              </View>
+              <View style={s.inputWrapper}>
                 <Text style={s.label}>Telefone</Text>
                 <TextInput style={s.input} value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" placeholderTextColor={Colors.gray} accessibilityLabel="Telefone" />
               </View>
+              {cpfMudou && (
+                <View style={s.inputWrapper}>
+                  <Text style={s.label}>Senha atual (pra confirmar a troca do CPF)</Text>
+                  <TextInput
+                    style={s.input}
+                    value={senhaAtualCpf}
+                    onChangeText={setSenhaAtualCpf}
+                    secureTextEntry
+                    placeholderTextColor={Colors.gray}
+                    accessibilityLabel="Senha atual"
+                  />
+                </View>
+              )}
               <View style={s.editActions}>
                 <TouchableOpacity style={s.cancelBtn} onPress={cancelarEdicao} disabled={salvando} accessibilityRole="button" accessibilityLabel="Cancelar edição">
                   <Text style={s.cancelBtnText}>Cancelar</Text>
@@ -173,6 +269,49 @@ export default function PerfilScreen() {
                 <Text style={s.dadoValue}>{entregador?.telefone || '—'}</Text>
               </View>
             </>
+          )}
+        </View>
+
+        <View style={s.card}>
+          <View style={s.cardHeaderRow}>
+            <Text style={s.cardTitle}>Segurança</Text>
+            {!senhaEditando && (
+              <TouchableOpacity
+                onPress={() => setSenhaEditando(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Alterar senha"
+                style={s.editBtn}>
+                <Icon name="lock" size={13} color={Colors.pulso} />
+                <Text style={s.editBtnText}>Alterar senha</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {senhaEditando ? (
+            <>
+              <View style={s.inputWrapper}>
+                <Text style={s.label}>Senha atual</Text>
+                <TextInput style={s.input} value={senhaAtual} onChangeText={setSenhaAtual} secureTextEntry placeholderTextColor={Colors.gray} accessibilityLabel="Senha atual" />
+              </View>
+              <View style={s.inputWrapper}>
+                <Text style={s.label}>Nova senha</Text>
+                <TextInput style={s.input} value={novaSenha} onChangeText={setNovaSenha} secureTextEntry placeholder="Mínimo 8 caracteres" placeholderTextColor={Colors.gray} accessibilityLabel="Nova senha" />
+              </View>
+              <View style={s.inputWrapper}>
+                <Text style={s.label}>Confirmar nova senha</Text>
+                <TextInput style={s.input} value={confirmarNovaSenha} onChangeText={setConfirmarNovaSenha} secureTextEntry placeholderTextColor={Colors.gray} accessibilityLabel="Confirmar nova senha" />
+              </View>
+              <View style={s.editActions}>
+                <TouchableOpacity style={s.cancelBtn} onPress={cancelarSenha} disabled={salvandoSenha} accessibilityRole="button" accessibilityLabel="Cancelar alteração de senha">
+                  <Text style={s.cancelBtnText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={s.saveBtn} onPress={salvarSenha} disabled={salvandoSenha} accessibilityRole="button" accessibilityLabel="Salvar nova senha">
+                  {salvandoSenha ? <ActivityIndicator color={Colors.clareza} size="small" /> : <Text style={s.saveBtnText}>Salvar</Text>}
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <Text style={s.dadoLabel}>Sua senha é usada pra entrar no app junto com o CPF.</Text>
           )}
         </View>
 

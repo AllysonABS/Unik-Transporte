@@ -59,7 +59,12 @@ export async function cadastrarEntregador(dados: {nome: string; cpf: string; tel
   }
 }
 
-export async function atualizarEntregador(entregadorId: string, dados: {nome: string; telefone?: string}): Promise<{success: boolean; error?: string}> {
+// senha_atual é obrigatória quando cpf ou nova_senha são enviados — o
+// servidor recusa a alteração sem ela (ver PUT /api/entregador/:id).
+export async function atualizarEntregador(
+  entregadorId: string,
+  dados: {nome: string; telefone?: string; cpf?: string; senha_atual?: string; nova_senha?: string},
+): Promise<{success: boolean; cpf?: string; error?: string}> {
   try {
     const res = await fetch(`${API_URL}/api/entregador/${entregadorId}`, {
       method: 'PUT',

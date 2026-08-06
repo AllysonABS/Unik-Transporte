@@ -1015,7 +1015,11 @@ app.post('/api/cadastro-entregador', async (req, res) => {
   }
 });
 
-// Entregador edita os próprios dados (tela de configurações do app)
+// Entregador edita os próprios dados (tela de configurações do app).
+// CPF e senha são os dois campos usados pra logar, então trocar qualquer um
+// dos dois exige confirmar a senha atual — sem isso, quem pegasse o celular
+// desbloqueado do entregador por um instante poderia sequestrar a conta
+// trocando CPF/senha sem saber a senha original.
 app.put('/api/entregador/:entregadorId', auth, async (req, res) => {
   try {
     const {entregadorId} = req.params;
@@ -1023,10 +1027,51 @@ app.put('/api/entregador/:entregadorId', auth, async (req, res) => {
     if (user.tipo !== 'entregador' || user.id !== entregadorId) {
       return res.status(403).json({error: 'Sem permissão.'});
     }
-    const {nome, telefone} = req.body;
+    const {nome, telefone, cpf, senha_atual, nova_senha} = req.body;
     if (!nome) return res.status(400).json({error: 'Informe o nome.'});
-    await pool.query('UPDATE entregadores SET nome=$1, telefone=$2 WHERE id=$3', [nome, telefone || null, entregadorId]);
-    res.json({success: true});
+
+    const atualRes = await pool.query('SELECT cpf, senha_hash FROM entregadores WHERE id=$1', [entregadorId]);
+    if (atualRes.rows.length === 0) return res.status(404).json({error: 'Entregador não encontrado.'});
+    const atual = atualRes.rows[0];
+
+    let cpfLimpo: string = atual.cpf;
+    const mudandoCpf = cpf !== undefined && cpf.replace(/\D/g, '') !== atual.cpf;
+    if (mudandoCpf) {
+      cpfLimpo = cpf.replace(/\D/g, '');
+      if (!isValidCpf(cpfLimpo)) return res.status(400).json({error: 'CPF inválido.'});
+    }
+
+    const mudandoSenha = !!nova_senha;
+    if (mudandoCpf || mudandoSenha) {
+      if (!senha_atual) return res.status(400).json({error: 'Informe sua senha atual para confirmar essa alteração.'});
+      const senhaOk = await bcrypt.compare(senha_atual, atual.senha_hash);
+      if (!senhaOk) return res.status(401).json({error: 'Senha atual incorreta.'});
+    }
+
+    let senha_hash: string | null = null;
+    if (mudandoSenha) {
+      const check = isStrongPassword(nova_senha);
+      if (!check.valid) return res.status(400).json({error: check.message});
+      senha_hash = await bcrypt.hash(nova_senha, 10);
+    }
+
+    if (mudandoCpf) {
+      const existe = await pool.query('SELECT id FROM entregadores WHERE cpf=$1 AND id<>$2', [cpfLimpo, entregadorId]);
+      if (existe.rows.length > 0) return res.status(409).json({error: 'Já existe uma conta com este CPF.'});
+    }
+
+    if (senha_hash) {
+      await pool.query(
+        'UPDATE entregadores SET nome=$1, telefone=$2, cpf=$3, senha_hash=$4 WHERE id=$5',
+        [nome, telefone || null, cpfLimpo, senha_hash, entregadorId]
+      );
+    } else {
+      await pool.query(
+        'UPDATE entregadores SET nome=$1, telefone=$2, cpf=$3 WHERE id=$4',
+        [nome, telefone || null, cpfLimpo, entregadorId]
+      );
+    }
+    res.json({success: true, cpf: cpfLimpo});
   } catch (err: any) {
     console.error('Erro ao atualizar entregador:', err.message);
     res.status(500).json({error: 'Erro interno do servidor.'});
