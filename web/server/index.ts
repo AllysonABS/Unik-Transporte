@@ -727,12 +727,34 @@ app.get('/api/empresa/:id/clientes', auth, async (req, res) => {
     const {id} = req.params;
     const user = (req as any).user as TokenPayload;
     if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
-    const result = await pool.query(
-      `SELECT ce.id as vinculo_id, ce.status, ce.nome, ce.cpf, ce.cnpj, ce.rg, ce.telefone, ce.email,
+
+    const busca = ((req.query.busca as string) || '').trim();
+    // `limite` só entra em ação quando o chamador pede — sem ele, mantém o
+    // comportamento de sempre (lista completa), usado pela tela de
+    // Clientes. Quem manda `limite` é o campo de busca do "Novo despacho":
+    // com base de milhares de clientes, carregar tudo pra filtrar no
+    // navegador não escala, então filtra e limita no banco.
+    const limiteBruto = req.query.limite ? parseInt(req.query.limite as string, 10) : null;
+    const limite = limiteBruto && limiteBruto > 0 ? Math.min(limiteBruto, 50) : null;
+
+    const condicoes = ['ce.empresa_id = $1'];
+    const params: any[] = [id];
+    if (busca) {
+      params.push(`%${busca}%`);
+      condicoes.push(`(ce.nome ILIKE $${params.length} OR ce.telefone ILIKE $${params.length} OR ce.cpf ILIKE $${params.length} OR ce.cnpj ILIKE $${params.length})`);
+    }
+
+    let sql = `SELECT ce.id as vinculo_id, ce.status, ce.nome, ce.cpf, ce.cnpj, ce.rg, ce.telefone, ce.email,
               ce.data_nascimento, ce.cep, ce.endereco, ce.numero, ce.bairro, ce.cidade, ce.estado, ce.observacoes, ce.data_vinculo
        FROM cliente_empresa ce
-       WHERE ce.empresa_id = $1 ORDER BY ce.data_vinculo DESC`, [id]
-    );
+       WHERE ${condicoes.join(' AND ')}
+       ORDER BY ${busca ? 'ce.nome ASC' : 'ce.data_vinculo DESC'}`;
+    if (limite) {
+      params.push(limite);
+      sql += ` LIMIT $${params.length}`;
+    }
+
+    const result = await pool.query(sql, params);
     const clientes = result.rows.map(r => ({
       vinculo_id: r.vinculo_id, status: r.status,
       nome: r.nome,

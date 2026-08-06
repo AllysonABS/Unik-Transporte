@@ -7,10 +7,10 @@ import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { criarPedido } from '@/services/pedidos';
-import { listarClientesEmpresa } from '@/services/clientes';
 import { listarEntregadores } from '@/services/entregadores';
 import { listarExcursoes } from '@/services/excursoes';
 import { ApiError } from '@/lib/apiClient';
+import type { ClienteVinculo } from '@/types/empresa';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/form';
 import EntregadorFormDialog from '@/components/empresa/EntregadorFormDialog';
 import ExcursaoFormDialog from '@/components/empresa/ExcursaoFormDialog';
+import ClientePicker from '@/components/empresa/ClientePicker';
 
 const schema = z.object({
   cliente_id: z.string().min(1, 'Selecione o cliente'),
@@ -63,17 +64,13 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [entregadorFormOpen, setEntregadorFormOpen] = useState(false);
   const [excursaoFormOpen, setExcursaoFormOpen] = useState(false);
+  const [clienteSelecionado, setClienteSelecionado] = useState<ClienteVinculo | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { cliente_id: '', entregador_id: '', excursao_id: '', volumes: '1', descricao: '' },
   });
 
-  const { data: clientesData } = useQuery({
-    queryKey: ['clientes-picker', empresa?.id],
-    queryFn: () => listarClientesEmpresa(empresa!.id),
-    enabled: open && !!empresa?.id,
-  });
   const { data: entregadoresData } = useQuery({
     queryKey: ['entregadores-picker', empresa?.id],
     queryFn: () => listarEntregadores(empresa!.id),
@@ -85,7 +82,6 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
     enabled: open && !!empresa?.id,
   });
 
-  const clientes = clientesData?.clientes ?? [];
   const entregadores = entregadoresData?.entregadores ?? [];
   const excursoes = excursoesData?.excursoes ?? [];
 
@@ -101,20 +97,20 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
     if (!open) {
       setEntregadorFormOpen(false);
       setExcursaoFormOpen(false);
+      setClienteSelecionado(null);
     }
   }, [open]);
 
   const mutation = useMutation({
     mutationFn: () => {
       const values = form.getValues();
-      const cliente = clientes.find(c => c.vinculo_id === values.cliente_id);
       const entregador = entregadores.find(d => d.id === values.entregador_id);
       const excursao = excursoes.find(e => e.id === values.excursao_id);
       return criarPedido(empresa!.id, {
         entregador_id: values.entregador_id,
         excursao_id: values.excursao_id,
-        cliente_nome: cliente?.nome ?? '',
-        cliente_telefone: cliente?.telefone || undefined,
+        cliente_nome: clienteSelecionado?.nome ?? '',
+        cliente_telefone: clienteSelecionado?.telefone || undefined,
         entregador_nome: entregador?.nome ?? '',
         excursao_nome: excursao?.nome ?? '',
         volumes: Number(values.volumes),
@@ -126,6 +122,7 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
       queryClient.invalidateQueries({ queryKey: ['pedidos', empresa?.id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard', empresa?.id] });
       form.reset();
+      setClienteSelecionado(null);
       onOpenChange(false);
     },
     onError: (err: unknown) => {
@@ -149,23 +146,19 @@ export default function CreatePedidoDialog({ open, onOpenChange }: Props) {
             <FormField
               control={form.control}
               name="cliente_id"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Cliente</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o cliente" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {clientes.map(c => (
-                        <SelectItem key={c.vinculo_id} value={c.vinculo_id}>
-                          {c.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <ClientePicker
+                      empresaId={empresa!.id}
+                      value={clienteSelecionado}
+                      onChange={cliente => {
+                        setClienteSelecionado(cliente);
+                        form.setValue('cliente_id', cliente?.vinculo_id ?? '', { shouldValidate: true });
+                      }}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
