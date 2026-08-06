@@ -619,9 +619,21 @@ function CobrancaCard() {
   );
 }
 
+// Mesma máscara usada pra exibir CNPJ em ConfiguracoesPage — o valor que
+// vem do Bling em geral já chega formatado, mas por segurança reformata a
+// partir só dos dígitos.
+function formatarCnpjExibicao(cnpj: string) {
+  const digitos = cnpj.replace(/\D/g, '');
+  if (digitos.length !== 14) return cnpj;
+  return digitos.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+}
+
 function IntegracaoBlingCard() {
   const { empresa } = useEmpresaAuth();
   const queryClient = useQueryClient();
+  const [importarPeriodoAberto, setImportarPeriodoAberto] = useState(false);
+  const [dataInicial, setDataInicial] = useState('');
+  const [dataFinal, setDataFinal] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['bling-status', empresa?.id],
@@ -659,6 +671,18 @@ function IntegracaoBlingCard() {
     },
   });
 
+  const importarPeriodoMutation = useMutation({
+    mutationFn: () => sincronizarBlingAgora(empresa!.id, { dataInicial, dataFinal: dataFinal || undefined }),
+    onSuccess: (res) => {
+      toast.success(res.novos > 0 ? `${res.novos} pedido(s) importado(s) do período.` : 'Nenhum pedido novo encontrado nesse período.');
+      queryClient.invalidateQueries({ queryKey: ['pedidos-importados', empresa?.id] });
+      setImportarPeriodoAberto(false);
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao importar o período.');
+    },
+  });
+
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -678,6 +702,15 @@ function IntegracaoBlingCard() {
                 )}
               </p>
             </div>
+            {data.conta_nome && (
+              <div className="text-sm text-gray">
+                Conta Bling conectada:{' '}
+                <span className="text-clareza font-medium">
+                  {data.conta_nome}
+                  {data.conta_cnpj && ` (${formatarCnpjExibicao(data.conta_cnpj)})`}
+                </span>
+              </div>
+            )}
             {data.ultimo_erro && (
               <p className="text-xs text-destructive">Último erro: {data.ultimo_erro}</p>
             )}
@@ -685,9 +718,12 @@ function IntegracaoBlingCard() {
               Pedidos criados no Bling caem automaticamente na fila de{' '}
               <span className="text-clareza">Pedidos importados</span>, pra você só escolher entregador e excursão.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button type="button" variant="outline" size="sm" disabled={sincronizarMutation.isPending} onClick={() => sincronizarMutation.mutate()}>
                 {sincronizarMutation.isPending ? 'Sincronizando...' : 'Sincronizar agora'}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setImportarPeriodoAberto(v => !v)}>
+                {importarPeriodoAberto ? 'Cancelar importação por período' : 'Importar período específico'}
               </Button>
               <Button
                 type="button"
@@ -700,6 +736,43 @@ function IntegracaoBlingCard() {
                 Desconectar
               </Button>
             </div>
+
+            {importarPeriodoAberto && (
+              <div className="rounded-lg border border-border p-4 space-y-3">
+                <p className="text-sm text-gray">
+                  Busca no Bling os pedidos feitos no período abaixo, mesmo os anteriores à conexão da integração.
+                  Pedidos já importados não são duplicados.
+                </p>
+                <div className="grid grid-cols-2 gap-3 max-w-sm">
+                  <div className="space-y-1">
+                    <Label htmlFor="bling-data-inicial">De</Label>
+                    <Input
+                      id="bling-data-inicial"
+                      type="date"
+                      value={dataInicial}
+                      onChange={e => setDataInicial(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="bling-data-final">Até (opcional)</Label>
+                    <Input
+                      id="bling-data-final"
+                      type="date"
+                      value={dataFinal}
+                      onChange={e => setDataFinal(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={!dataInicial || importarPeriodoMutation.isPending}
+                  onClick={() => importarPeriodoMutation.mutate()}
+                >
+                  {importarPeriodoMutation.isPending ? 'Importando...' : 'Importar período'}
+                </Button>
+              </div>
+            )}
           </>
         ) : (
           <>

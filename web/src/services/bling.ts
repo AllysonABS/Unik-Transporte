@@ -5,6 +5,8 @@ export interface BlingStatus {
   conectado: boolean;
   ultima_sincronizacao?: string | null;
   ultimo_erro?: string | null;
+  conta_nome?: string | null;
+  conta_cnpj?: string | null;
 }
 
 export function buscarStatusBling(empresaId: string) {
@@ -19,6 +21,6 @@ export function desconectarBling(empresaId: string) {
   return api.delete<{ success: boolean }>(`/api/empresa/${empresaId}/integracoes/bling`);
 }
 
-export function sincronizarBlingAgora(empresaId: string) {
-  return api.post<{ success: boolean; novos: number }>(`/api/empresa/${empresaId}/integracoes/bling/sincronizar`);
+export function sincronizarBlingAgora(empresaId: string, periodo?: { dataInicial: string; dataFinal?: string }) {
+  return api.post<{ success: boolean; novos: number }>(`/api/empresa/${empresaId}/integracoes/bling/sincronizar`, periodo);
 }

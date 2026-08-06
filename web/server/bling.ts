@@ -95,17 +95,37 @@ async function renovarToken(refreshToken: string): Promise<TokenResponse> {
   return res.json();
 }
 
+// Dados básicos da conta Bling conectada (nome/CNPJ) — só pra identificação
+// na nossa tela, não afeta a sincronização em si. Validado contra a
+// documentação pública da v3 (GET /empresas/me/dados-basicos), mas — como o
+// resto do mapeamento — ainda não contra uma resposta real.
+async function buscarDadosContaBling(accessToken: string): Promise<{ nome: string | null; cnpj: string | null }> {
+  try {
+    const resp = await blingFetch(accessToken, '/empresas/me/dados-basicos');
+    const dados = resp.data || resp;
+    return { nome: dados.nome || null, cnpj: dados.cnpj || null };
+  } catch (err: any) {
+    console.error('[BLING] Erro ao buscar dados básicos da empresa:', err.message);
+    return { nome: null, cnpj: null };
+  }
+}
+
 // Troca o código do callback OAuth por tokens e salva/atualiza a conexão
 // da empresa. Chamado uma vez, na hora do "Conectar Bling".
 export async function conectarEmpresa(pool: Pool, empresaId: string, code: string): Promise<void> {
   const tokens = await trocarCodigoPorToken(code);
   const expiraEm = new Date(Date.now() + tokens.expires_in * 1000);
+  // Busca já com o token novo em mãos pra mostrar na tela com qual conta
+  // Bling a empresa acabou de conectar — não trava o "Conectar Bling" se a
+  // consulta falhar (fica pra ser preenchida depois, na sincronização).
+  const conta = await buscarDadosContaBling(tokens.access_token);
   await pool.query(
-    `INSERT INTO bling_integracoes (empresa_id, access_token, refresh_token, expira_em, ativo)
-     VALUES ($1, $2, $3, $4, true)
+    `INSERT INTO bling_integracoes (empresa_id, access_token, refresh_token, expira_em, ativo, conta_nome, conta_cnpj)
+     VALUES ($1, $2, $3, $4, true, $5, $6)
      ON CONFLICT (empresa_id) DO UPDATE SET
-       access_token = $2, refresh_token = $3, expira_em = $4, ativo = true, ultimo_erro = NULL`,
-    [empresaId, tokens.access_token, tokens.refresh_token, expiraEm]
+       access_token = $2, refresh_token = $3, expira_em = $4, ativo = true, ultimo_erro = NULL,
+       conta_nome = COALESCE($5, bling_integracoes.conta_nome), conta_cnpj = COALESCE($6, bling_integracoes.conta_cnpj)`,
+    [empresaId, tokens.access_token, tokens.refresh_token, expiraEm, conta.nome, conta.cnpj]
   );
 }
 
@@ -231,30 +251,77 @@ async function resolverCliente(pool: Pool, empresaId: string, dados: ReturnType<
   return novo.rows[0].id;
 }
 
-// Sincroniza os pedidos de uma empresa: busca no Bling o que teve
-// movimentação desde a última sincronização, e insere na fila de
-// importação (pedidos_importados) o que ainda não existe lá.
-export async function sincronizarEmpresa(pool: Pool, empresaId: string): Promise<{ novos: number }> {
+// Parâmetros de um pedido manual de importação por período (tela de
+// Integrações → "Importar período") — sobrepõe a janela automática.
+export type OpcoesSincronizacao = {
+  dataInicial?: string; // YYYY-MM-DD
+  dataFinal?: string; // YYYY-MM-DD
+};
+
+const LIMITE_PAGINA = 100;
+const MAX_PAGINAS = 50; // teto de segurança (5000 pedidos) pra uma importação manual não rodar pra sempre
+
+// Busca todas as páginas de /pedidos/vendas no intervalo pedido. O Bling
+// pagina em blocos de até 100 — uma janela de vários dias/semanas (caso de
+// uma importação manual retroativa) facilmente passa de 100 pedidos, então
+// sem paginar aqui alguns pedidos do período nunca apareceriam.
+async function buscarTodosPedidos(accessToken: string, dataInicial: string, dataFinal?: string): Promise<any[]> {
+  const pedidos: any[] = [];
+  for (let pagina = 1; pagina <= MAX_PAGINAS; pagina++) {
+    const params = new URLSearchParams({ dataInicial, limite: String(LIMITE_PAGINA), pagina: String(pagina) });
+    if (dataFinal) params.set('dataFinal', dataFinal);
+    const resposta = await blingFetch(accessToken, `/pedidos/vendas?${params.toString()}`);
+    const pagina_dados: any[] = resposta.data || [];
+    pedidos.push(...pagina_dados);
+    if (pagina_dados.length < LIMITE_PAGINA) break; // última página
+    await esperar(400); // respeita o limite de requisições/segundo entre páginas
+  }
+  return pedidos;
+}
+
+// Sincroniza os pedidos de uma empresa: por padrão, busca no Bling o que
+// teve movimentação desde a última sincronização. Passando `opcoes.dataInicial`
+// (e opcionalmente `dataFinal`), ignora a janela automática e busca
+// exatamente o período pedido — usado pra importação manual retroativa
+// (ex.: pedidos anteriores à conexão da integração).
+export async function sincronizarEmpresa(pool: Pool, empresaId: string, opcoes?: OpcoesSincronizacao): Promise<{ novos: number }> {
   const accessToken = await obterTokenValido(pool, empresaId);
   if (!accessToken) return { novos: 0 };
 
   try {
-    // Sempre olha pelo menos alguns dias pra trás, mesmo em sincronizações
-    // seguintes — usar exatamente "ultima_sincronizacao" como início faz a
-    // janela encolher a cada ciclo e pedidos de dias anteriores nunca mais
-    // aparecem na busca, mesmo que nunca tenham sido importados (ex.:
-    // pedido lançado com atraso no Bling). A deduplicação por
-    // origem_pedido_id (UNIQUE) já garante que não reprocessa o que já
-    // está na fila ou já foi finalizado.
-    const JANELA_MINIMA_DIAS = 3;
-    const integ = await pool.query('SELECT ultima_sincronizacao FROM bling_integracoes WHERE empresa_id=$1', [empresaId]);
-    const desdeUltimaSync: Date | null = integ.rows[0]?.ultima_sincronizacao ? new Date(integ.rows[0].ultima_sincronizacao) : null;
-    const janelaMinima = new Date(Date.now() - JANELA_MINIMA_DIAS * 24 * 60 * 60 * 1000);
-    const desde = desdeUltimaSync && desdeUltimaSync < janelaMinima ? desdeUltimaSync : janelaMinima;
-    const dataInicial = desde.toISOString().slice(0, 10);
+    let dataInicial: string;
+    let dataFinal: string | undefined;
 
-    const resposta = await blingFetch(accessToken, `/pedidos/vendas?dataInicial=${dataInicial}&limite=100`);
-    const pedidos: any[] = resposta.data || [];
+    if (opcoes?.dataInicial) {
+      dataInicial = opcoes.dataInicial;
+      dataFinal = opcoes.dataFinal;
+    } else {
+      // Sempre olha pelo menos alguns dias pra trás, mesmo em sincronizações
+      // seguintes — usar exatamente "ultima_sincronizacao" como início faz a
+      // janela encolher a cada ciclo e pedidos de dias anteriores nunca mais
+      // aparecem na busca, mesmo que nunca tenham sido importados (ex.:
+      // pedido lançado com atraso no Bling). A deduplicação por
+      // origem_pedido_id (UNIQUE) já garante que não reprocessa o que já
+      // está na fila ou já foi finalizado.
+      const JANELA_MINIMA_DIAS = 3;
+      const integ = await pool.query('SELECT ultima_sincronizacao, conta_nome FROM bling_integracoes WHERE empresa_id=$1', [empresaId]);
+      const desdeUltimaSync: Date | null = integ.rows[0]?.ultima_sincronizacao ? new Date(integ.rows[0].ultima_sincronizacao) : null;
+      const janelaMinima = new Date(Date.now() - JANELA_MINIMA_DIAS * 24 * 60 * 60 * 1000);
+      const desde = desdeUltimaSync && desdeUltimaSync < janelaMinima ? desdeUltimaSync : janelaMinima;
+      dataInicial = desde.toISOString().slice(0, 10);
+
+      // Conexões feitas antes da coluna conta_nome existir ficam sem essa
+      // informação pra sempre, a menos que a gente preencha em algum momento
+      // depois — aproveita o primeiro ciclo automático pra completar.
+      if (!integ.rows[0]?.conta_nome) {
+        const conta = await buscarDadosContaBling(accessToken);
+        if (conta.nome) {
+          await pool.query('UPDATE bling_integracoes SET conta_nome=$1, conta_cnpj=$2 WHERE empresa_id=$3', [conta.nome, conta.cnpj, empresaId]);
+        }
+      }
+    }
+
+    const pedidos = await buscarTodosPedidos(accessToken, dataInicial, dataFinal);
 
     let novos = 0;
     for (const pedidoResumo of pedidos) {

@@ -1324,7 +1324,7 @@ app.get('/api/empresa/:id/integracoes/bling', auth, async (req, res) => {
     const user = (req as any).user as TokenPayload;
     if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
     const result = await pool.query(
-      'SELECT ativo, ultima_sincronizacao, ultimo_erro FROM bling_integracoes WHERE empresa_id=$1', [id]
+      'SELECT ativo, ultima_sincronizacao, ultimo_erro, conta_nome, conta_cnpj FROM bling_integracoes WHERE empresa_id=$1', [id]
     );
     if (result.rows.length === 0) {
       return res.json({success: true, conectado: false});
@@ -1411,13 +1411,23 @@ app.delete('/api/empresa/:id/integracoes/bling', auth, async (req, res) => {
   }
 });
 
-// Força uma sincronização agora (além do loop automático a cada 5min)
+// Força uma sincronização agora (além do loop automático a cada 5min).
+// Aceita opcionalmente dataInicial/dataFinal (YYYY-MM-DD) no body pra
+// importar um período específico — ex.: pedidos anteriores à conexão da
+// integração, que a janela automática (últimos dias) nunca alcançaria.
 app.post('/api/empresa/:id/integracoes/bling/sincronizar', auth, async (req, res) => {
   try {
     const {id} = req.params;
     const user = (req as any).user as TokenPayload;
     if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
-    const {novos} = await sincronizarEmpresa(pool, id);
+
+    const {dataInicial, dataFinal} = (req.body || {}) as {dataInicial?: string; dataFinal?: string};
+    const dataValida = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v);
+    if (dataInicial && !dataValida(dataInicial)) return res.status(400).json({error: 'dataInicial inválida. Use o formato AAAA-MM-DD.'});
+    if (dataFinal && !dataValida(dataFinal)) return res.status(400).json({error: 'dataFinal inválida. Use o formato AAAA-MM-DD.'});
+    if (dataFinal && !dataInicial) return res.status(400).json({error: 'Informe dataInicial junto com dataFinal.'});
+
+    const {novos} = await sincronizarEmpresa(pool, id, dataInicial ? {dataInicial, dataFinal} : undefined);
     res.json({success: true, novos});
   } catch (err: any) {
     console.error('Erro ao sincronizar Bling:', err.message);
