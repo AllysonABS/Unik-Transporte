@@ -17,6 +17,11 @@ export interface PedidoImportado {
   valor_total: string | null;
   status: 'pendente' | 'finalizado' | 'ignorado';
   pedido_status: 'aguardando' | 'em_transito' | 'entregue' | 'cancelado' | null;
+  // Situação do pedido dentro do próprio Bling (Em aberto, Atendido,
+  // Cancelado...) — independente do nosso status de fila acima. Só existe
+  // pra pedidos vindos do Bling; fica null pra outras origens.
+  situacao_bling_id: number | null;
+  situacao_bling_nome: string | null;
   criado_em: string;
 }
 

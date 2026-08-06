@@ -173,6 +173,27 @@ async function blingFetch(accessToken: string, caminho: string): Promise<any> {
   return res.json();
 }
 
+// IDs padrão de situação de pedido de venda no Bling (fixos pra qualquer
+// conta, salvo quando a empresa cria situações customizadas — nesse caso o
+// id não bate com essa tabela e cai no fallback "Situação #id" lá embaixo).
+// Confirmado contra dados reais de produção em 06/08/2026: os pedidos
+// importados vieram com id 6 ("Em aberto") e 9 ("Atendido"), batendo com a
+// documentação pública do Bling.
+const SITUACOES_PEDIDO_VENDA_BLING: Record<number, string> = {
+  6: 'Em aberto',
+  9: 'Atendido',
+  12: 'Cancelado',
+  15: 'Em andamento',
+  18: 'Venda agenciada',
+  21: 'Em digitação',
+  24: 'Verificado',
+};
+
+function nomeSituacaoBling(id: number | null): string | null {
+  if (id == null) return null;
+  return SITUACOES_PEDIDO_VENDA_BLING[id] || `Situação #${id}`;
+}
+
 // Extrai do payload do pedido (formato v3) só o que a gente precisa pra
 // preencher a fila de importação. Validado contra resposta real da API em
 // 05/08/2026 — "volumes" é transporte.quantidadeVolumes (NÃO a soma das
@@ -185,6 +206,7 @@ function mapearPedido(pedidoBling: any, telefoneContato: string | null) {
   const itens: any[] = pedidoBling.itens || [];
   const quantidadeVolumes = Number(pedidoBling.transporte?.quantidadeVolumes) || 0;
   const itensResumo = itens.map(i => i.descricao || i.codigo).filter(Boolean).join(', ');
+  const situacaoBlingId = pedidoBling.situacao?.id != null ? Number(pedidoBling.situacao.id) : null;
 
   return {
     origemPedidoId: String(pedidoBling.id),
@@ -199,6 +221,8 @@ function mapearPedido(pedidoBling: any, telefoneContato: string | null) {
     volumes: quantidadeVolumes > 0 ? quantidadeVolumes : 1,
     itensResumo: itensResumo || null,
     valorTotal: pedidoBling.total ?? null,
+    situacaoBlingId,
+    situacaoBlingNome: nomeSituacaoBling(situacaoBlingId),
     dadosBrutos: pedidoBling,
   };
 }
@@ -330,19 +354,34 @@ export async function sincronizarEmpresa(pool: Pool, empresaId: string, opcoes?:
 
     let novos = 0;
     for (const pedidoResumo of pedidos) {
-      // O Bling limita a 3 requisições/segundo — um respiro entre cada
-      // pedido evita 429 quando muitos pedidos novos chegam de uma vez.
+      // A listagem já vem com a situação (id) de cada pedido, sem custo de
+      // requisição extra — usa isso tanto pro pedido novo quanto pra manter
+      // em dia a situação de um pedido que já está na fila (ex.: virou
+      // "Cancelado" no Bling depois de já ter sido importado).
+      const situacaoBlingId = pedidoResumo.situacao?.id != null ? Number(pedidoResumo.situacao.id) : null;
+      const situacaoBlingNome = nomeSituacaoBling(situacaoBlingId);
+
+      const jaExiste = await pool.query(
+        'SELECT id FROM pedidos_importados WHERE empresa_id=$1 AND origem=$2 AND origem_pedido_id=$3',
+        [empresaId, 'bling', String(pedidoResumo.id)]
+      );
+      if (jaExiste.rows.length > 0) {
+        if (situacaoBlingId != null) {
+          await pool.query(
+            'UPDATE pedidos_importados SET situacao_bling_id=$1, situacao_bling_nome=$2 WHERE id=$3',
+            [situacaoBlingId, situacaoBlingNome, jaExiste.rows[0].id]
+          );
+        }
+        continue;
+      }
+
+      // O Bling limita a 3 requisições/segundo — um respiro antes de cada
+      // chamada evita 429 quando muitos pedidos novos chegam de uma vez.
       await esperar(400);
       // O endpoint de listagem costuma vir resumido — busca o detalhe pra
       // pegar itens/contato completos.
       const detalheResp = await blingFetch(accessToken, `/pedidos/vendas/${pedidoResumo.id}`);
       const pedidoBling = detalheResp.data || detalheResp;
-
-      const jaExiste = await pool.query(
-        'SELECT id FROM pedidos_importados WHERE empresa_id=$1 AND origem=$2 AND origem_pedido_id=$3',
-        [empresaId, 'bling', String(pedidoBling.id)]
-      );
-      if (jaExiste.rows.length > 0) continue;
 
       // Só busca o telefone (chamada extra) pra pedido que realmente vai
       // entrar na fila — evita gastar requisição em pedido já importado.
@@ -355,11 +394,12 @@ export async function sincronizarEmpresa(pool: Pool, empresaId: string, opcoes?:
       await pool.query(
         `INSERT INTO pedidos_importados
           (empresa_id, origem, origem_pedido_id, numero_pedido, data_pedido, cliente_nome, cliente_telefone,
-           cliente_documento, cliente_empresa_id, volumes, itens_resumo, valor_total, dados_brutos)
-         VALUES ($1,'bling',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+           cliente_documento, cliente_empresa_id, volumes, itens_resumo, valor_total, situacao_bling_id,
+           situacao_bling_nome, dados_brutos)
+         VALUES ($1,'bling',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
         [empresaId, dados.origemPedidoId, dados.numeroPedido, dados.dataPedido, dados.clienteNome, dados.clienteTelefone,
           dados.clienteDocumento, clienteEmpresaId, dados.volumes, dados.itensResumo, dados.valorTotal,
-          JSON.stringify(dados.dadosBrutos)]
+          dados.situacaoBlingId, dados.situacaoBlingNome, JSON.stringify(dados.dadosBrutos)]
       );
       novos++;
     }

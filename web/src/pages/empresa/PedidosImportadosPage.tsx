@@ -41,6 +41,23 @@ function statusPill(p: PedidoImportado) {
   return { label: 'Aguardando coleta', cls: 'bg-pulso/15 text-pulso' };
 }
 
+// Cor da situação de origem no Bling — independente do statusPill acima
+// (que é o nosso fluxo interno). Nomes fora dessa lista (situação
+// customizada na conta do cliente) caem no estilo neutro.
+const SITUACAO_BLING_CLS: Record<string, string> = {
+  'Em aberto': 'bg-warning/15 text-warning',
+  'Atendido': 'bg-success/15 text-success',
+  'Verificado': 'bg-success/15 text-success',
+  'Cancelado': 'bg-destructive/15 text-destructive',
+  'Em andamento': 'bg-info/15 text-info',
+  'Venda agenciada': 'bg-info/15 text-info',
+  'Em digitação': 'bg-gray/15 text-gray',
+};
+
+function situacaoBlingCls(nome: string) {
+  return SITUACAO_BLING_CLS[nome] || 'bg-gray/15 text-gray';
+}
+
 function formatarDataPedido(data: string | null) {
   if (!data) return '—';
   // O Postgres serializa a coluna DATE como datetime completo (ex.:
@@ -58,6 +75,9 @@ export default function PedidosImportadosPage() {
   const [filtro, setFiltro] = useState<FiltroPedidosImportados>('pendente');
   const [mes, setMes] = useState(() => new Date().toISOString().slice(0, 7));
   const [busca, setBusca] = useState('');
+  // Situação de origem no Bling (Em aberto, Atendido...) — eixo de filtro
+  // independente do status interno (fila/entrega) acima. 'todas' não filtra.
+  const [situacaoBling, setSituacaoBling] = useState('todas');
 
   const { data, isLoading } = useQuery({
     queryKey: ['pedidos-importados', empresa?.id, filtro, mes],
@@ -66,17 +86,27 @@ export default function PedidosImportadosPage() {
     refetchInterval: 30000,
   });
 
-  const pedidos = data?.pedidos_importados ?? [];
+  const pedidos = useMemo(() => data?.pedidos_importados ?? [], [data]);
+
+  // Opções do filtro de situação Bling vêm dos pedidos já carregados — não
+  // é uma lista fixa porque a conta pode ter situações customizadas.
+  const situacoesBlingDisponiveis = useMemo(() => {
+    const nomes = new Set<string>();
+    for (const p of pedidos) if (p.situacao_bling_nome) nomes.add(p.situacao_bling_nome);
+    return Array.from(nomes).sort();
+  }, [pedidos]);
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    if (!termo) return pedidos;
-    return pedidos.filter(
-      p =>
+    return pedidos.filter(p => {
+      if (situacaoBling !== 'todas' && p.situacao_bling_nome !== situacaoBling) return false;
+      if (!termo) return true;
+      return (
         p.cliente_nome?.toLowerCase().includes(termo) ||
-        p.numero_pedido?.toLowerCase().includes(termo),
-    );
-  }, [pedidos, busca]);
+        p.numero_pedido?.toLowerCase().includes(termo)
+      );
+    });
+  }, [pedidos, busca, situacaoBling]);
 
   return (
     <div className="space-y-6">
@@ -107,6 +137,17 @@ export default function PedidosImportadosPage() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={situacaoBling} onValueChange={setSituacaoBling}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Situação no Bling" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Situação no Bling: todas</SelectItem>
+            {situacoesBlingDisponiveis.map(nome => (
+              <SelectItem key={nome} value={nome}>{nome}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
@@ -124,6 +165,7 @@ export default function PedidosImportadosPage() {
                 <TableHead>Data</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Volumes</TableHead>
+                <TableHead>Situação no Bling</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead />
               </TableRow>
@@ -131,7 +173,7 @@ export default function PedidosImportadosPage() {
             <TableBody>
               {filtrados.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray py-8">
+                  <TableCell colSpan={7} className="text-center text-gray py-8">
                     Nenhum pedido encontrado.
                   </TableCell>
                 </TableRow>
@@ -149,6 +191,15 @@ export default function PedidosImportadosPage() {
                         )}
                       </TableCell>
                       <TableCell>{p.volumes}</TableCell>
+                      <TableCell>
+                        {p.situacao_bling_nome ? (
+                          <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ${situacaoBlingCls(p.situacao_bling_nome)}`}>
+                            {p.situacao_bling_nome}
+                          </span>
+                        ) : (
+                          <span className="text-gray">—</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ${pill.cls}`}>
                           {pill.label}
