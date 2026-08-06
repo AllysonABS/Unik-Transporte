@@ -1250,6 +1250,32 @@ app.delete('/api/empresa/:empresaId/pedidos/:pedidoId', auth, async (req, res) =
   }
 });
 
+// Empresa edita a quantidade de volumes de um despacho já criado — cenário
+// comum: o cliente compra mais em cima da hora e o pedido sai com mais
+// volumes do que foi cadastrado originalmente.
+app.put('/api/empresa/:empresaId/pedidos/:pedidoId/volumes', auth, async (req, res) => {
+  try {
+    const {empresaId, pedidoId} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== empresaId) {
+      return res.status(403).json({error: 'Sem permissão.'});
+    }
+    const volumes = Number(req.body.volumes);
+    if (!Number.isInteger(volumes) || volumes < 1) {
+      return res.status(400).json({error: 'Informe uma quantidade de volumes válida (mínimo 1).'});
+    }
+    const result = await pool.query(
+      'UPDATE pedidos SET volumes=$1 WHERE id=$2 AND empresa_id=$3 RETURNING id',
+      [volumes, pedidoId, empresaId]
+    );
+    if (result.rows.length === 0) return res.status(404).json({error: 'Pedido não encontrado.'});
+    res.json({success: true});
+  } catch (err: any) {
+    console.error('Erro ao atualizar volumes do pedido:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
 // === COBRANÇA (ASAAS) ===
 // Essas rotas ficam liberadas mesmo com assinatura inativa (ver
 // ROTAS_LIVRES_SEM_ASSINATURA_ATIVA no middleware `auth`) — senão a empresa

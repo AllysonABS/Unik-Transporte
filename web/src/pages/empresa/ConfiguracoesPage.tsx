@@ -674,7 +674,11 @@ function IntegracaoBlingCard() {
   const importarPeriodoMutation = useMutation({
     mutationFn: () => sincronizarBlingAgora(empresa!.id, { dataInicial, dataFinal: dataFinal || undefined }),
     onSuccess: (res) => {
-      toast.success(res.novos > 0 ? `${res.novos} pedido(s) importado(s) do período.` : 'Nenhum pedido novo encontrado nesse período.');
+      toast.success(
+        res.novos > 0
+          ? `${res.novos} pedido(s) importado(s) do período. Se forem de outro mês, ajuste o filtro de mês em Pedidos importados pra ver.`
+          : 'Nenhum pedido novo nesse período — pode ser que já estejam importados (confira o filtro de mês em Pedidos importados).'
+      );
       queryClient.invalidateQueries({ queryKey: ['pedidos-importados', empresa?.id] });
       setImportarPeriodoAberto(false);
     },

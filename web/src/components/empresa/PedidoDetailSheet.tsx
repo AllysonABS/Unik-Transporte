@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil, Check, X } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -10,10 +10,11 @@ import {
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import StatusBadge from '@/components/empresa/StatusBadge';
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
-import { excluirPedido } from '@/services/pedidos';
+import { excluirPedido, atualizarVolumesPedido } from '@/services/pedidos';
 import { formatHora } from '@/lib/format';
 import { ApiError } from '@/lib/apiClient';
 import type { PedidoData } from '@/types/empresa';
@@ -27,6 +28,14 @@ export default function PedidoDetailSheet({ pedido, onOpenChange }: Props) {
   const { empresa } = useEmpresaAuth();
   const queryClient = useQueryClient();
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [editandoVolumes, setEditandoVolumes] = useState(false);
+  const [novoVolumes, setNovoVolumes] = useState('');
+
+  // Sai do modo de edição sempre que o sheet troca de pedido (ou fecha).
+  useEffect(() => {
+    setEditandoVolumes(false);
+    setNovoVolumes(pedido ? String(pedido.volumes) : '');
+  }, [pedido]);
 
   const excluirMutation = useMutation({
     mutationFn: () => excluirPedido(empresa!.id, pedido!.id),
@@ -42,6 +51,28 @@ export default function PedidoDetailSheet({ pedido, onOpenChange }: Props) {
       toast.error(err instanceof ApiError ? err.message : 'Erro ao excluir pedido.');
     },
   });
+
+  const volumesMutation = useMutation({
+    mutationFn: (volumes: number) => atualizarVolumesPedido(empresa!.id, pedido!.id, volumes),
+    onSuccess: () => {
+      toast.success('Volumes atualizados.');
+      queryClient.invalidateQueries({ queryKey: ['pedidos', empresa?.id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', empresa?.id] });
+      setEditandoVolumes(false);
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao atualizar volumes.');
+    },
+  });
+
+  function salvarVolumes() {
+    const valor = Number(novoVolumes);
+    if (!Number.isInteger(valor) || valor < 1) {
+      toast.error('Informe uma quantidade de volumes válida (mínimo 1).');
+      return;
+    }
+    volumesMutation.mutate(valor);
+  }
 
   return (
     <Sheet open={!!pedido} onOpenChange={onOpenChange}>
@@ -59,7 +90,53 @@ export default function PedidoDetailSheet({ pedido, onOpenChange }: Props) {
               <DetailRow label="Cliente" value={pedido.cliente_nome} />
               <DetailRow label="Entregador" value={pedido.entregador_nome} />
               <DetailRow label="Excursão" value={pedido.excursao_nome} />
-              <DetailRow label="Volumes" value={String(pedido.volumes)} />
+              <div className="flex justify-between items-center border-b border-border py-2 text-sm gap-3">
+                <span className="text-gray">Volumes</span>
+                {editandoVolumes ? (
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      type="number"
+                      min={1}
+                      value={novoVolumes}
+                      onChange={e => setNovoVolumes(e.target.value)}
+                      disabled={volumesMutation.isPending}
+                      className="h-7 w-16 text-right text-sm"
+                      autoFocus
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-success hover:text-success"
+                      disabled={volumesMutation.isPending}
+                      onClick={salvarVolumes}
+                      aria-label="Salvar volumes"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-gray"
+                      disabled={volumesMutation.isPending}
+                      onClick={() => { setEditandoVolumes(false); setNovoVolumes(String(pedido.volumes)); }}
+                      aria-label="Cancelar edição de volumes"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-clareza font-medium hover:text-pulso"
+                    onClick={() => setEditandoVolumes(true)}
+                  >
+                    {pedido.volumes}
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
               <DetailRow label="Descrição" value={pedido.descricao || '—'} />
             </div>
 

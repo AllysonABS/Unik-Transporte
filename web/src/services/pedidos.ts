@@ -31,3 +31,7 @@ export function criarPedido(empresaId: string, payload: CriarPedidoPayload) {
 export function excluirPedido(empresaId: string, pedidoId: string) {
   return api.delete<{ success: boolean }>(`/api/empresa/${empresaId}/pedidos/${pedidoId}`);
 }
+
+export function atualizarVolumesPedido(empresaId: string, pedidoId: string, volumes: number) {
+  return api.put<{ success: boolean }>(`/api/empresa/${empresaId}/pedidos/${pedidoId}/volumes`, { volumes });
+}
