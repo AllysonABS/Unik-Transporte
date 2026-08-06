@@ -380,12 +380,18 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      // Permite carregar as fotos dos pedidos, hospedadas no Cloudflare R2
-      'img-src': ["'self'", 'data:', ...(r2Origin ? [r2Origin] : [])],
+      // Permite carregar as fotos dos pedidos, hospedadas no Cloudflare R2,
+      // e o pixel de fallback do Meta Ads (tag <img> no <noscript>).
+      'img-src': ["'self'", 'data:', 'https://www.facebook.com', ...(r2Origin ? [r2Origin] : [])],
       // Autocompletar endereço por CEP (tela de cadastro) chama essas APIs
       // públicas direto do navegador — viacep é tentado primeiro, brasilapi
-      // é o fallback (ver web/src/lib/cep.ts).
-      'connect-src': ["'self'", 'https://viacep.com.br', 'https://brasilapi.com.br'],
+      // é o fallback (ver web/src/lib/cep.ts). facebook.com/connect.facebook.net
+      // são pro Pixel do Meta Ads enviar os eventos de conversão.
+      'connect-src': ["'self'", 'https://viacep.com.br', 'https://brasilapi.com.br', 'https://www.facebook.com', 'https://connect.facebook.net'],
+      // O código oficial do Pixel do Meta Ads é um script inline (é assim
+      // que a própria Meta manda instalar) e ele injeta o fbevents.js de
+      // connect.facebook.net — precisa liberar os dois.
+      'script-src': ["'self'", "'unsafe-inline'", 'https://connect.facebook.net'],
     },
   },
 }));
