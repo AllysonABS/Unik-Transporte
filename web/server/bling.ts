@@ -366,11 +366,33 @@ export async function sincronizarEmpresa(pool: Pool, empresaId: string, opcoes?:
         [empresaId, 'bling', String(pedidoResumo.id)]
       );
       if (jaExiste.rows.length > 0) {
+        const pedidoImportadoId = jaExiste.rows[0].id;
         if (situacaoBlingId != null) {
           await pool.query(
             'UPDATE pedidos_importados SET situacao_bling_id=$1, situacao_bling_nome=$2 WHERE id=$3',
-            [situacaoBlingId, situacaoBlingNome, jaExiste.rows[0].id]
+            [situacaoBlingId, situacaoBlingNome, pedidoImportadoId]
           );
+        }
+        // Cliente vinculado sem telefone — comum em pedido importado antes
+        // da loja preencher o telefone no cadastro do Bling. Sem re-checar
+        // isso, o cliente ficaria pra sempre sem telefone no nosso sistema
+        // (e sem aviso por WhatsApp), mesmo depois de corrigido lá.
+        const clienteSemTelefone = await pool.query(
+          `SELECT ce.id FROM pedidos_importados pi
+           JOIN cliente_empresa ce ON ce.id = pi.cliente_empresa_id
+           WHERE pi.id=$1 AND (ce.telefone IS NULL OR ce.telefone = '')`,
+          [pedidoImportadoId]
+        );
+        if (clienteSemTelefone.rows.length > 0 && pedidoResumo.contato?.id) {
+          await esperar(400);
+          const telefone = await resolverTelefoneContato(accessToken, pedidoResumo.contato.id);
+          if (telefone) {
+            await pool.query('UPDATE cliente_empresa SET telefone=$1 WHERE id=$2', [telefone, clienteSemTelefone.rows[0].id]);
+            await pool.query(
+              "UPDATE pedidos_importados SET cliente_telefone=$1 WHERE id=$2 AND (cliente_telefone IS NULL OR cliente_telefone = '')",
+              [telefone, pedidoImportadoId]
+            );
+          }
         }
         continue;
       }
