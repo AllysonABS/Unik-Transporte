@@ -48,13 +48,15 @@ export default function ExcursoesPage() {
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    if (!termo) return excursoes;
-    return excursoes.filter(
-      e =>
-        e.nome?.toLowerCase().includes(termo) ||
-        e.responsavel?.toLowerCase().includes(termo) ||
-        e.setor?.toLowerCase().includes(termo),
-    );
+    const lista = termo
+      ? excursoes.filter(
+          e =>
+            e.nome?.toLowerCase().includes(termo) ||
+            e.responsavel?.toLowerCase().includes(termo) ||
+            e.setor?.toLowerCase().includes(termo),
+        )
+      : excursoes;
+    return [...lista].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   }, [excursoes, busca]);
 
   const excluirMutation = useMutation({
@@ -107,11 +109,11 @@ export default function ExcursoesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Setor</TableHead>
-                <TableHead>Vaga</TableHead>
-                <TableHead>Responsável</TableHead>
-                <TableHead>Telefone</TableHead>
+                <TableHead className="min-w-[160px]">Nome</TableHead>
+                <TableHead className="w-28">Setor</TableHead>
+                <TableHead className="w-20">Vaga</TableHead>
+                <TableHead className="min-w-[140px]">Responsável</TableHead>
+                <TableHead className="w-36">Telefone</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -125,14 +127,14 @@ export default function ExcursoesPage() {
               ) : (
                 filtrados.map(e => (
                   <TableRow key={e.id}>
-                    <TableCell className="font-medium text-clareza">{e.nome}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium text-clareza py-3">{e.nome}</TableCell>
+                    <TableCell className="py-3 whitespace-nowrap">
                       <Badge className="bg-success/10 text-success hover:bg-success/10">{e.setor}</Badge>
                     </TableCell>
-                    <TableCell>{e.vaga}</TableCell>
-                    <TableCell>{e.responsavel}</TableCell>
-                    <TableCell>{e.telefone ? maskTelefone(e.telefone) : '—'}</TableCell>
-                    <TableCell>
+                    <TableCell className="py-3 whitespace-nowrap">{e.vaga}</TableCell>
+                    <TableCell className="py-3">{e.responsavel}</TableCell>
+                    <TableCell className="py-3 whitespace-nowrap">{e.telefone ? maskTelefone(e.telefone) : '—'}</TableCell>
+                    <TableCell className="py-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">
