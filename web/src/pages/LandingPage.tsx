@@ -16,7 +16,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl shadow-lg shadow-pulso/20" />
             <span className="text-xl font-bold tracking-tight">
-              Unik <span className="text-gray-400">Transporte</span>
+              Unik <span className="text-gray-400">Logística</span>
             </span>
           </div>
           <div className="flex items-center gap-3">
