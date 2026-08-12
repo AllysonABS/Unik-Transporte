@@ -1,0 +1,42 @@
+name: Build e Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  build-and-deploy:
+    name: Build, Push e Deploy
+    runs-on: [self-hosted, unik-transporte]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build da imagem
+        working-directory: web
+        run: |
+          docker build \
+            -t 127.0.0.1:5000/unik-transporte-app:${{ github.sha }} \
+            -t 127.0.0.1:5000/unik-transporte-app:latest \
+            .
+
+      - name: Push pro registry local da VPS
+        run: |
+          docker push 127.0.0.1:5000/unik-transporte-app:${{ github.sha }}
+          docker push 127.0.0.1:5000/unik-transporte-app:latest
+
+      - name: Deploy no Swarm
+        run: |
+          docker service update \
+            --force \
+            --image 127.0.0.1:5000/unik-transporte-app:${{ github.sha }} \
+            --update-order start-first \
+            unik-transporte_unik_transporte_app
+
+          echo "=== Limpando imagens antigas ==="
+          docker image prune -af
+
+          echo "=== Deploy concluido! ==="
+          docker service ls --filter name=unik-transporte
