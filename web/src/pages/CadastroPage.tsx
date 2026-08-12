@@ -213,7 +213,7 @@ export default function CadastroPage() {
         <div className="bg-[#081544] border border-[#0B1E5A] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
           <span className="text-5xl mb-6 block">🎉</span>
           <h1 className="text-2xl font-bold text-clareza mb-4">Cadastro realizado!</h1>
-          <p className="text-gray-400 mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Unik Transporte.</p>
+          <p className="text-gray-400 mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Unik Logística.</p>
           <button onClick={() => navigate('/')} className="w-full bg-pulso text-clareza font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-95 transition-transform">
             Voltar para o início
           </button>
@@ -457,7 +457,7 @@ export default function CadastroPage() {
                   <p className="text-clareza font-semibold text-sm">Plano Mensal</p>
                   <p className="text-gray-400 text-xs">Acesso completo ao sistema</p>
                 </div>
-                <p className="text-pulso font-black text-xl">R$69,90</p>
+                <p className="text-pulso font-black text-xl">R$89,90</p>
               </div>
 
               <p className="text-gray-500 text-[11px] -mt-2">

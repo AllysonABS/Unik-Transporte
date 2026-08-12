@@ -8,23 +8,23 @@ export default function ManualBlingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/Logo.png" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
-            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
+            <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl" />
+            <span className="text-xl font-bold tracking-tight">Unik Logística</span>
           </button>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-5 md:px-8 pt-28 pb-20">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Manual — Integração com o Bling</h1>
-        <p className="text-gray-400 text-sm mb-10">Como conectar e usar a integração Unik Transporte + Bling</p>
+        <p className="text-gray-400 text-sm mb-10">Como conectar e usar a integração Unik Logística + Bling</p>
 
         <div className="space-y-8 text-gray-300 text-sm leading-relaxed">
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">O que essa integração faz</h2>
             <p>
-              O Unik Transporte organiza a entrega de pedidos até o ônibus de uma excursão, antes dela partir.
+              O Unik Logística organiza a entrega de pedidos até o ônibus de uma excursão, antes dela partir.
               Conectando sua conta do Bling, os pedidos de venda que você já cadastra por lá caem automaticamente
-              no painel do Unik Transporte — junto com os dados do cliente — sem precisar digitar nada de novo.
+              no painel do Unik Logística — junto com os dados do cliente — sem precisar digitar nada de novo.
               Você só completa duas informações que o Bling não tem: <strong className="text-clareza">qual excursão</strong> e{' '}
               <strong className="text-clareza">qual entregador</strong> vai levar aquele pedido.
             </p>
@@ -33,18 +33,18 @@ export default function ManualBlingPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">1. Conectar sua conta do Bling</h2>
             <ul className="list-disc list-inside space-y-2">
-              <li>Acesse o painel do Unik Transporte e faça login com a conta da sua empresa.</li>
+              <li>Acesse o painel do Unik Logística e faça login com a conta da sua empresa.</li>
               <li>Vá em <strong className="text-clareza">Configurações</strong> → seção <strong className="text-clareza">Integração com o Bling</strong>.</li>
               <li>Clique em <strong className="text-clareza">Conectar Bling</strong> — você será levado pra tela de autorização do próprio Bling.</li>
               <li>Faça login na sua conta Bling e autorize o acesso.</li>
-              <li>Você volta automaticamente pro Unik Transporte com a integração já ativa.</li>
+              <li>Você volta automaticamente pro Unik Logística com a integração já ativa.</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">2. Como os pedidos chegam</h2>
             <p>
-              A cada poucos minutos, o Unik Transporte verifica se há pedidos novos ou atualizados no Bling.
+              A cada poucos minutos, o Unik Logística verifica se há pedidos novos ou atualizados no Bling.
               Cada pedido encontrado entra numa fila chamada <strong className="text-clareza">Pedidos importados</strong>,
               disponível no menu lateral do painel. O cliente do pedido é localizado ou cadastrado automaticamente
               (por CPF/CNPJ ou telefone), sem duplicar cadastro.

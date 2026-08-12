@@ -14,7 +14,7 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
-            <img src="/Logo.png" alt="Unik Transporte" className="w-10 h-10 rounded-xl shadow-lg shadow-pulso/20" />
+            <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl shadow-lg shadow-pulso/20" />
             <span className="text-xl font-bold tracking-tight">
               Unik <span className="text-gray-400">Transporte</span>
             </span>
@@ -52,7 +52,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            O Unik Transporte centraliza todo o processo, aciona o entregador certo e <strong className="text-clareza font-semibold">confirma cada entrega com foto</strong>, tudo em tempo real.
+            O Unik Logística centraliza todo o processo, aciona o entregador certo e <strong className="text-clareza font-semibold">confirma cada entrega com foto</strong>, tudo em tempo real.
             Chega de pedir comprovante de entrega e torcer pra ninguém esquecer de mandar.
           </p>
 
@@ -119,7 +119,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="bg-gradient-to-br from-pulso/25 to-pulso/5 border border-pulso/40 rounded-2xl p-8">
-            <span className="text-pulso text-xs font-bold uppercase tracking-widest">Com o Unik Transporte</span>
+            <span className="text-pulso text-xs font-bold uppercase tracking-widest">Com o Unik Logística</span>
             <div className="space-y-4 mt-6">
               {[
                 'Pedido feito, entregador acionado, pedido enviado e registrado em um só lugar.',
@@ -228,7 +228,7 @@ export default function LandingPage() {
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
                   <span className="text-sm text-gray-400">R$</span>
-                  <span className="text-5xl md:text-6xl font-black bg-gradient-to-b from-white to-gray-300 bg-clip-text text-transparent">69</span>
+                  <span className="text-5xl md:text-6xl font-black bg-gradient-to-b from-white to-gray-300 bg-clip-text text-transparent">89</span>
                   <span className="text-2xl font-bold text-gray-300">,90</span>
                   <span className="text-gray-500 text-sm ml-1">/mês</span>
                 </div>

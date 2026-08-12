@@ -31,7 +31,7 @@ function LogoMark() {
     <Image
       source={require('../../assets/Logo.png')}
       style={logo.image}
-      accessibilityLabel="Logo Unik Transporte"
+      accessibilityLabel="Logo Unik Logística"
     />
   );
 }
@@ -116,7 +116,7 @@ export default function LoginScreen({navigation}: Props) {
 
         <View style={styles.header}>
           <LogoMark />
-          <Text style={styles.appName}>Unik Transporte</Text>
+          <Text style={styles.appName}>Unik Logística</Text>
         </View>
 
         <View style={styles.card}>

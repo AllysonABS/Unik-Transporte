@@ -8,8 +8,8 @@ export default function PrivacidadePage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/Logo.png" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
-            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
+            <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl" />
+            <span className="text-xl font-bold tracking-tight">Unik Logística</span>
           </button>
         </div>
       </header>
@@ -24,10 +24,10 @@ export default function PrivacidadePage() {
             <p>
               Esta Política de Privacidade descreve como a <strong>Unik Tecnologia</strong> (CPF: 100.136.644-17),
               doravante denominada "Nós", coleta, utiliza, armazena e protege as informações pessoais dos usuários do
-              aplicativo e plataforma <strong>Unik Transporte</strong>.
+              aplicativo e plataforma <strong>Unik Logística</strong>.
             </p>
             <p className="mt-3">
-              Ao utilizar o Unik Transporte, você concorda com as práticas descritas nesta política, em conformidade com a
+              Ao utilizar o Unik Logística, você concorda com as práticas descritas nesta política, em conformidade com a
               Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018) e demais legislações aplicáveis.
             </p>
           </section>
@@ -111,7 +111,7 @@ export default function PrivacidadePage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">8. Cookies e Tecnologias</h2>
             <p>
-              O aplicativo Unik Transporte não utiliza cookies. A versão web pode utilizar armazenamento local (localStorage)
+              O aplicativo Unik Logística não utiliza cookies. A versão web pode utilizar armazenamento local (localStorage)
               exclusivamente para manter preferências do usuário.
             </p>
           </section>

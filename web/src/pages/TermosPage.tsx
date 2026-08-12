@@ -8,8 +8,8 @@ export default function TermosPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/Logo.png" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
-            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
+            <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl" />
+            <span className="text-xl font-bold tracking-tight">Unik Logística</span>
           </button>
         </div>
       </header>
@@ -22,7 +22,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">1. Aceitação dos Termos</h2>
             <p>
-              Ao criar uma conta ou utilizar o aplicativo <strong>Unik Transporte</strong>, você declara que leu, compreendeu e concorda
+              Ao criar uma conta ou utilizar o aplicativo <strong>Unik Logística</strong>, você declara que leu, compreendeu e concorda
               com estes Termos de Uso. Caso não concorde, não utilize a plataforma.
             </p>
           </section>
@@ -30,7 +30,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">2. Descrição do Serviço</h2>
             <p>
-              O Unik Transporte é uma plataforma de gestão de expedições e transporte que permite a empresas:
+              O Unik Logística é uma plataforma de gestão de expedições e transporte que permite a empresas:
             </p>
             <ul className="list-disc list-inside mt-3 space-y-2">
               <li>Gerenciar pedidos de transporte com rastreamento em tempo real.</li>
@@ -64,7 +64,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">5. Assinatura e Pagamento</h2>
             <ul className="list-disc list-inside space-y-2">
-              <li>O plano custa <strong>R$ 69,90/mês</strong> por empresa.</li>
+              <li>O plano custa <strong>R$ 89,90/mês</strong> por empresa.</li>
               <li>O primeiro período de 30 dias é concedido automaticamente no cadastro.</li>
               <li>Inclui pedidos, clientes, entregadores e excursões ilimitados.</li>
               <li>Clientes e entregadores utilizam o app gratuitamente.</li>
@@ -86,7 +86,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">7. Propriedade Intelectual</h2>
             <p>
-              Todo o conteúdo do aplicativo Unik Transporte (código, design, marca, textos) é propriedade da Unik Tecnologia.
+              Todo o conteúdo do aplicativo Unik Logística (código, design, marca, textos) é propriedade da Unik Tecnologia.
               É proibida a reprodução, modificação ou distribuição sem autorização expressa.
             </p>
           </section>
@@ -94,7 +94,7 @@ export default function TermosPage() {
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">8. Limitação de Responsabilidade</h2>
             <ul className="list-disc list-inside space-y-2">
-              <li>O Unik Transporte é uma ferramenta de gestão e não se responsabiliza pela execução física do transporte.</li>
+              <li>O Unik Logística é uma ferramenta de gestão e não se responsabiliza pela execução física do transporte.</li>
               <li>Não garantimos disponibilidade ininterrupta do serviço (manutenções podem ocorrer).</li>
               <li>Não somos responsáveis por perdas decorrentes de uso indevido de credenciais pelo usuário.</li>
               <li>A responsabilidade máxima da Unik Tecnologia é limitada ao valor pago pelo usuário no último mês.</li>

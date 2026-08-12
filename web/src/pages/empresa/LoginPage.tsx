@@ -63,7 +63,7 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2.5 pt-4">
           <LogoMark />
-          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Transporte</h1>
+          <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Logística</h1>
         </div>
 
         <div className="rounded-2xl bg-white/[0.07] backdrop-blur-2xl border border-white/10 p-7 shadow-2xl shadow-black/40">

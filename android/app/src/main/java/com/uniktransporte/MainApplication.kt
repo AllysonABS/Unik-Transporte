@@ -36,7 +36,7 @@ class MainApplication : Application(), ReactApplication {
         "Notifica\u00e7\u00f5es",
         NotificationManager.IMPORTANCE_HIGH
       ).apply {
-        description = "Notifica\u00e7\u00f5es do Unik Transporte"
+        description = "Notifica\u00e7\u00f5es do Unik Logística"
         enableVibration(true)
       }
       val manager = getSystemService(NotificationManager::class.java)

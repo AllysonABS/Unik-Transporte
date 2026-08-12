@@ -95,7 +95,7 @@ export default function DashboardLayout() {
             <LogoMark size="sm" />
             {!collapsed && (
               <div className="overflow-hidden">
-                <p className="text-clareza font-bold leading-tight truncate">Unik Transporte</p>
+                <p className="text-clareza font-bold leading-tight truncate">Unik Logística</p>
                 <p className="text-xs text-gray truncate">{empresa?.nome_empresa}</p>
               </div>
             )}

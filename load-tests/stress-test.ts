@@ -1,5 +1,5 @@
 /**
- * Teste de Carga - Unik Transporte
+ * Teste de Carga - Unik Logística
  * Simula: entregadores upload foto + clientes lendo + empresas operando
  * Usa IDs REAIS do banco para resultados válidos.
  *

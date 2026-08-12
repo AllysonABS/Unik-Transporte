@@ -8,7 +8,7 @@ export default function LogoMark({ size = 'lg' }: Props) {
   return (
     <img
       src="/Logo.png"
-      alt="Unik Transporte"
+      alt="Unik Logística"
       className={`${dimension} shrink-0 rounded-2xl`}
     />
   );

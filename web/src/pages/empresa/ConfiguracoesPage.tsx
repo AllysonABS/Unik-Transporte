@@ -507,7 +507,7 @@ function CobrancaCard() {
           {cancelada && (
             <p className="text-sm text-gray">
               Sua assinatura foi cancelada. O acesso ao sistema continua liberado até a data acima; depois disso, pra
-              voltar a usar o Unik Transporte, é necessário fazer um novo cadastro.
+              voltar a usar o Unik Logística, é necessário fazer um novo cadastro.
             </p>
           )}
         </CardContent>
@@ -610,7 +610,7 @@ function CobrancaCard() {
         open={confirmarCancelamento}
         onOpenChange={setConfirmarCancelamento}
         title="Cancelar assinatura?"
-        description="Você continua com acesso ao sistema até o fim do período já pago. Depois disso, pra voltar a usar o Unik Transporte, será necessário um novo cadastro com cartão."
+        description="Você continua com acesso ao sistema até o fim do período já pago. Depois disso, pra voltar a usar o Unik Logística, será necessário um novo cadastro com cartão."
         confirmLabel={cancelarMutation.isPending ? 'Cancelando...' : 'Cancelar assinatura'}
         destructive
         onConfirm={() => cancelarMutation.mutate()}

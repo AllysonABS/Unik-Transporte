@@ -296,7 +296,7 @@
 				DEVELOPMENT_TEAM = G7U75BJ9MW;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = UnikTransporte/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Unik Transporte";
+				INFOPLIST_KEY_CFBundleDisplayName = "Unik Logística";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -327,7 +327,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = G7U75BJ9MW;
 				INFOPLIST_FILE = UnikTransporte/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Unik Transporte";
+				INFOPLIST_KEY_CFBundleDisplayName = "Unik Logística";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

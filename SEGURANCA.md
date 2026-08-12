@@ -1,4 +1,4 @@
-# 🔒 Auditoria de Segurança — Unik Transporte
+# 🔒 Auditoria de Segurança — Unik Logística
 
 > Última atualização: Julho 2025  
 > Total: **33 vulnerabilidades identificadas e corrigidas**

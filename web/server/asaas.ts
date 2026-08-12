@@ -80,7 +80,7 @@ export async function criarAssinaturaComCartao(
       value: valor,
       nextDueDate: hoje,
       cycle: 'MONTHLY',
-      description: 'Unik Transporte - Plano único',
+      description: 'Unik Logística - Plano único',
       creditCard: cartao,
       creditCardHolderInfo: titular,
       remoteIp,

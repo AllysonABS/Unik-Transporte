@@ -426,7 +426,7 @@ const pool = new Pool({
 });
 
 // Cadastro de empresa
-const VALOR_PLANO = 69.90;
+const VALOR_PLANO = 89.90;
 
 app.post('/api/cadastro', async (req, res) => {
   try {
@@ -2090,9 +2090,9 @@ app.post('/api/recuperar-senha/solicitar', resetRateLimit, async (req, res) => {
     if (email && smtpTransporter) {
       const emailMasked = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Unik Transporte" <suporte.unikcrm@gmail.com>',
+        from: process.env.SMTP_FROM || '"Unik Logística" <suporte.unikcrm@gmail.com>',
         to: email,
-        subject: 'Código de recuperação de senha - Unik Transporte',
+        subject: 'Código de recuperação de senha - Unik Logística',
         html: `
           <div style="font-family:sans-serif;max-width:400px;margin:0 auto;padding:20px">
             <h2 style="color:#0F2A3F">Recuperação de Senha</h2>
@@ -2211,14 +2211,14 @@ app.post('/api/exclusao-dados', async (req, res) => {
     // Envia e-mail de confirmação para o usuário
     if (smtpTransporter) {
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Unik Transporte" <suporte.unikcrm@gmail.com>',
+        from: process.env.SMTP_FROM || '"Unik Logística" <suporte.unikcrm@gmail.com>',
         to: email,
-        subject: 'Solicitação de exclusão de dados recebida - Unik Transporte',
+        subject: 'Solicitação de exclusão de dados recebida - Unik Logística',
         html: `
           <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
             <h2 style="color:#0F2A3F">Solicitação Recebida</h2>
             <p>Olá ${nome},</p>
-            <p>Recebemos sua solicitação de exclusão de dados da plataforma Unik Transporte.</p>
+            <p>Recebemos sua solicitação de exclusão de dados da plataforma Unik Logística.</p>
             <div style="background:#F3F4F6;padding:16px;border-radius:8px;margin:16px 0">
               <p style="margin:0"><strong>Documento:</strong> ${documento}</p>
               <p style="margin:8px 0 0"><strong>Prazo:</strong> Até 30 dias úteis</p>
@@ -2235,7 +2235,7 @@ app.post('/api/exclusao-dados', async (req, res) => {
     // Notifica o admin
     if (smtpTransporter) {
       await smtpTransporter.sendMail({
-        from: process.env.SMTP_FROM || '"Unik Transporte" <suporte.unikcrm@gmail.com>',
+        from: process.env.SMTP_FROM || '"Unik Logística" <suporte.unikcrm@gmail.com>',
         to: process.env.SMTP_USER || 'suporte.unikcrm@gmail.com',
         subject: `[LGPD] Solicitação de exclusão - ${nome}`,
         html: `<p><strong>Nome:</strong> ${nome}</p><p><strong>Doc:</strong> ${documento}</p><p><strong>Email:</strong> ${email}</p><p><strong>Motivo:</strong> ${motivo || 'Não informado'}</p>`,
@@ -2596,7 +2596,7 @@ app.post('/api/admin/whatsapp/instance', auth, requireAdmin, async (req, res) =>
       return res.status(409).json({error: 'Já existe uma instância configurada.'});
     }
     const {name} = req.body;
-    const instanceName = name || 'Unik Transporte';
+    const instanceName = name || 'Unik Logística';
     const data = await uazapiAdminRequest('/instance/init', 'POST', {name: instanceName});
     await pool.query(
       'INSERT INTO whatsapp_config (instance_id, instance_token, instance_name, status) VALUES ($1,$2,$3,$4)',

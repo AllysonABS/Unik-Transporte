@@ -97,8 +97,8 @@ export default function ExclusaoDadosPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/Logo.png" alt="Unik Transporte" className="w-10 h-10 rounded-xl" />
-            <span className="text-xl font-bold tracking-tight">Unik Transporte</span>
+            <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl" />
+            <span className="text-xl font-bold tracking-tight">Unik Logística</span>
           </button>
         </div>
       </header>
@@ -106,7 +106,7 @@ export default function ExclusaoDadosPage() {
       <main className="max-w-2xl mx-auto px-5 md:px-8 pt-28 pb-20">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Exclusão de Dados</h1>
         <p className="text-gray-400 text-sm mb-10">
-          Preencha o formulário abaixo para solicitar a exclusão completa dos seus dados pessoais da plataforma Unik Transporte.
+          Preencha o formulário abaixo para solicitar a exclusão completa dos seus dados pessoais da plataforma Unik Logística.
         </p>
 
         <div className="bg-[#081544] border border-[#0B1E5A] rounded-2xl p-6 md:p-8 mb-8">
@@ -176,7 +176,7 @@ export default function ExclusaoDadosPage() {
               className="mt-1 w-4 h-4 accent-pulso"
             />
             <label htmlFor="confirmacao" className="text-gray-400 text-sm">
-              Eu entendo que esta ação é <strong className="text-clareza">irreversível</strong> e que todos os meus dados serão permanentemente excluídos da plataforma Unik Transporte.
+              Eu entendo que esta ação é <strong className="text-clareza">irreversível</strong> e que todos os meus dados serão permanentemente excluídos da plataforma Unik Logística.
             </label>
           </div>
 

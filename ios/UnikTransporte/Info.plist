@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Unik Transporte</string>
+	<string>Unik Logística</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -34,11 +34,11 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Unik Transporte precisa da câmera para registrar fotos dos pedidos e comprovantes de entrega.</string>
+	<string>Unik Logística precisa da câmera para registrar fotos dos pedidos e comprovantes de entrega.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Unik Transporte precisa acessar a galeria para anexar fotos aos pedidos.</string>
+	<string>Unik Logística precisa acessar a galeria para anexar fotos aos pedidos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Unik Transporte precisa acessar sua localização para rastrear as entregas em andamento.</string>
+	<string>Unik Logística precisa acessar sua localização para rastrear as entregas em andamento.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

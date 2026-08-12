@@ -22,7 +22,7 @@ async function solicitarPermissaoCamera(): Promise<boolean> {
       PermissionsAndroid.PERMISSIONS.CAMERA,
       {
         title: 'Permissão de Câmera',
-        message: 'Unik Transporte precisa da câmera para fotografar os pedidos.',
+        message: 'Unik Logística precisa da câmera para fotografar os pedidos.',
         buttonPositive: 'Permitir',
         buttonNegative: 'Cancelar',
       },
