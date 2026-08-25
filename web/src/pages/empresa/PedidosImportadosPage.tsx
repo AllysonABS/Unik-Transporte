@@ -24,6 +24,20 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import FinalizarPedidoImportadoDialog from '@/components/empresa/FinalizarPedidoImportadoDialog';
 
+type PeriodoPreset = '7' | '15' | '30' | '60' | 'personalizado';
+
+const PERIODOS: { value: PeriodoPreset; label: string }[] = [
+  { value: '7', label: 'Últimos 7 dias' },
+  { value: '15', label: 'Últimos 15 dias' },
+  { value: '30', label: 'Últimos 30 dias' },
+  { value: '60', label: 'Últimos 60 dias' },
+  { value: 'personalizado', label: 'Período personalizado' },
+];
+
+function dataDiasAtras(dias: number) {
+  return new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 const FILTROS: { value: FiltroPedidosImportados; label: string }[] = [
   { value: 'pendente', label: 'Pendentes (a completar)' },
   { value: 'em_andamento', label: 'Em andamento' },
@@ -73,16 +87,32 @@ export default function PedidosImportadosPage() {
   useSetPageHeader('Pedidos importados', 'Pedidos vindos do Bling — complete e acompanhe até a entrega');
   const [selecionado, setSelecionado] = useState<PedidoImportado | null>(null);
   const [filtro, setFiltro] = useState<FiltroPedidosImportados>('pendente');
-  const [mes, setMes] = useState(() => new Date().toISOString().slice(0, 7));
+  const [periodoPreset, setPeriodoPreset] = useState<PeriodoPreset>('30');
+  const [dataInicialCustom, setDataInicialCustom] = useState('');
+  const [dataFinalCustom, setDataFinalCustom] = useState('');
   const [busca, setBusca] = useState('');
   // Situação de origem no Bling (Em aberto, Atendido...) — eixo de filtro
   // independente do status interno (fila/entrega) acima. 'todas' não filtra.
   const [situacaoBling, setSituacaoBling] = useState('todas');
 
+  // No preset (7/15/30/60 dias) o período é calculado; no personalizado, vem
+  // dos dois campos de data escolhidos livremente.
+  const { dataInicial, dataFinal } = useMemo(() => {
+    if (periodoPreset === 'personalizado') {
+      return { dataInicial: dataInicialCustom, dataFinal: dataFinalCustom || new Date().toISOString().slice(0, 10) };
+    }
+    return { dataInicial: dataDiasAtras(Number(periodoPreset)), dataFinal: new Date().toISOString().slice(0, 10) };
+  }, [periodoPreset, dataInicialCustom, dataFinalCustom]);
+
+  // No personalizado, só busca depois que a empresa escolher a data inicial
+  // — sem isso a primeira renderização dispararia uma busca sem período
+  // nenhum definido de propósito.
+  const periodoPronto = periodoPreset !== 'personalizado' || !!dataInicialCustom;
+
   const { data, isLoading } = useQuery({
-    queryKey: ['pedidos-importados', empresa?.id, filtro, mes],
-    queryFn: () => listarPedidosImportados(empresa!.id, filtro, mes),
-    enabled: !!empresa?.id,
+    queryKey: ['pedidos-importados', empresa?.id, filtro, dataInicial, dataFinal],
+    queryFn: () => listarPedidosImportados(empresa!.id, filtro, dataInicial, dataFinal),
+    enabled: !!empresa?.id && periodoPronto,
     refetchInterval: 30000,
   });
 
@@ -110,8 +140,8 @@ export default function PedidosImportadosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-3">
-        <div className="relative flex-1">
+      <div className="flex gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray" />
           <Input
             value={busca}
@@ -120,13 +150,34 @@ export default function PedidosImportadosPage() {
             className="pl-9"
           />
         </div>
-        <Input
-          type="month"
-          value={mes}
-          onChange={e => setMes(e.target.value)}
-          className="w-44"
-          aria-label="Filtrar por mês"
-        />
+        <Select value={periodoPreset} onValueChange={v => setPeriodoPreset(v as PeriodoPreset)}>
+          <SelectTrigger className="w-48" aria-label="Filtrar por período">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PERIODOS.map(p => (
+              <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {periodoPreset === 'personalizado' && (
+          <>
+            <Input
+              type="date"
+              value={dataInicialCustom}
+              onChange={e => setDataInicialCustom(e.target.value)}
+              className="w-40"
+              aria-label="Data inicial"
+            />
+            <Input
+              type="date"
+              value={dataFinalCustom}
+              onChange={e => setDataFinalCustom(e.target.value)}
+              className="w-40"
+              aria-label="Data final"
+            />
+          </>
+        )}
         <Select value={filtro} onValueChange={v => setFiltro(v as FiltroPedidosImportados)}>
           <SelectTrigger className="w-56">
             <SelectValue />

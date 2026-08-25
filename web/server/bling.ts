@@ -303,20 +303,68 @@ export type OpcoesSincronizacao = {
 const LIMITE_PAGINA = 100;
 const MAX_PAGINAS = 50; // teto de segurança (5000 pedidos) pra uma importação manual não rodar pra sempre
 
+// Lista as lojas cadastradas dentro da conta Bling conectada — pra empresa
+// escolher, na tela de Integrações, de quais delas importar pedido (ver
+// salvarLojasSelecionadas). Mapeamento a partir da documentação pública da
+// v3 (GET /lojas), ainda não validado contra uma resposta real.
+export async function listarLojas(pool: Pool, empresaId: string): Promise<{ id: number; nome: string }[]> {
+  const accessToken = await obterTokenValido(pool, empresaId);
+  if (!accessToken) throw new Error('Empresa sem integração Bling ativa.');
+  const resp = await blingFetch(accessToken, '/lojas');
+  const lojas: any[] = resp.data || [];
+  if (lojas.length === 0) console.error('[BLING] /lojas não retornou nenhuma loja — payload:', JSON.stringify(resp).slice(0, 500));
+  return lojas.map(l => ({ id: Number(l.id), nome: l.nome || l.descricao || `Loja #${l.id}` }));
+}
+
+// Salva quais lojas (dentro da conta Bling) devem entrar na sincronização.
+// `lojaIds` vazio/null volta ao comportamento padrão (importa de todas).
+// Como pedido de loja fora do filtro não deveria ter entrado na fila, remove
+// da fila PENDENTE o que já tinha sido importado de lojas que ficaram de
+// fora — só mexe em pedido ainda não finalizado, e só quando dá pra saber a
+// loja de origem (dados_brutos.loja.id); pedido importado antes dessa
+// coluna existir, sem essa informação, fica como está.
+export async function salvarLojasSelecionadas(pool: Pool, empresaId: string, lojaIds: number[] | null): Promise<{ removidosDaFila: number }> {
+  const selecao = lojaIds && lojaIds.length > 0 ? lojaIds : null;
+  await pool.query(
+    'UPDATE bling_integracoes SET lojas_selecionadas=$1 WHERE empresa_id=$2',
+    [selecao ? JSON.stringify(selecao) : null, empresaId]
+  );
+  if (!selecao) return { removidosDaFila: 0 };
+
+  const placeholders = selecao.map((_, i) => `$${i + 2}`).join(',');
+  const result = await pool.query(
+    `DELETE FROM pedidos_importados
+     WHERE empresa_id=$1 AND origem='bling' AND status='pendente'
+       AND (dados_brutos->'loja'->>'id') IS NOT NULL
+       AND (dados_brutos->'loja'->>'id')::bigint NOT IN (${placeholders})`,
+    [empresaId, ...selecao]
+  );
+  return { removidosDaFila: result.rowCount || 0 };
+}
+
 // Busca todas as páginas de /pedidos/vendas no intervalo pedido. O Bling
 // pagina em blocos de até 100 — uma janela de vários dias/semanas (caso de
 // uma importação manual retroativa) facilmente passa de 100 pedidos, então
 // sem paginar aqui alguns pedidos do período nunca apareceriam.
-async function buscarTodosPedidos(accessToken: string, dataInicial: string, dataFinal?: string): Promise<any[]> {
+//
+// Com `idsLoja` preenchido, busca (e pagina) separado pra cada loja — o
+// filtro `idLoja` da API do Bling aceita um id só por chamada, não uma
+// lista.
+async function buscarTodosPedidos(accessToken: string, dataInicial: string, dataFinal?: string, idsLoja?: number[]): Promise<any[]> {
+  const lojasParaBuscar = idsLoja && idsLoja.length > 0 ? idsLoja : [undefined];
   const pedidos: any[] = [];
-  for (let pagina = 1; pagina <= MAX_PAGINAS; pagina++) {
-    const params = new URLSearchParams({ dataInicial, limite: String(LIMITE_PAGINA), pagina: String(pagina) });
-    if (dataFinal) params.set('dataFinal', dataFinal);
-    const resposta = await blingFetch(accessToken, `/pedidos/vendas?${params.toString()}`);
-    const pagina_dados: any[] = resposta.data || [];
-    pedidos.push(...pagina_dados);
-    if (pagina_dados.length < LIMITE_PAGINA) break; // última página
-    await esperar(400); // respeita o limite de requisições/segundo entre páginas
+  for (const idLoja of lojasParaBuscar) {
+    for (let pagina = 1; pagina <= MAX_PAGINAS; pagina++) {
+      const params = new URLSearchParams({ dataInicial, limite: String(LIMITE_PAGINA), pagina: String(pagina) });
+      if (dataFinal) params.set('dataFinal', dataFinal);
+      if (idLoja != null) params.set('idLoja', String(idLoja));
+      const resposta = await blingFetch(accessToken, `/pedidos/vendas?${params.toString()}`);
+      const pagina_dados: any[] = resposta.data || [];
+      pedidos.push(...pagina_dados);
+      if (pagina_dados.length < LIMITE_PAGINA) break; // última página
+      await esperar(400); // respeita o limite de requisições/segundo entre páginas
+    }
+    await esperar(400); // respiro também entre uma loja e outra
   }
   return pedidos;
 }
@@ -331,6 +379,9 @@ export async function sincronizarEmpresa(pool: Pool, empresaId: string, opcoes?:
   if (!accessToken) return { novos: 0 };
 
   try {
+    const integLojas = await pool.query('SELECT lojas_selecionadas FROM bling_integracoes WHERE empresa_id=$1', [empresaId]);
+    const lojasSelecionadas: number[] = integLojas.rows[0]?.lojas_selecionadas || [];
+
     let dataInicial: string;
     let dataFinal: string | undefined;
 
@@ -363,7 +414,7 @@ export async function sincronizarEmpresa(pool: Pool, empresaId: string, opcoes?:
       }
     }
 
-    const pedidos = await buscarTodosPedidos(accessToken, dataInicial, dataFinal);
+    const pedidos = await buscarTodosPedidos(accessToken, dataInicial, dataFinal, lojasSelecionadas);
 
     let novos = 0;
     for (const pedidoResumo of pedidos) {

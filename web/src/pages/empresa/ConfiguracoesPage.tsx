@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { buscarEmpresa, atualizarEmpresa } from '@/services/empresaPerfil';
-import { buscarStatusBling, gerarUrlConexaoBling, desconectarBling, sincronizarBlingAgora } from '@/services/bling';
+import { buscarStatusBling, gerarUrlConexaoBling, desconectarBling, sincronizarBlingAgora, buscarLojasBling, salvarLojasBling } from '@/services/bling';
 import { buscarCobranca, trocarCartaoCobranca, cancelarAssinaturaCobranca } from '@/services/cobranca';
 import ConfirmDialog from '@/components/empresa/ConfirmDialog';
 import { buscarCep } from '@/lib/cep';
@@ -676,8 +676,8 @@ function IntegracaoBlingCard() {
     onSuccess: (res) => {
       toast.success(
         res.novos > 0
-          ? `${res.novos} pedido(s) importado(s) do período. Se forem de outro mês, ajuste o filtro de mês em Pedidos importados pra ver.`
-          : 'Nenhum pedido novo nesse período — pode ser que já estejam importados (confira o filtro de mês em Pedidos importados).'
+          ? `${res.novos} pedido(s) importado(s) do período. Se não aparecerem, ajuste o filtro de período em Pedidos importados pra ver.`
+          : 'Nenhum pedido novo nesse período — pode ser que já estejam importados (confira o filtro de período em Pedidos importados).'
       );
       queryClient.invalidateQueries({ queryKey: ['pedidos-importados', empresa?.id] });
       setImportarPeriodoAberto(false);
@@ -741,6 +741,8 @@ function IntegracaoBlingCard() {
               </Button>
             </div>
 
+            <SeletorLojasBling empresaId={empresa!.id} lojasSelecionadasAtuais={data.lojas_selecionadas} />
+
             {importarPeriodoAberto && (
               <div className="rounded-lg border border-border p-4 space-y-3">
                 <p className="text-sm text-gray">
@@ -791,5 +793,112 @@ function IntegracaoBlingCard() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// Conta Bling pode ter várias lojas cadastradas dentro dela (site próprio,
+// Mercado Livre, Shopee etc.) — deixa a empresa escolher de quais delas
+// importar pedido, em vez de trazer tudo misturado. Sem nada marcado (ou
+// com todas marcadas), o filtro é removido — importa de todas de novo.
+function SeletorLojasBling({ empresaId, lojasSelecionadasAtuais }: { empresaId: string; lojasSelecionadasAtuais?: number[] | null }) {
+  const queryClient = useQueryClient();
+  const [aberto, setAberto] = useState(false);
+  const [selecao, setSelecao] = useState<Set<number> | null>(null);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['bling-lojas', empresaId],
+    queryFn: () => buscarLojasBling(empresaId),
+    enabled: aberto,
+  });
+
+  useEffect(() => {
+    if (data?.lojas && selecao === null) {
+      const atuais = lojasSelecionadasAtuais && lojasSelecionadasAtuais.length > 0
+        ? lojasSelecionadasAtuais
+        : data.lojas.map(l => l.id);
+      setSelecao(new Set(atuais));
+    }
+  }, [data, selecao, lojasSelecionadasAtuais]);
+
+  const salvarMutation = useMutation({
+    mutationFn: (lojaIds: number[]) => salvarLojasBling(empresaId, lojaIds),
+    onSuccess: (res, lojaIds) => {
+      toast.success(
+        lojaIds.length === 0
+          ? 'Voltou a importar pedidos de todas as lojas da conta.'
+          : `Filtro salvo — importando só das lojas marcadas.${res.removidosDaFila > 0 ? ` ${res.removidosDaFila} pedido(s) pendente(s) de fora do filtro foram removidos da fila.` : ''}`
+      );
+      queryClient.invalidateQueries({ queryKey: ['bling-status', empresaId] });
+      queryClient.invalidateQueries({ queryKey: ['pedidos-importados', empresaId] });
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof ApiError ? err.message : 'Erro ao salvar as lojas selecionadas.');
+    },
+  });
+
+  const alternarLoja = (id: number) => {
+    setSelecao(prev => {
+      const novo = new Set(prev);
+      if (novo.has(id)) novo.delete(id); else novo.add(id);
+      return novo;
+    });
+  };
+
+  if (!aberto) {
+    return (
+      <Button type="button" variant="outline" size="sm" onClick={() => setAberto(true)}>
+        {lojasSelecionadasAtuais && lojasSelecionadasAtuais.length > 0 ? 'Editar lojas importadas' : 'Filtrar por loja'}
+      </Button>
+    );
+  }
+
+  const todasMarcadas = !!(data?.lojas && selecao && data.lojas.every(l => selecao.has(l.id)));
+
+  return (
+    <div className="rounded-lg border border-border p-4 space-y-3">
+      <p className="text-sm text-gray">
+        Escolha de quais lojas cadastradas na sua conta Bling os pedidos devem ser importados. Com todas marcadas
+        (ou nenhuma), importa de todas — sem filtro.
+      </p>
+      {isLoading ? (
+        <Skeleton className="h-10 rounded-md" />
+      ) : error ? (
+        <p className="text-sm text-destructive">Erro ao buscar as lojas no Bling. Tente de novo em instantes.</p>
+      ) : data?.lojas.length === 0 ? (
+        <p className="text-sm text-gray">A conta Bling conectada não tem lojas cadastradas.</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {data?.lojas.map(loja => {
+            const marcada = selecao?.has(loja.id) ?? false;
+            return (
+              <button
+                key={loja.id}
+                type="button"
+                onClick={() => alternarLoja(loja.id)}
+                className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                  marcada ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-gray hover:text-clareza'
+                }`}
+              >
+                {marcada ? '✓ ' : ''}
+                {loja.nome}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          size="sm"
+          disabled={!data?.lojas.length || salvarMutation.isPending}
+          onClick={() => salvarMutation.mutate(todasMarcadas ? [] : Array.from(selecao || []))}
+        >
+          {salvarMutation.isPending ? 'Salvando...' : 'Salvar'}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setAberto(false)}>
+          Fechar
+        </Button>
+      </div>
+    </div>
   );
 }

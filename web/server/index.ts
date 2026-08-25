@@ -16,7 +16,7 @@ import crypto from 'crypto';
 import cluster from 'cluster';
 import os from 'os';
 import nodemailer from 'nodemailer';
-import { blingConfigurado, montarUrlAutorizacao, conectarEmpresa, sincronizarEmpresa, sincronizarTodasEmpresas, iniciarLoopSincronizacaoBling } from './bling.js';
+import { blingConfigurado, montarUrlAutorizacao, conectarEmpresa, sincronizarEmpresa, sincronizarTodasEmpresas, iniciarLoopSincronizacaoBling, listarLojas, salvarLojasSelecionadas } from './bling.js';
 import { asaasConfigurado, criarClienteAsaas, criarAssinaturaComCartao, trocarCartao, cancelarAssinatura, buscarAssinatura } from './asaas.js';
 import { salvarTokenEntregador, removerTokenEntregador, enviarPushEntregador } from './push.js';
 
@@ -1417,7 +1417,7 @@ app.get('/api/empresa/:id/integracoes/bling', auth, async (req, res) => {
     const user = (req as any).user as TokenPayload;
     if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
     const result = await pool.query(
-      'SELECT ativo, ultima_sincronizacao, ultimo_erro, conta_nome, conta_cnpj FROM bling_integracoes WHERE empresa_id=$1', [id]
+      'SELECT ativo, ultima_sincronizacao, ultimo_erro, conta_nome, conta_cnpj, lojas_selecionadas FROM bling_integracoes WHERE empresa_id=$1', [id]
     );
     if (result.rows.length === 0) {
       return res.json({success: true, conectado: false});
@@ -1504,6 +1504,40 @@ app.delete('/api/empresa/:id/integracoes/bling', auth, async (req, res) => {
   }
 });
 
+// Lista as lojas cadastradas dentro da conta Bling conectada, pra empresa
+// escolher de quais delas importar pedido.
+app.get('/api/empresa/:id/integracoes/bling/lojas', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    const lojas = await listarLojas(pool, id);
+    res.json({success: true, lojas});
+  } catch (err: any) {
+    console.error('Erro ao listar lojas do Bling:', err.message);
+    res.status(500).json({error: err.message || 'Erro ao consultar as lojas no Bling.'});
+  }
+});
+
+// Salva quais lojas devem entrar na sincronização (vazio = todas). Remove da
+// fila pendente o que já tinha sido importado de loja que ficou de fora.
+app.put('/api/empresa/:id/integracoes/bling/lojas', auth, async (req, res) => {
+  try {
+    const {id} = req.params;
+    const user = (req as any).user as TokenPayload;
+    if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
+    const {lojaIds} = (req.body || {}) as {lojaIds?: unknown};
+    if (lojaIds !== undefined && (!Array.isArray(lojaIds) || !lojaIds.every(v => Number.isInteger(v)))) {
+      return res.status(400).json({error: 'lojaIds deve ser uma lista de números inteiros.'});
+    }
+    const resultado = await salvarLojasSelecionadas(pool, id, (lojaIds as number[] | undefined) || null);
+    res.json({success: true, ...resultado});
+  } catch (err: any) {
+    console.error('Erro ao salvar lojas selecionadas do Bling:', err.message);
+    res.status(500).json({error: 'Erro interno do servidor.'});
+  }
+});
+
 // Força uma sincronização agora (além do loop automático a cada 5min).
 // Aceita opcionalmente dataInicial/dataFinal (YYYY-MM-DD) no body pra
 // importar um período específico — ex.: pedidos anteriores à conexão da
@@ -1540,11 +1574,18 @@ app.get('/api/empresa/:id/pedidos-importados', auth, async (req, res) => {
     if (user.tipo !== 'empresa' || user.id !== id) return res.status(403).json({error: 'Sem permissão.'});
 
     const status = (req.query.status as string) || 'pendente';
-    const mes = (req.query.mes as string) || new Date().toISOString().slice(0, 7);
-    if (!/^\d{4}-\d{2}$/.test(mes)) return res.status(400).json({error: 'Mês inválido. Use o formato AAAA-MM.'});
+    // Período de data_pedido — padrão últimos 30 dias quando a tela ainda
+    // não pediu nada específico (equivalente ao preset "Últimos 30 dias").
+    const dataValida = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v);
+    const hoje = new Date().toISOString().slice(0, 10);
+    const trintaDiasAtras = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const dataInicial = (req.query.dataInicial as string) || trintaDiasAtras;
+    const dataFinal = (req.query.dataFinal as string) || hoje;
+    if (!dataValida(dataInicial)) return res.status(400).json({error: 'dataInicial inválida. Use o formato AAAA-MM-DD.'});
+    if (!dataValida(dataFinal)) return res.status(400).json({error: 'dataFinal inválida. Use o formato AAAA-MM-DD.'});
 
-    const condicoes = ['pi.empresa_id=$1', "to_char(pi.data_pedido, 'YYYY-MM') = $2"];
-    const params: any[] = [id, mes];
+    const condicoes = ['pi.empresa_id=$1', 'pi.data_pedido BETWEEN $2 AND $3'];
+    const params: any[] = [id, dataInicial, dataFinal];
 
     if (status === 'pendente') condicoes.push("pi.status = 'pendente'");
     else if (status === 'ignorado') condicoes.push("pi.status = 'ignorado'");

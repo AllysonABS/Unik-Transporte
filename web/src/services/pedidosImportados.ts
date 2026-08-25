@@ -32,9 +32,15 @@ interface ListaResponse {
 
 export type FiltroPedidosImportados = 'pendente' | 'em_andamento' | 'entregue' | 'ignorado' | 'todos';
 
-export function listarPedidosImportados(empresaId: string, status: FiltroPedidosImportados = 'pendente', mes?: string) {
+export function listarPedidosImportados(
+  empresaId: string,
+  status: FiltroPedidosImportados = 'pendente',
+  dataInicial?: string,
+  dataFinal?: string,
+) {
   const params = new URLSearchParams({ status });
-  if (mes) params.set('mes', mes);
+  if (dataInicial) params.set('dataInicial', dataInicial);
+  if (dataFinal) params.set('dataFinal', dataFinal);
   return api.get<ListaResponse>(`/api/empresa/${empresaId}/pedidos-importados?${params.toString()}`);
 }
 

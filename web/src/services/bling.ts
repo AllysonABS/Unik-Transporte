@@ -7,6 +7,12 @@ export interface BlingStatus {
   ultimo_erro?: string | null;
   conta_nome?: string | null;
   conta_cnpj?: string | null;
+  lojas_selecionadas?: number[] | null;
+}
+
+export interface BlingLoja {
+  id: number;
+  nome: string;
 }
 
 export function buscarStatusBling(empresaId: string) {
@@ -23,4 +29,12 @@ export function desconectarBling(empresaId: string) {
 
 export function sincronizarBlingAgora(empresaId: string, periodo?: { dataInicial: string; dataFinal?: string }) {
   return api.post<{ success: boolean; novos: number }>(`/api/empresa/${empresaId}/integracoes/bling/sincronizar`, periodo);
+}
+
+export function buscarLojasBling(empresaId: string) {
+  return api.get<{ success: boolean; lojas: BlingLoja[] }>(`/api/empresa/${empresaId}/integracoes/bling/lojas`);
+}
+
+export function salvarLojasBling(empresaId: string, lojaIds: number[]) {
+  return api.put<{ success: boolean; removidosDaFila: number }>(`/api/empresa/${empresaId}/integracoes/bling/lojas`, { lojaIds });
 }
