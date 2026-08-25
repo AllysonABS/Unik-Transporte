@@ -303,17 +303,21 @@ export type OpcoesSincronizacao = {
 const LIMITE_PAGINA = 100;
 const MAX_PAGINAS = 50; // teto de segurança (5000 pedidos) pra uma importação manual não rodar pra sempre
 
-// Lista as lojas cadastradas dentro da conta Bling conectada — pra empresa
-// escolher, na tela de Integrações, de quais delas importar pedido (ver
-// salvarLojasSelecionadas). Mapeamento a partir da documentação pública da
-// v3 (GET /lojas), ainda não validado contra uma resposta real.
+// Lista as lojas (na API v3, "canais de venda" — site próprio, Mercado
+// Livre, Shopee etc.) cadastradas dentro da conta Bling conectada, pra
+// empresa escolher, na tela de Integrações, de quais delas importar pedido
+// (ver salvarLojasSelecionadas). GET /lojas não existe (testado em produção,
+// deu 404) — o endpoint certo é GET /canais-venda, cada item vindo como
+// {id, descricao, tipo, situacao}. `pedido.loja.id` (usado no filtro por
+// idLoja e na limpeza da fila em salvarLojasSelecionadas) referencia esse
+// mesmo id.
 export async function listarLojas(pool: Pool, empresaId: string): Promise<{ id: number; nome: string }[]> {
   const accessToken = await obterTokenValido(pool, empresaId);
   if (!accessToken) throw new Error('Empresa sem integração Bling ativa.');
-  const resp = await blingFetch(accessToken, '/lojas');
+  const resp = await blingFetch(accessToken, '/canais-venda');
   const lojas: any[] = resp.data || [];
-  if (lojas.length === 0) console.error('[BLING] /lojas não retornou nenhuma loja — payload:', JSON.stringify(resp).slice(0, 500));
-  return lojas.map(l => ({ id: Number(l.id), nome: l.nome || l.descricao || `Loja #${l.id}` }));
+  if (lojas.length === 0) console.error('[BLING] /canais-venda não retornou nenhuma loja — payload:', JSON.stringify(resp).slice(0, 500));
+  return lojas.map(l => ({ id: Number(l.id), nome: l.descricao || l.nome || `Loja #${l.id}` }));
 }
 
 // Salva quais lojas (dentro da conta Bling) devem entrar na sincronização.

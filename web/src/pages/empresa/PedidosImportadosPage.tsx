@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { useEmpresaAuth } from '@/context/EmpresaAuthContext';
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { listarPedidosImportados, type PedidoImportado, type FiltroPedidosImportados } from '@/services/pedidosImportados';
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import FinalizarPedidoImportadoDialog from '@/components/empresa/FinalizarPedidoImportadoDialog';
 
@@ -36,6 +37,21 @@ const PERIODOS: { value: PeriodoPreset; label: string }[] = [
 
 function dataDiasAtras(dias: number) {
   return new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+// dd/mm curto, só pra caber no botão do filtro — a data por extenso já
+// aparece nos campos De/Até dentro do próprio painel.
+function formatarDataCurta(iso: string) {
+  if (!iso) return '';
+  const [, m, d] = iso.split('-');
+  return `${d}/${m}`;
+}
+
+function rotuloPeriodo(preset: PeriodoPreset, dataInicialCustom: string, dataFinalCustom: string) {
+  if (preset !== 'personalizado') return PERIODOS.find(p => p.value === preset)!.label;
+  if (!dataInicialCustom) return 'Período personalizado';
+  const fim = dataFinalCustom || new Date().toISOString().slice(0, 10);
+  return `${formatarDataCurta(dataInicialCustom)} – ${formatarDataCurta(fim)}`;
 }
 
 const FILTROS: { value: FiltroPedidosImportados; label: string }[] = [
@@ -150,34 +166,14 @@ export default function PedidosImportadosPage() {
             className="pl-9"
           />
         </div>
-        <Select value={periodoPreset} onValueChange={v => setPeriodoPreset(v as PeriodoPreset)}>
-          <SelectTrigger className="w-48" aria-label="Filtrar por período">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PERIODOS.map(p => (
-              <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {periodoPreset === 'personalizado' && (
-          <>
-            <Input
-              type="date"
-              value={dataInicialCustom}
-              onChange={e => setDataInicialCustom(e.target.value)}
-              className="w-40"
-              aria-label="Data inicial"
-            />
-            <Input
-              type="date"
-              value={dataFinalCustom}
-              onChange={e => setDataFinalCustom(e.target.value)}
-              className="w-40"
-              aria-label="Data final"
-            />
-          </>
-        )}
+        <SeletorPeriodo
+          preset={periodoPreset}
+          onPresetChange={setPeriodoPreset}
+          dataInicial={dataInicialCustom}
+          dataFinal={dataFinalCustom}
+          onDataInicialChange={setDataInicialCustom}
+          onDataFinalChange={setDataFinalCustom}
+        />
         <Select value={filtro} onValueChange={v => setFiltro(v as FiltroPedidosImportados)}>
           <SelectTrigger className="w-56">
             <SelectValue />
@@ -271,6 +267,100 @@ export default function PedidosImportadosPage() {
       )}
 
       <FinalizarPedidoImportadoDialog pedido={selecionado} onOpenChange={open => !open && setSelecionado(null)} />
+    </div>
+  );
+}
+
+// Botão + painel próprio (em vez de Select) porque o personalizado precisa
+// dos campos De/Até dentro do mesmo painel, não soltos do lado — o Select
+// do shadcn não segura input dentro do dropdown.
+function SeletorPeriodo({
+  preset,
+  onPresetChange,
+  dataInicial,
+  dataFinal,
+  onDataInicialChange,
+  onDataFinalChange,
+}: {
+  preset: PeriodoPreset;
+  onPresetChange: (p: PeriodoPreset) => void;
+  dataInicial: string;
+  dataFinal: string;
+  onDataInicialChange: (v: string) => void;
+  onDataFinalChange: (v: string) => void;
+}) {
+  const [aberto, setAberto] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!aberto) return;
+    function aoClicarFora(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setAberto(false);
+    }
+    document.addEventListener('mousedown', aoClicarFora);
+    return () => document.removeEventListener('mousedown', aoClicarFora);
+  }, [aberto]);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setAberto(v => !v)}
+        className="flex h-10 w-48 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        aria-label="Filtrar por período"
+      >
+        <span className="truncate">{rotuloPeriodo(preset, dataInicial, dataFinal)}</span>
+        <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+      </button>
+      {aberto && (
+        <div className="absolute z-50 mt-1 w-64 rounded-md border bg-popover text-popover-foreground shadow-md p-1">
+          {PERIODOS.filter(p => p.value !== 'personalizado').map(p => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => { onPresetChange(p.value); setAberto(false); }}
+              className={`w-full text-left rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground ${preset === p.value ? 'bg-accent/60 font-medium' : ''}`}
+            >
+              {p.label}
+            </button>
+          ))}
+          <div className="my-1 h-px bg-border" />
+          <button
+            type="button"
+            onClick={() => onPresetChange('personalizado')}
+            className={`w-full text-left rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground ${preset === 'personalizado' ? 'bg-accent/60 font-medium' : ''}`}
+          >
+            Período personalizado
+          </button>
+          {preset === 'personalizado' && (
+            <div className="p-2 space-y-2">
+              <div className="space-y-1">
+                <Label htmlFor="periodo-data-inicial" className="text-xs">De</Label>
+                <Input
+                  id="periodo-data-inicial"
+                  type="date"
+                  value={dataInicial}
+                  onChange={e => onDataInicialChange(e.target.value)}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="periodo-data-final" className="text-xs">Até</Label>
+                <Input
+                  id="periodo-data-final"
+                  type="date"
+                  value={dataFinal}
+                  onChange={e => onDataFinalChange(e.target.value)}
+                  className="h-9"
+                />
+              </div>
+              <Button type="button" size="sm" className="w-full" disabled={!dataInicial} onClick={() => setAberto(false)}>
+                Aplicar
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
