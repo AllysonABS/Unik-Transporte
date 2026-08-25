@@ -4,13 +4,15 @@ import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { buscarStatsAdmin } from '@/services/admin';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Cores legíveis em fundo branco — antes eram tons pastel pro tema escuro
+// antigo (ex.: #60A5FA e #86EFAC quase somem em cima do card branco).
 const cards = [
-  { key: 'total_empresas', label: 'Empresas', icon: Building2, color: '#3B82F6' },
-  { key: 'empresas_ativas', label: 'Empresas ativas', icon: CheckCircle2, color: '#60A5FA' },
-  { key: 'total_clientes', label: 'Clientes', icon: Users, color: '#F59E0B' },
-  { key: 'total_entregadores', label: 'Entregadores', icon: Truck, color: '#A78BFA' },
-  { key: 'total_pedidos', label: 'Pedidos', icon: Package, color: '#FCA5A5' },
-  { key: 'assinaturas_ativas', label: 'Assinaturas ativas', icon: CreditCard, color: '#86EFAC' },
+  { key: 'total_empresas', label: 'Empresas', icon: Building2, color: '#0E7490' },
+  { key: 'empresas_ativas', label: 'Empresas ativas', icon: CheckCircle2, color: '#00695A' },
+  { key: 'total_clientes', label: 'Clientes', icon: Users, color: '#B45309' },
+  { key: 'total_entregadores', label: 'Entregadores', icon: Truck, color: '#7C3AED' },
+  { key: 'total_pedidos', label: 'Pedidos', icon: Package, color: '#DC2626' },
+  { key: 'assinaturas_ativas', label: 'Assinaturas ativas', icon: CreditCard, color: '#059669' },
 ] as const;
 
 export default function AdminDashboardPage() {

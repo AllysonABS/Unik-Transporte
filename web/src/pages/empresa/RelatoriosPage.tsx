@@ -64,7 +64,7 @@ export default function RelatoriosPage() {
   const cancelados = filtrados.filter(p => p.status === 'cancelado').length;
   const totalVolumes = filtrados.reduce((acc, p) => acc + (p.volumes || 0), 0);
   const taxaEntrega = totalPedidos > 0 ? Math.round((entregues / totalPedidos) * 100) : 0;
-  const corTaxa = taxaEntrega >= 90 ? '#86EFAC' : taxaEntrega >= 50 ? '#F59E0B' : '#EF4444';
+  const corTaxa = taxaEntrega >= 90 ? '#059669' : taxaEntrega >= 50 ? '#B45309' : '#DC2626';
 
   const ranking = useMemo(() => {
     return entregadores
@@ -112,10 +112,10 @@ export default function RelatoriosPage() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Total de despachos" value={totalPedidos} color="#F1F5F9" />
-            <StatCard label="Entregues" value={entregues} color="#86EFAC" />
-            <StatCard label="Aguardando" value={aguardando} color="#F59E0B" />
-            <StatCard label="Em trânsito" value={emTransito} color="#3B82F6" />
+            <StatCard label="Total de despachos" value={totalPedidos} color="#0B1F1B" />
+            <StatCard label="Entregues" value={entregues} color="#059669" />
+            <StatCard label="Aguardando" value={aguardando} color="#B45309" />
+            <StatCard label="Em trânsito" value={emTransito} color="#0E7490" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

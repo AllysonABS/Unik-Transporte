@@ -15,10 +15,12 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import type { NotificacaoData } from '@/types/empresa';
 
+// Cores legíveis em fundo claro — antes eram tons pastel pensados pro tema
+// escuro antigo (ex.: #60A5FA quase sumia em cima do card branco).
 const ICONS: Record<string, { icon: typeof Link2; color: string }> = {
-  novo_vinculo: { icon: Link2, color: '#60A5FA' },
-  novo_pedido: { icon: Package, color: '#3B82F6' },
-  alerta: { icon: AlertTriangle, color: '#F59E0B' },
+  novo_vinculo: { icon: Link2, color: '#0E7490' },
+  novo_pedido: { icon: Package, color: '#00695A' },
+  alerta: { icon: AlertTriangle, color: '#B45309' },
 };
 
 export default function TopHeader() {
@@ -88,7 +90,7 @@ export default function TopHeader() {
               </div>
             ) : (
               notificacoes.map((n: NotificacaoData) => {
-                const config = ICONS[n.tipo] ?? { icon: Bell, color: '#9CA3AF' };
+                const config = ICONS[n.tipo] ?? { icon: Bell, color: '#5B6B67' };
                 const Icon = config.icon;
                 return (
                   <div

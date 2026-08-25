@@ -105,7 +105,7 @@ export default function AdminPedidosPage() {
                 filtrados.map(p => {
                   const config = STATUS_CONFIG[p.status as PedidoStatus] ?? {
                     label: p.status,
-                    color: '#9CA3AF',
+                    color: '#5B6B67',
                     bg: 'transparent',
                   };
                   return (

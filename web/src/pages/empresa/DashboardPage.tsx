@@ -40,17 +40,19 @@ export default function DashboardPage() {
   const entreguesHoje = pedidosHoje.filter((p: PedidoData) => p.status === 'entregue').length;
   const recentes = pedidos.slice(0, 5);
 
+  // Cores legíveis em fundo branco — antes eram tons pastel pro tema escuro
+  // antigo (ex.: #60A5FA e #86EFAC quase somem em cima do card branco).
   const statCards = [
-    { label: 'Clientes ativos', value: stats?.total_clientes ?? 0, icon: Users, color: '#3B82F6' },
-    { label: 'Entregadores', value: stats?.total_entregadores ?? 0, icon: Truck, color: '#60A5FA' },
-    { label: 'Excursões', value: stats?.total_excursoes ?? 0, icon: Map, color: '#F59E0B' },
-    { label: 'Despachos hoje', value: pedidosHoje.length, icon: Package, color: '#C084FC' },
+    { label: 'Clientes ativos', value: stats?.total_clientes ?? 0, icon: Users, color: '#0E7490' },
+    { label: 'Entregadores', value: stats?.total_entregadores ?? 0, icon: Truck, color: '#00695A' },
+    { label: 'Excursões', value: stats?.total_excursoes ?? 0, icon: Map, color: '#B45309' },
+    { label: 'Despachos hoje', value: pedidosHoje.length, icon: Package, color: '#7C3AED' },
   ];
 
   const statusCards = [
-    { label: 'Em trânsito', value: emTransito, icon: Navigation, color: '#3B82F6' },
-    { label: 'Aguardando', value: aguardando, icon: Clock, color: '#F59E0B' },
-    { label: 'Entregues hoje', value: entreguesHoje, icon: CheckCircle, color: '#86EFAC' },
+    { label: 'Em trânsito', value: emTransito, icon: Navigation, color: '#0E7490' },
+    { label: 'Aguardando', value: aguardando, icon: Clock, color: '#B45309' },
+    { label: 'Entregues hoje', value: entreguesHoje, icon: CheckCircle, color: '#059669' },
   ];
 
   return (
