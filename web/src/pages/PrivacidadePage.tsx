@@ -5,7 +5,7 @@ export default function PrivacidadePage() {
 
   return (
     <div className="min-h-screen bg-matriz text-clareza">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-border">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 hover:opacity-80 transition">
             <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl" />
@@ -16,9 +16,9 @@ export default function PrivacidadePage() {
 
       <main className="max-w-3xl mx-auto px-5 md:px-8 pt-28 pb-20">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Política de Privacidade</h1>
-        <p className="text-gray-400 text-sm mb-10">Última atualização: Julho de 2025</p>
+        <p className="text-gray text-sm mb-10">Última atualização: Julho de 2025</p>
 
-        <div className="space-y-8 text-gray-300 text-sm leading-relaxed">
+        <div className="space-y-8 text-gray text-sm leading-relaxed">
           <section>
             <h2 className="text-lg font-bold text-clareza mb-3">1. Informações Gerais</h2>
             <p>
@@ -137,8 +137,8 @@ export default function PrivacidadePage() {
         </div>
       </main>
 
-      <footer className="px-5 md:px-16 py-8 border-t border-white/5 text-center">
-        <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
+      <footer className="px-5 md:px-16 py-8 border-t border-border text-center">
+        <p className="text-gray/70 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

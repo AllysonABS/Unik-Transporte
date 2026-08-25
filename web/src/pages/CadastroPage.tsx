@@ -210,11 +210,11 @@ export default function CadastroPage() {
   if (sucesso) {
     return (
       <div className="min-h-screen bg-matriz flex items-center justify-center px-5">
-        <div className="bg-[#081544] border border-[#0B1E5A] rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
+        <div className="bg-white border border-border shadow-xl shadow-black/5 rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
           <span className="text-5xl mb-6 block">🎉</span>
           <h1 className="text-2xl font-bold text-clareza mb-4">Cadastro realizado!</h1>
-          <p className="text-gray-400 mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Unik Logística.</p>
-          <button onClick={() => navigate('/')} className="w-full bg-pulso text-clareza font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-95 transition-transform">
+          <p className="text-gray mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Unik Logística.</p>
+          <button onClick={() => navigate('/')} className="w-full bg-pulso text-white font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-95 transition-transform">
             Voltar para o início
           </button>
         </div>
@@ -222,7 +222,7 @@ export default function CadastroPage() {
     );
   }
 
-  const inputClass = "w-full h-12 bg-[#081544] border border-[#0B1E5A] rounded-lg px-4 text-clareza focus:border-pulso focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
+  const inputClass = "w-full h-12 bg-secondary/40 border border-border rounded-lg px-4 text-clareza focus:border-pulso focus:bg-white focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
 
   return (
     <div className="min-h-screen bg-matriz py-8 md:py-12 px-5">
@@ -233,25 +233,25 @@ export default function CadastroPage() {
             ← Voltar ao início
           </button>
           <h1 className="text-2xl md:text-3xl font-bold text-clareza mb-2">Criar sua conta</h1>
-          <p className="text-gray-400 text-sm md:text-base">Preencha os dados da sua empresa para começar.</p>
+          <p className="text-gray text-sm md:text-base">Preencha os dados da sua empresa para começar.</p>
         </div>
 
         {/* Indicador de etapas */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {STEPS.map((s, i) => (
             <div key={s.key} className="flex items-center gap-2">
-              <div className={`flex items-center gap-2 ${i <= stepIndex ? 'text-pulso' : 'text-gray-600'}`}>
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i <= stepIndex ? 'bg-pulso text-clareza' : 'bg-[#0B1E5A] text-gray-400'}`}>
+              <div className={`flex items-center gap-2 ${i <= stepIndex ? 'text-pulso' : 'text-gray/60'}`}>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i <= stepIndex ? 'bg-pulso text-white' : 'bg-secondary text-gray'}`}>
                   {i + 1}
                 </span>
                 <span className="text-xs font-semibold hidden sm:inline">{s.label}</span>
               </div>
-              {i < STEPS.length - 1 && <span className="w-6 md:w-10 h-px bg-[#0B1E5A]" />}
+              {i < STEPS.length - 1 && <span className="w-6 md:w-10 h-px bg-border" />}
             </div>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#081544] border border-[#0B1E5A] rounded-2xl p-6 md:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white border border-border shadow-xl shadow-black/5 rounded-2xl p-6 md:p-8 space-y-6">
           {/* Etapa 1: Dados */}
           {etapa === 'dados' && (
             <>
@@ -265,8 +265,8 @@ export default function CadastroPage() {
                     onClick={() => { setDocTipo(tipo); update('doc', ''); }}
                     className={`flex-1 h-10 rounded-lg text-sm font-semibold border transition ${
                       docTipo === tipo
-                        ? 'bg-pulso text-clareza border-pulso'
-                        : 'bg-[#081544] text-gray-400 border-[#0B1E5A]'
+                        ? 'bg-pulso text-white border-pulso'
+                        : 'bg-secondary/40 text-gray border-border'
                     }`}
                   >
                     Tenho {tipo.toUpperCase()}
@@ -275,7 +275,7 @@ export default function CadastroPage() {
               </div>
 
               <div>
-                <label className="text-gray-400 text-xs font-medium block mb-1.5">
+                <label className="text-gray text-xs font-medium block mb-1.5">
                   {docTipo === 'cnpj' ? 'CNPJ *' : 'CPF *'}
                 </label>
                 <div className="relative">
@@ -292,15 +292,15 @@ export default function CadastroPage() {
                   )}
                 </div>
                 {docTipo === 'cnpj' && (
-                  <p className="text-gray-600 text-[11px] mt-1">Preenchemos os dados automaticamente ao sair do campo.</p>
+                  <p className="text-gray/70 text-[11px] mt-1">Preenchemos os dados automaticamente ao sair do campo.</p>
                 )}
                 {docTipo === 'cpf' && (
-                  <p className="text-gray-600 text-[11px] mt-1">Sem CNPJ ainda? Sem problema, cadastre com seu CPF.</p>
+                  <p className="text-gray/70 text-[11px] mt-1">Sem CNPJ ainda? Sem problema, cadastre com seu CPF.</p>
                 )}
               </div>
 
               <div>
-                <label className="text-gray-400 text-xs font-medium block mb-1.5">Nome da empresa *</label>
+                <label className="text-gray text-xs font-medium block mb-1.5">Nome da empresa *</label>
                 <input
                   type="text"
                   value={form.nome_empresa}
@@ -308,12 +308,12 @@ export default function CadastroPage() {
                   maxLength={100}
                   className={inputClass}
                 />
-                <span className="text-gray-600 text-[10px] mt-0.5 block text-right">{form.nome_empresa.length}/100</span>
+                <span className="text-gray/70 text-[10px] mt-0.5 block text-right">{form.nome_empresa.length}/100</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Nome do responsável *</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Nome do responsável *</label>
                   <input
                     type="text"
                     value={form.nome_responsavel}
@@ -323,7 +323,7 @@ export default function CadastroPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Telefone *</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Telefone *</label>
                   <input
                     type="text"
                     value={form.telefone}
@@ -335,7 +335,7 @@ export default function CadastroPage() {
               </div>
 
               <div>
-                <label className="text-gray-400 text-xs font-medium block mb-1.5">E-mail *</label>
+                <label className="text-gray text-xs font-medium block mb-1.5">E-mail *</label>
                 <input
                   type="email"
                   value={form.email}
@@ -353,7 +353,7 @@ export default function CadastroPage() {
               <h2 className="text-pulso font-bold text-xs uppercase tracking-wider">Endereço</h2>
 
               <div>
-                <label className="text-gray-400 text-xs font-medium block mb-1.5">CEP</label>
+                <label className="text-gray text-xs font-medium block mb-1.5">CEP</label>
                 <input
                   type="text"
                   value={form.cep}
@@ -366,7 +366,7 @@ export default function CadastroPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-2">
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Rua / Avenida</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Rua / Avenida</label>
                   <input
                     type="text"
                     value={form.endereco}
@@ -376,7 +376,7 @@ export default function CadastroPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Número</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Número</label>
                   <input
                     type="text"
                     value={form.numero}
@@ -389,7 +389,7 @@ export default function CadastroPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Bairro</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Bairro</label>
                   <input
                     type="text"
                     value={form.bairro}
@@ -399,7 +399,7 @@ export default function CadastroPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Cidade</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Cidade</label>
                   <input
                     type="text"
                     value={form.cidade}
@@ -409,7 +409,7 @@ export default function CadastroPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">UF</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">UF</label>
                   <input
                     type="text"
                     value={form.estado}
@@ -429,7 +429,7 @@ export default function CadastroPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Senha *</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Senha *</label>
                   <input
                     type="password"
                     value={form.senha}
@@ -440,7 +440,7 @@ export default function CadastroPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Confirmar senha *</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Confirmar senha *</label>
                   <input
                     type="password"
                     value={form.confirmar_senha}
@@ -452,20 +452,20 @@ export default function CadastroPage() {
               </div>
 
               <h2 className="text-pulso font-bold text-xs uppercase tracking-wider pt-2">Pagamento</h2>
-              <div className="bg-[#081544] border border-[#0B1E5A] rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-secondary/40 border border-border rounded-xl p-4 flex items-center justify-between">
                 <div>
                   <p className="text-clareza font-semibold text-sm">Plano Mensal</p>
-                  <p className="text-gray-400 text-xs">Acesso completo ao sistema</p>
+                  <p className="text-gray text-xs">Acesso completo ao sistema</p>
                 </div>
                 <p className="text-pulso font-black text-xl">R$89,90</p>
               </div>
 
-              <p className="text-gray-500 text-[11px] -mt-2">
+              <p className="text-gray text-[11px] -mt-2">
                 A cobrança é feita agora, no cartão informado abaixo. Trabalhamos só com cartão de crédito — sem período grátis.
               </p>
 
               <div>
-                <label className="text-gray-400 text-xs font-medium block mb-1.5">Número do cartão *</label>
+                <label className="text-gray text-xs font-medium block mb-1.5">Número do cartão *</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -478,7 +478,7 @@ export default function CadastroPage() {
               </div>
 
               <div>
-                <label className="text-gray-400 text-xs font-medium block mb-1.5">Nome impresso no cartão *</label>
+                <label className="text-gray text-xs font-medium block mb-1.5">Nome impresso no cartão *</label>
                 <input
                   type="text"
                   autoComplete="cc-name"
@@ -492,7 +492,7 @@ export default function CadastroPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">Validade (MM/AAAA) *</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">Validade (MM/AAAA) *</label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -504,7 +504,7 @@ export default function CadastroPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs font-medium block mb-1.5">CVV *</label>
+                  <label className="text-gray text-xs font-medium block mb-1.5">CVV *</label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -521,8 +521,8 @@ export default function CadastroPage() {
 
           {/* Erro */}
           {erro && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-              <p className="text-red-400 text-sm">{erro}</p>
+            <div className="bg-danger/10 border border-danger/30 rounded-lg p-3">
+              <p className="text-danger text-sm">{erro}</p>
             </div>
           )}
 
@@ -532,7 +532,7 @@ export default function CadastroPage() {
               <button
                 type="button"
                 onClick={voltarEtapa}
-                className="h-14 px-6 border border-[#0B1E5A] text-clareza font-bold rounded-xl hover:bg-[#0B1E5A]/30 transition-colors"
+                className="h-14 px-6 border border-border text-clareza font-bold rounded-xl hover:bg-secondary transition-colors"
               >
                 Voltar
               </button>
@@ -542,7 +542,7 @@ export default function CadastroPage() {
                 key="continuar"
                 type="button"
                 onClick={irParaProximaEtapa}
-                className="flex-1 h-14 bg-pulso text-clareza font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform"
+                className="flex-1 h-14 bg-pulso text-white font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform"
               >
                 Continuar
               </button>
@@ -551,7 +551,7 @@ export default function CadastroPage() {
                 key="finalizar"
                 type="submit"
                 disabled={loading}
-                className="flex-1 h-14 bg-pulso text-clareza font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform disabled:opacity-60 disabled:pointer-events-none"
+                className="flex-1 h-14 bg-pulso text-white font-bold text-lg rounded-xl hover:scale-[1.01] active:scale-95 transition-transform disabled:opacity-60 disabled:pointer-events-none"
               >
                 {loading ? 'Cadastrando...' : 'Finalizar cadastro'}
               </button>

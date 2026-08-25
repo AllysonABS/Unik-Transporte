@@ -4,34 +4,35 @@
 
 @layer base {
   :root {
-    /* Escala oficial Unik: bordaProfunda(#02081F) -> principal(#040D30) ->
-       transição(#081544) -> iluminado(#0B1E5A) */
-    --background: 228 85% 10%; /* #040D30 — cor principal */
-    --foreground: 210 40% 96%;
-    --card: 227 79% 15%; /* #081544 — transição */
-    --card-foreground: 210 40% 96%;
-    --popover: 227 79% 15%; /* #081544 — transição */
-    --popover-foreground: 210 40% 96%;
-    --primary: 217 91% 60%;
+    /* Tema claro Unik: fundo branco + verde de marca (#00695A) no lugar do
+       azul. Escala: matriz(#F7FAF9) -> transição(#FFFFFF) ->
+       iluminado(#D7E2DF) -> bordaProfunda(#0B1F1B) — ver tailwind.config.js. */
+    --background: 160 23% 97%; /* #F7FAF9 — matriz */
+    --foreground: 168 48% 8%; /* #0B1F1B — bordaProfunda */
+    --card: 0 0% 100%; /* #FFFFFF — transição */
+    --card-foreground: 168 48% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 168 48% 8%;
+    --primary: 171 100% 21%; /* #00695A — pulso */
     --primary-foreground: 0 0% 100%;
-    --secondary: 227 79% 15%; /* #081544 — transição */
-    --secondary-foreground: 210 40% 96%;
-    --muted: 227 79% 15%; /* #081544 — transição */
-    --muted-foreground: 218 11% 65%;
-    --accent: 226 78% 20%; /* #0B1E5A — iluminado */
-    --accent-foreground: 210 40% 96%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 96%;
-    --border: 226 78% 20%; /* #0B1E5A — iluminado */
-    --input: 226 78% 20%; /* #0B1E5A — iluminado */
-    --ring: 217 91% 60%;
+    --secondary: 160 25% 94%;
+    --secondary-foreground: 171 60% 15%;
+    --muted: 210 16% 95%;
+    --muted-foreground: 215 14% 42%;
+    --accent: 171 45% 93%; /* verde bem claro — hover/seleção */
+    --accent-foreground: 171 100% 18%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 160 15% 88%; /* #D7E2DF — iluminado */
+    --input: 160 15% 88%;
+    --ring: 171 90% 30%;
     --radius: 0.5rem;
   }
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -45,12 +46,12 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #040D30;
+  background: #F7FAF9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #0B1E5A;
+  background: #00695A;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0B1E5A;
+  background: #00564A;
 }

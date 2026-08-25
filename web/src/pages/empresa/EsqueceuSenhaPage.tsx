@@ -109,8 +109,8 @@ export default function EsqueceuSenhaPage() {
   return (
     <div className="min-h-screen bg-matriz flex items-center justify-center px-6 py-10 relative overflow-hidden">
       {/* Blobs decorativos — mesmos do login, pra manter a identidade visual */}
-      <div className="absolute -top-24 -left-24 w-[420px] h-[420px] bg-pulso/25 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-24 -right-24 w-[420px] h-[420px] bg-emerald-400/15 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -top-24 -left-24 w-[420px] h-[420px] bg-pulso/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-[420px] h-[420px] bg-emerald-400/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative w-full max-w-sm flex flex-col gap-6">
         <button
@@ -126,7 +126,7 @@ export default function EsqueceuSenhaPage() {
           <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Logística</h1>
         </div>
 
-        <div className="rounded-2xl bg-white/[0.07] backdrop-blur-2xl border border-white/10 p-7 shadow-2xl shadow-black/40">
+        <div className="rounded-2xl bg-white border border-border p-7 shadow-xl shadow-black/5">
           <h2 className="text-lg font-bold text-clareza mb-1.5">{copy.title}</h2>
           <p className="text-[13px] text-gray leading-relaxed mb-6">{copy.subtitle(emailHint)}</p>
 
@@ -143,14 +143,14 @@ export default function EsqueceuSenhaPage() {
                   placeholder="CPF ou CNPJ"
                   inputMode="numeric"
                   autoComplete="username"
-                  className="h-[50px] w-full rounded-xl border border-white/10 bg-white/5 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso/70 focus:bg-white/[0.07] transition-colors"
+                  className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-white transition-colors"
                 />
               </div>
               {erro && <p className="mb-4 text-sm font-medium text-danger">{erro}</p>}
               <button
                 onClick={enviarCodigo}
                 disabled={loading}
-                className="flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
+                className="flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-white shadow-lg shadow-pulso/30 transition-opacity disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Enviar código'}
               </button>
@@ -170,14 +170,14 @@ export default function EsqueceuSenhaPage() {
                   placeholder="000000"
                   inputMode="numeric"
                   maxLength={6}
-                  className="h-[50px] w-full rounded-xl border border-white/10 bg-white/5 px-4 text-center text-2xl font-bold tracking-[8px] text-clareza placeholder:text-gray outline-none focus:border-pulso/70 focus:bg-white/[0.07] transition-colors"
+                  className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-center text-2xl font-bold tracking-[8px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-white transition-colors"
                 />
               </div>
               {erro && <p className="mb-4 text-sm font-medium text-danger">{erro}</p>}
               <button
                 onClick={verificarCodigo}
                 disabled={loading}
-                className="flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
+                className="flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-white shadow-lg shadow-pulso/30 transition-opacity disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Verificar'}
               </button>
@@ -199,7 +199,7 @@ export default function EsqueceuSenhaPage() {
                 <label htmlFor="novaSenha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
                   Nova senha
                 </label>
-                <div className="flex h-[50px] items-center rounded-xl border border-white/10 bg-white/5 focus-within:border-pulso/70 focus-within:bg-white/[0.07] transition-colors">
+                <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-white transition-colors">
                   <input
                     id="novaSenha"
                     type={showSenha ? 'text' : 'password'}
@@ -223,7 +223,7 @@ export default function EsqueceuSenhaPage() {
                 <label htmlFor="confirmarSenha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
                   Confirmar senha
                 </label>
-                <div className="flex h-[50px] items-center rounded-xl border border-white/10 bg-white/5 focus-within:border-pulso/70 focus-within:bg-white/[0.07] transition-colors">
+                <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-white transition-colors">
                   <input
                     id="confirmarSenha"
                     type={showConfirmar ? 'text' : 'password'}
@@ -250,7 +250,7 @@ export default function EsqueceuSenhaPage() {
               <button
                 onClick={handleRedefinir}
                 disabled={loading}
-                className="mt-4 flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-clareza shadow-lg shadow-pulso/40 transition-opacity disabled:opacity-70"
+                className="mt-4 flex h-[52px] w-full items-center justify-center rounded-xl bg-pulso font-bold text-white shadow-lg shadow-pulso/30 transition-opacity disabled:opacity-70"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Redefinir senha'}
               </button>
@@ -263,7 +263,7 @@ export default function EsqueceuSenhaPage() {
             <span
               key={s}
               className={cn(
-                'h-1.5 rounded-full bg-white/15 transition-all',
+                'h-1.5 rounded-full bg-border transition-all',
                 i === stepIndex ? 'w-6 bg-pulso' : i < stepIndex ? 'w-1.5 bg-pulso' : 'w-1.5',
               )}
             />

@@ -5,27 +5,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        matriz: '#040D30', // cor principal
-        transicao: '#081544', // superfícies elevadas (cards, inputs)
-        iluminado: '#0B1E5A', // azul marinho iluminado — bordas/destaques
-        bordaProfunda: '#02081F', // quase preto — bordas mais profundas
-        pulso: '#3B82F6',
-        clareza: '#F1F5F9',
-        gray: '#9CA3AF',
+        // Escala de marca Unik (tema claro): matriz(#F7FAF9) -> transição
+        // (#FFFFFF) -> iluminado(#D7E2DF) -> bordaProfunda(#0B1F1B). Nomes
+        // mantidos por compatibilidade (usados em dezenas de arquivos) —
+        // era escala escura, agora é clara, mas o PAPEL de cada um
+        // (fundo de página, superfície elevada, borda/destaque, contraste
+        // máximo) é o mesmo de antes.
+        matriz: '#F7FAF9', // fundo de página
+        transicao: '#FFFFFF', // superfícies elevadas (cards, inputs)
+        iluminado: '#D7E2DF', // bordas/destaques claros
+        bordaProfunda: '#0B1F1B', // quase preto — contraste máximo
+        pulso: '#00695A', // verde de marca — antes era o azul de destaque
+        clareza: '#0B1F1B', // texto principal (era texto claro p/ fundo escuro; agora é o inverso)
+        gray: '#5B6B67', // texto secundário — escurecido em relação ao tema escuro pra manter contraste em fundo branco
         grayLight: '#F5F5F5',
         grayBorder: '#E5E7EB',
-        danger: '#EF4444',
-        success: '#34D399',
-        warning: '#F59E0B',
-        info: '#67E8F9',
-        purple: '#A78BFA',
-        indigo: '#818CF8',
+        danger: '#DC2626',
+        success: '#059669',
+        warning: '#B45309',
+        info: '#0E7490',
+        purple: '#7C3AED',
+        indigo: '#4F46E5',
         status: {
-          aguardandoBg: '#451A03',
-          emTransitoBg: '#052E16',
-          entregueBg: '#14532D',
-          canceladoBg: '#7F1D1D',
-          cancelado: '#FCA5A5',
+          aguardandoBg: '#FEF3C7',
+          emTransitoBg: '#DBEAFE',
+          entregueBg: '#D1FAE5',
+          canceladoBg: '#FEE2E2',
+          cancelado: '#B91C1C',
         },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

@@ -11,12 +11,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-matriz text-clareza overflow-x-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-white/5">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-matriz/70 backdrop-blur-xl border-b border-border">
         <div className="flex items-center justify-between px-5 md:px-16 py-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <img src="/Logo.png" alt="Unik Logística" className="w-10 h-10 rounded-xl shadow-lg shadow-pulso/20" />
             <span className="text-xl font-bold tracking-tight">
-              Unik <span className="text-gray-400">Logística</span>
+              Unik <span className="text-gray">Logística</span>
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -28,7 +28,7 @@ export default function LandingPage() {
             </button>
             <button
               onClick={() => navigate('/cadastro')}
-              className="bg-[linear-gradient(135deg,#3B82F6,#0B1E5A)] text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-[0_0_40px_rgba(59,130,246,0.5),0_4px_20px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-100 transition-all duration-300"
+              className="bg-[linear-gradient(135deg,#00897B,#00695A)] text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-[0_0_40px_rgba(0,105,90,0.35),0_4px_20px_rgba(0,0,0,0.12)] hover:scale-105 active:scale-100 transition-all duration-300"
             >
               Criar conta
             </button>
@@ -51,7 +51,7 @@ export default function LandingPage() {
             <br />cada entrega.
           </h1>
 
-          <p className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-gray mb-10 max-w-2xl mx-auto leading-relaxed">
             O Unik Logística centraliza todo o processo, aciona o entregador certo e <strong className="text-clareza font-semibold">confirma cada entrega com foto</strong>, tudo em tempo real.
             Chega de pedir comprovante de entrega e torcer pra ninguém esquecer de mandar.
           </p>
@@ -59,7 +59,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
             <button
               onClick={() => navigate('/cadastro')}
-              className="w-full sm:w-auto bg-[linear-gradient(135deg,#3B82F6,#0B1E5A)] text-white font-bold text-base px-10 py-4 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.5),0_4px_20px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-100 transition-all duration-300"
+              className="w-full sm:w-auto bg-[linear-gradient(135deg,#00897B,#00695A)] text-white font-bold text-base px-10 py-4 rounded-xl shadow-[0_0_40px_rgba(0,105,90,0.35),0_4px_20px_rgba(0,0,0,0.12)] hover:scale-105 active:scale-100 transition-all duration-300"
             >
               Criar minha conta →
             </button>
@@ -69,7 +69,7 @@ export default function LandingPage() {
 
       {/* Como funciona */}
       <section className="px-5 md:px-16 py-20 md:py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#081544] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/60 to-transparent pointer-events-none" />
         <div className="relative max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Como funciona</span>
@@ -84,10 +84,10 @@ export default function LandingPage() {
               { n: '2', title: 'Coleta e conferência', desc: 'O entregador recebe a notificação no app, confere os itens no local e aceita a corrida.' },
               { n: '3', title: 'Entrega com comprovante', desc: 'O pedido é entregue na excursão e o cliente recebe a confirmação com o comprovante no WhatsApp.' },
             ].map(step => (
-              <div key={step.n} className="relative bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6">
+              <div key={step.n} className="relative bg-white border border-border shadow-sm rounded-2xl p-6">
                 <span className="text-4xl font-black text-pulso/25">{step.n}</span>
                 <h3 className="text-base font-bold mt-3 mb-2">{step.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{step.desc}</p>
+                <p className="text-gray text-sm leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -110,10 +110,10 @@ export default function LandingPage() {
                 'Cliente errado, excursão errada e a culpa sempre cai na loja.',
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <span className="mt-1 w-5 h-5 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center flex-shrink-0">
-                    <span className="text-red-400 text-[11px]">✕</span>
+                  <span className="mt-1 w-5 h-5 rounded-full bg-danger/10 border border-danger/30 flex items-center justify-center flex-shrink-0">
+                    <span className="text-danger text-[11px]">✕</span>
                   </span>
-                  <p className="text-gray-300 text-sm md:text-base">{item}</p>
+                  <p className="text-gray text-sm md:text-base">{item}</p>
                 </div>
               ))}
             </div>
@@ -141,7 +141,7 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="px-5 md:px-16 py-20 md:py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#081544] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/60 to-transparent pointer-events-none" />
         <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-14 md:mb-16">
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Funcionalidades</span>
@@ -159,12 +159,12 @@ export default function LandingPage() {
               { icon: '💬', title: 'Aviso automático no WhatsApp', desc: 'O cliente recebe a confirmação de entrega direto no WhatsApp.' },
               { icon: '📊', title: 'Relatórios', desc: 'Taxa de entrega, tempo médio e ranking de entregador.' },
             ].map(f => (
-              <div key={f.title} className="group relative bg-white/[0.03] border border-white/[0.06] rounded-2xl p-7 hover:bg-white/[0.06] hover:border-pulso/20 transition-all duration-300">
+              <div key={f.title} className="group relative bg-white border border-border shadow-sm rounded-2xl p-7 hover:shadow-md hover:border-pulso/30 transition-all duration-300">
                 <div className="w-12 h-12 bg-gradient-to-br from-pulso/20 to-pulso/5 border border-pulso/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
                   <span className="text-2xl">{f.icon}</span>
                 </div>
                 <h3 className="text-base font-bold mb-2">{f.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+                <p className="text-gray text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -173,13 +173,13 @@ export default function LandingPage() {
 
       {/* Entregador autônomo — diferencial */}
       <section className="px-5 md:px-16 py-20 md:py-24">
-        <div className="max-w-5xl mx-auto bg-white/[0.03] border border-white/[0.06] rounded-[28px] p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center">
+        <div className="max-w-5xl mx-auto bg-white border border-border shadow-sm rounded-[28px] p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Sem contratar ninguém</span>
             <h2 className="text-2xl md:text-3xl font-bold mt-3 mb-4 tracking-tight leading-tight">
               Seus entregadores já podem estar no app
             </h2>
-            <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-5">
+            <p className="text-gray text-sm md:text-base leading-relaxed mb-5">
               O entregador cria a própria conta no app de graça, sozinho, quando quiser. Você não cadastra senha
               de ninguém: só busca o CPF que ele te passou e vincula à sua loja. Um mesmo entregador pode atender
               várias lojas ao mesmo tempo.
@@ -198,9 +198,9 @@ export default function LandingPage() {
               { n: '03', label: 'Você busca o CPF no painel e vincula' },
               { n: '04', label: 'Pronto ele já vê os pedidos da sua loja na fila dele' },
             ].map(s => (
-              <div key={s.n} className="flex items-center gap-4 bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-3.5">
+              <div key={s.n} className="flex items-center gap-4 bg-white border border-border shadow-sm rounded-xl px-5 py-3.5">
                 <span className="text-pulso font-black text-sm">{s.n}</span>
-                <span className="text-gray-300 text-sm">{s.label}</span>
+                <span className="text-gray text-sm">{s.label}</span>
               </div>
             ))}
           </div>
@@ -213,24 +213,24 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Preço</span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 tracking-tight">Simples e transparente</h2>
-            <p className="text-gray-400 mt-4 text-sm md:text-base">Um preço fixo por loja. Nunca cobramos por entregador vinculado.</p>
+            <p className="text-gray mt-4 text-sm md:text-base">Um preço fixo por loja. Nunca cobramos por entregador vinculado.</p>
           </div>
 
           <div className="max-w-sm mx-auto relative">
             <div className="absolute inset-0 bg-pulso/10 rounded-[32px] blur-2xl scale-95 pointer-events-none" />
 
-            <div className="relative bg-white/[0.04] border border-pulso/20 rounded-[28px] p-8 md:p-10 backdrop-blur-sm">
+            <div className="relative bg-white border border-pulso/25 shadow-xl shadow-black/5 rounded-[28px] p-8 md:p-10">
               <div className="flex items-center justify-between mb-8">
                 <span className="bg-pulso/10 text-pulso text-xs font-bold px-3 py-1.5 rounded-full border border-pulso/20">Plano Único</span>
-                <span className="text-gray-500 text-xs">por loja</span>
+                <span className="text-gray/80 text-xs">por loja</span>
               </div>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-sm text-gray-400">R$</span>
-                  <span className="text-5xl md:text-6xl font-black bg-gradient-to-b from-white to-gray-300 bg-clip-text text-transparent">89</span>
-                  <span className="text-2xl font-bold text-gray-300">,90</span>
-                  <span className="text-gray-500 text-sm ml-1">/mês</span>
+                  <span className="text-sm text-gray">R$</span>
+                  <span className="text-5xl md:text-6xl font-black text-clareza">89</span>
+                  <span className="text-2xl font-bold text-gray">,90</span>
+                  <span className="text-gray/80 text-sm ml-1">/mês</span>
                 </div>
               </div>
 
@@ -249,18 +249,18 @@ export default function LandingPage() {
                     <div className="w-5 h-5 rounded-full bg-pulso/10 border border-pulso/30 flex items-center justify-center flex-shrink-0">
                       <span className="text-pulso text-[10px]">✓</span>
                     </div>
-                    <span className="text-gray-300 text-sm">{item}</span>
+                    <span className="text-gray text-sm">{item}</span>
                   </div>
                 ))}
               </div>
 
               <button
                 onClick={() => navigate('/cadastro')}
-                className="w-full bg-[linear-gradient(135deg,#3B82F6,#0B1E5A)] text-white font-bold text-base py-4 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.5),0_4px_20px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-100 transition-all duration-300"
+                className="w-full bg-[linear-gradient(135deg,#00897B,#00695A)] text-white font-bold text-base py-4 rounded-xl shadow-[0_0_40px_rgba(0,105,90,0.35),0_4px_20px_rgba(0,0,0,0.12)] hover:scale-105 active:scale-100 transition-all duration-300"
               >
                 Começar agora
               </button>
-              <p className="text-center text-gray-500 text-xs mt-4">Pague no cartão. Cancele quando quiser, sem multa.</p>
+              <p className="text-center text-gray/80 text-xs mt-4">Pague no cartão. Cancele quando quiser, sem multa.</p>
             </div>
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function LandingPage() {
             ].map((faq, i) => {
               const aberta = faqAberta === i;
               return (
-                <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl overflow-hidden">
+                <div key={i} className="bg-white border border-border shadow-sm rounded-2xl overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setFaqAberta(aberta ? null : i)}
@@ -312,14 +312,14 @@ export default function LandingPage() {
                   >
                     <span className="text-clareza font-semibold text-sm md:text-base">{faq.q}</span>
                     <ChevronDown
-                      className={`h-5 w-5 text-gray-500 shrink-0 transition-transform duration-300 ${aberta ? 'rotate-180' : ''}`}
+                      className={`h-5 w-5 text-gray/80 shrink-0 transition-transform duration-300 ${aberta ? 'rotate-180' : ''}`}
                     />
                   </button>
                   <div
                     className={`grid transition-all duration-300 ease-in-out ${aberta ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
                   >
                     <div className="overflow-hidden">
-                      <p className="text-gray-400 text-sm leading-relaxed px-6 pb-6">{faq.a}</p>
+                      <p className="text-gray text-sm leading-relaxed px-6 pb-6">{faq.a}</p>
                     </div>
                   </div>
                 </div>
@@ -330,14 +330,14 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="px-5 md:px-16 py-8 border-t border-white/5">
+      <footer className="px-5 md:px-16 py-8 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-600 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
+          <p className="text-gray/70 text-sm">© {new Date().getFullYear()} Unik Tecnologia. Todos os direitos reservados.</p>
           <div className="flex items-center gap-6">
-            <a href={`mailto:${CONTATO_EMAIL}`} className="text-gray-500 text-sm hover:text-pulso transition">Fale conosco</a>
-            <button onClick={() => navigate('/privacidade')} className="text-gray-500 text-sm hover:text-pulso transition">Privacidade</button>
-            <button onClick={() => navigate('/termos')} className="text-gray-500 text-sm hover:text-pulso transition">Termos de Uso</button>
-            <button onClick={() => navigate('/exclusao-de-dados')} className="text-gray-500 text-sm hover:text-pulso transition">Exclusão de Dados</button>
+            <a href={`mailto:${CONTATO_EMAIL}`} className="text-gray/80 text-sm hover:text-pulso transition">Fale conosco</a>
+            <button onClick={() => navigate('/privacidade')} className="text-gray/80 text-sm hover:text-pulso transition">Privacidade</button>
+            <button onClick={() => navigate('/termos')} className="text-gray/80 text-sm hover:text-pulso transition">Termos de Uso</button>
+            <button onClick={() => navigate('/exclusao-de-dados')} className="text-gray/80 text-sm hover:text-pulso transition">Exclusão de Dados</button>
           </div>
         </div>
       </footer>
