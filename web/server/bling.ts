@@ -314,7 +314,21 @@ const MAX_PAGINAS = 50; // teto de segurança (5000 pedidos) pra uma importaçã
 export async function listarLojas(pool: Pool, empresaId: string): Promise<{ id: number; nome: string }[]> {
   const accessToken = await obterTokenValido(pool, empresaId);
   if (!accessToken) throw new Error('Empresa sem integração Bling ativa.');
-  const resp = await blingFetch(accessToken, '/canais-venda');
+  let resp: any;
+  try {
+    resp = await blingFetch(accessToken, '/canais-venda');
+  } catch (err: any) {
+    // O app Bling precisa ter o escopo "Canais de Venda" (às vezes chamado
+    // de "Lojas") habilitado em developer.bling.com.br — e, como habilitar
+    // um escopo novo não atualiza tokens já emitidos, cada empresa
+    // conectada antes disso precisa desconectar e reconectar o Bling pra
+    // pegar um token com esse escopo. Confirmado em produção em 25/08/2026:
+    // sem o escopo, /canais-venda responde 403 insufficient_scope.
+    if (err.message?.includes('403') && err.message?.includes('insufficient_scope')) {
+      throw new Error('O app Bling conectado não tem permissão pra ver os canais de venda (lojas). Habilite o escopo "Canais de Venda" no app em developer.bling.com.br e reconecte o Bling (Desconectar → Conectar de novo) pra gerar um token com essa permissão.');
+    }
+    throw err;
+  }
   const lojas: any[] = resp.data || [];
   if (lojas.length === 0) console.error('[BLING] /canais-venda não retornou nenhuma loja — payload:', JSON.stringify(resp).slice(0, 500));
   return lojas.map(l => ({ id: Number(l.id), nome: l.descricao || l.nome || `Loja #${l.id}` }));
