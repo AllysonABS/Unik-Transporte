@@ -28,6 +28,16 @@
     --ring: 171 90% 30%;
     --radius: 0.5rem;
   }
+
+  /* O preflight do Tailwind zera border-color pra currentColor — sem isso,
+     todo `border`/`border-b` sem cor própria (ex.: linha entre linhas de
+     tabela) herda a cor do TEXTO em vez do cinza suave de --border. No tema
+     escuro antigo passava batido (texto claro = linha clara, discreta); no
+     tema claro isso vira uma linha escura e pesada em cada linha de tabela —
+     por isso toda tabela do app precisa dessa regra. */
+  * {
+    @apply border-border;
+  }
 }
 
 html {
