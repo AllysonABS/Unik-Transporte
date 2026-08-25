@@ -66,7 +66,7 @@ export default function LoginPage() {
           <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Logística</h1>
         </div>
 
-        <div className="rounded-2xl bg-white border border-border p-7 shadow-xl shadow-black/5">
+        <div className="rounded-2xl bg-card border border-border p-7 shadow-xl shadow-black/5">
           <h2 className="text-lg font-bold text-clareza mb-6">Entrar na sua conta</h2>
 
           <form onSubmit={handleSubmit}>
@@ -81,7 +81,7 @@ export default function LoginPage() {
                 placeholder="CPF ou CNPJ"
                 inputMode="numeric"
                 autoComplete="username"
-                className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-white transition-colors"
+                className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-card transition-colors"
               />
             </div>
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
               <label htmlFor="senha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
                 Senha
               </label>
-              <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-white transition-colors">
+              <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-card transition-colors">
                 <input
                   id="senha"
                   type={showPassword ? 'text' : 'password'}

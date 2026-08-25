@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    /* Tema claro Unik: fundo branco + verde de marca (#00695A) no lugar do
-       azul. Escala: matriz(#F7FAF9) -> transição(#FFFFFF) ->
+    /* Tema claro Unik: branco gelo + verde de marca (#00695A) no lugar do
+       azul. Escala: matriz(#F0F5F3) -> transição(#F8FBFA) ->
        iluminado(#D7E2DF) -> bordaProfunda(#0B1F1B) — ver tailwind.config.js. */
-    --background: 160 23% 97%; /* #F7FAF9 — matriz */
+    --background: 156 20% 95%; /* #F0F5F3 — matriz */
     --foreground: 168 48% 8%; /* #0B1F1B — bordaProfunda */
-    --card: 0 0% 100%; /* #FFFFFF — transição */
+    --card: 160 27% 98%; /* #F8FBFA — transição, branco gelo */
     --card-foreground: 168 48% 8%;
-    --popover: 0 0% 100%;
+    --popover: 160 27% 98%;
     --popover-foreground: 168 48% 8%;
     --primary: 171 100% 21%; /* #00695A — pulso */
     --primary-foreground: 0 0% 100%;
@@ -46,7 +46,7 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F7FAF9;
+  background: #F0F5F3;
 }
 ::-webkit-scrollbar-thumb {
   background: #00695A;

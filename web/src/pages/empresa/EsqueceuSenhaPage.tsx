@@ -126,7 +126,7 @@ export default function EsqueceuSenhaPage() {
           <h1 className="text-[28px] font-bold text-clareza tracking-tight">Unik Logística</h1>
         </div>
 
-        <div className="rounded-2xl bg-white border border-border p-7 shadow-xl shadow-black/5">
+        <div className="rounded-2xl bg-card border border-border p-7 shadow-xl shadow-black/5">
           <h2 className="text-lg font-bold text-clareza mb-1.5">{copy.title}</h2>
           <p className="text-[13px] text-gray leading-relaxed mb-6">{copy.subtitle(emailHint)}</p>
 
@@ -143,7 +143,7 @@ export default function EsqueceuSenhaPage() {
                   placeholder="CPF ou CNPJ"
                   inputMode="numeric"
                   autoComplete="username"
-                  className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-white transition-colors"
+                  className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-[15px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-card transition-colors"
                 />
               </div>
               {erro && <p className="mb-4 text-sm font-medium text-danger">{erro}</p>}
@@ -170,7 +170,7 @@ export default function EsqueceuSenhaPage() {
                   placeholder="000000"
                   inputMode="numeric"
                   maxLength={6}
-                  className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-center text-2xl font-bold tracking-[8px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-white transition-colors"
+                  className="h-[50px] w-full rounded-xl border border-border bg-secondary/40 px-4 text-center text-2xl font-bold tracking-[8px] text-clareza placeholder:text-gray outline-none focus:border-pulso focus:bg-card transition-colors"
                 />
               </div>
               {erro && <p className="mb-4 text-sm font-medium text-danger">{erro}</p>}
@@ -199,7 +199,7 @@ export default function EsqueceuSenhaPage() {
                 <label htmlFor="novaSenha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
                   Nova senha
                 </label>
-                <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-white transition-colors">
+                <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-card transition-colors">
                   <input
                     id="novaSenha"
                     type={showSenha ? 'text' : 'password'}
@@ -223,7 +223,7 @@ export default function EsqueceuSenhaPage() {
                 <label htmlFor="confirmarSenha" className="block text-xs font-semibold text-clareza/80 mb-1.5">
                   Confirmar senha
                 </label>
-                <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-white transition-colors">
+                <div className="flex h-[50px] items-center rounded-xl border border-border bg-secondary/40 focus-within:border-pulso focus-within:bg-card transition-colors">
                   <input
                     id="confirmarSenha"
                     type={showConfirmar ? 'text' : 'password'}

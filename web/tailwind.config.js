@@ -11,8 +11,8 @@ export default {
         // era escala escura, agora é clara, mas o PAPEL de cada um
         // (fundo de página, superfície elevada, borda/destaque, contraste
         // máximo) é o mesmo de antes.
-        matriz: '#F7FAF9', // fundo de página
-        transicao: '#FFFFFF', // superfícies elevadas (cards, inputs)
+        matriz: '#F0F5F3', // fundo de página
+        transicao: '#F8FBFA', // superfícies elevadas (cards, inputs) — branco gelo, não branco puro
         iluminado: '#D7E2DF', // bordas/destaques claros
         bordaProfunda: '#0B1F1B', // quase preto — contraste máximo
         pulso: '#00695A', // verde de marca — antes era o azul de destaque

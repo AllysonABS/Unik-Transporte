@@ -79,7 +79,7 @@ export default function DashboardLayout() {
       <div className="h-screen bg-matriz flex overflow-hidden">
         <aside
           className={cn(
-            'relative shrink-0 border-r border-border bg-card flex flex-col transition-[width] duration-300 ease-in-out',
+            'relative shrink-0 bg-pulso flex flex-col transition-[width] duration-300 ease-in-out',
             collapsed ? 'w-[76px]' : 'w-64',
           )}
         >
@@ -91,12 +91,12 @@ export default function DashboardLayout() {
             <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform', collapsed && 'rotate-180')} />
           </button>
 
-          <div className={cn('flex items-center gap-3 px-5 h-14 shrink-0 border-b border-border', collapsed && 'justify-center px-0')}>
+          <div className={cn('flex items-center gap-3 px-5 h-14 shrink-0 border-b border-white/15', collapsed && 'justify-center px-0')}>
             <LogoMark size="sm" />
             {!collapsed && (
               <div className="overflow-hidden">
-                <p className="text-clareza font-bold leading-tight truncate">Unik Logística</p>
-                <p className="text-xs text-gray truncate">{empresa?.nome_empresa}</p>
+                <p className="text-white font-bold leading-tight truncate">Unik Logística</p>
+                <p className="text-xs text-white/70 truncate">{empresa?.nome_empresa}</p>
               </div>
             )}
           </div>
@@ -110,11 +110,11 @@ export default function DashboardLayout() {
                   className={cn(
                     'relative flex items-center gap-3 rounded-md py-2.5 text-sm font-medium transition-colors',
                     collapsed ? 'justify-center px-0' : 'justify-between px-3',
-                    isActive ? 'bg-pulso/10 text-clareza' : 'text-clareza/70 hover:bg-accent hover:text-clareza',
+                    isActive ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white',
                   )}
                 >
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-pulso" />
+                    <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-white" />
                   )}
                   <span className={cn('flex items-center gap-3', collapsed && 'relative')}>
                     <item.icon className="h-4 w-4 shrink-0" />
@@ -145,8 +145,8 @@ export default function DashboardLayout() {
                     className={cn(
                       'flex w-full items-center justify-center rounded-md py-2.5 transition-colors',
                       location.pathname === '/empresa/configuracoes'
-                        ? 'bg-pulso/10 text-clareza'
-                        : 'text-clareza/70 hover:bg-accent hover:text-clareza',
+                        ? 'bg-white/15 text-white'
+                        : 'text-white/70 hover:bg-white/10 hover:text-white',
                     )}
                   >
                     <Settings className="h-4 w-4" />
@@ -162,8 +162,8 @@ export default function DashboardLayout() {
                 className={cn(
                   'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
                   location.pathname === '/empresa/configuracoes'
-                    ? 'bg-pulso/10 text-clareza'
-                    : 'text-clareza/70 hover:bg-accent hover:text-clareza',
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white',
                 )}
               >
                 <Settings className="h-4 w-4" />
@@ -172,14 +172,14 @@ export default function DashboardLayout() {
             )}
           </div>
 
-          <div className="px-3 py-4 border-t border-border">
+          <div className="px-3 py-4 border-t border-white/15">
             {collapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     onClick={handleLogout}
                     aria-label="Sair"
-                    className="flex w-full items-center justify-center rounded-md py-2.5 text-danger hover:bg-destructive/10 transition-colors"
+                    className="flex w-full items-center justify-center rounded-md py-2.5 text-white/85 hover:bg-white/10 hover:text-white transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                   </button>
@@ -191,7 +191,7 @@ export default function DashboardLayout() {
             ) : (
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-danger hover:bg-destructive/10 transition-colors"
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-colors"
               >
                 <LogOut className="h-4 w-4" />
                 Sair

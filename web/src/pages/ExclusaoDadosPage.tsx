@@ -73,7 +73,7 @@ export default function ExclusaoDadosPage() {
   if (sucesso) {
     return (
       <div className="min-h-screen bg-matriz flex items-center justify-center px-5">
-        <div className="bg-white border border-border rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
+        <div className="bg-card border border-border rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
           <span className="text-5xl mb-6 block">✅</span>
           <h1 className="text-2xl font-bold text-clareza mb-4">Solicitação enviada</h1>
           <p className="text-gray mb-4 text-sm">
@@ -90,7 +90,7 @@ export default function ExclusaoDadosPage() {
     );
   }
 
-  const inputClass = "w-full h-12 bg-secondary/40 border border-border rounded-lg px-4 text-clareza focus:border-pulso focus:bg-white focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
+  const inputClass = "w-full h-12 bg-secondary/40 border border-border rounded-lg px-4 text-clareza focus:border-pulso focus:bg-card focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
 
   return (
     <div className="min-h-screen bg-matriz text-clareza">
@@ -109,7 +109,7 @@ export default function ExclusaoDadosPage() {
           Preencha o formulário abaixo para solicitar a exclusão completa dos seus dados pessoais da plataforma Unik Logística.
         </p>
 
-        <div className="bg-white border border-border rounded-2xl p-6 md:p-8 mb-8">
+        <div className="bg-card border border-border rounded-2xl p-6 md:p-8 mb-8">
           <h2 className="text-pulso font-bold text-xs uppercase tracking-wider mb-4">⚠️ Informações Importantes</h2>
           <ul className="text-gray text-sm space-y-3">
             <li>• A exclusão é <strong className="text-clareza">irreversível</strong>. Todos os seus dados serão permanentemente removidos.</li>
@@ -120,7 +120,7 @@ export default function ExclusaoDadosPage() {
           </ul>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white border border-border rounded-2xl p-6 md:p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 md:p-8 space-y-5">
           <h2 className="text-pulso font-bold text-xs uppercase tracking-wider">Dados para Identificação</h2>
 
           <div>

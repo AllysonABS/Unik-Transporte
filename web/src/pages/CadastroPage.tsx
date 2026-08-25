@@ -210,7 +210,7 @@ export default function CadastroPage() {
   if (sucesso) {
     return (
       <div className="min-h-screen bg-matriz flex items-center justify-center px-5">
-        <div className="bg-white border border-border shadow-xl shadow-black/5 rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
+        <div className="bg-card border border-border shadow-xl shadow-black/5 rounded-3xl p-10 md:p-12 text-center max-w-md w-full">
           <span className="text-5xl mb-6 block">🎉</span>
           <h1 className="text-2xl font-bold text-clareza mb-4">Cadastro realizado!</h1>
           <p className="text-gray mb-8 text-sm md:text-base">Sua conta foi criada com sucesso. Use seu e-mail e senha para acessar o aplicativo Unik Logística.</p>
@@ -222,7 +222,7 @@ export default function CadastroPage() {
     );
   }
 
-  const inputClass = "w-full h-12 bg-secondary/40 border border-border rounded-lg px-4 text-clareza focus:border-pulso focus:bg-white focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
+  const inputClass = "w-full h-12 bg-secondary/40 border border-border rounded-lg px-4 text-clareza focus:border-pulso focus:bg-card focus:ring-1 focus:ring-pulso/30 outline-none transition text-sm";
 
   return (
     <div className="min-h-screen bg-matriz py-8 md:py-12 px-5">
@@ -251,7 +251,7 @@ export default function CadastroPage() {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white border border-border shadow-xl shadow-black/5 rounded-2xl p-6 md:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-card border border-border shadow-xl shadow-black/5 rounded-2xl p-6 md:p-8 space-y-6">
           {/* Etapa 1: Dados */}
           {etapa === 'dados' && (
             <>

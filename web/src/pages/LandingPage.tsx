@@ -84,7 +84,7 @@ export default function LandingPage() {
               { n: '2', title: 'Coleta e conferência', desc: 'O entregador recebe a notificação no app, confere os itens no local e aceita a corrida.' },
               { n: '3', title: 'Entrega com comprovante', desc: 'O pedido é entregue na excursão e o cliente recebe a confirmação com o comprovante no WhatsApp.' },
             ].map(step => (
-              <div key={step.n} className="relative bg-white border border-border shadow-sm rounded-2xl p-6">
+              <div key={step.n} className="relative bg-card border border-border shadow-sm rounded-2xl p-6">
                 <span className="text-4xl font-black text-pulso/25">{step.n}</span>
                 <h3 className="text-base font-bold mt-3 mb-2">{step.title}</h3>
                 <p className="text-gray text-sm leading-relaxed">{step.desc}</p>
@@ -159,7 +159,7 @@ export default function LandingPage() {
               { icon: '💬', title: 'Aviso automático no WhatsApp', desc: 'O cliente recebe a confirmação de entrega direto no WhatsApp.' },
               { icon: '📊', title: 'Relatórios', desc: 'Taxa de entrega, tempo médio e ranking de entregador.' },
             ].map(f => (
-              <div key={f.title} className="group relative bg-white border border-border shadow-sm rounded-2xl p-7 hover:shadow-md hover:border-pulso/30 transition-all duration-300">
+              <div key={f.title} className="group relative bg-card border border-border shadow-sm rounded-2xl p-7 hover:shadow-md hover:border-pulso/30 transition-all duration-300">
                 <div className="w-12 h-12 bg-gradient-to-br from-pulso/20 to-pulso/5 border border-pulso/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
                   <span className="text-2xl">{f.icon}</span>
                 </div>
@@ -173,7 +173,7 @@ export default function LandingPage() {
 
       {/* Entregador autônomo — diferencial */}
       <section className="px-5 md:px-16 py-20 md:py-24">
-        <div className="max-w-5xl mx-auto bg-white border border-border shadow-sm rounded-[28px] p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center">
+        <div className="max-w-5xl mx-auto bg-card border border-border shadow-sm rounded-[28px] p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <span className="text-pulso text-xs font-bold uppercase tracking-widest">Sem contratar ninguém</span>
             <h2 className="text-2xl md:text-3xl font-bold mt-3 mb-4 tracking-tight leading-tight">
@@ -198,7 +198,7 @@ export default function LandingPage() {
               { n: '03', label: 'Você busca o CPF no painel e vincula' },
               { n: '04', label: 'Pronto ele já vê os pedidos da sua loja na fila dele' },
             ].map(s => (
-              <div key={s.n} className="flex items-center gap-4 bg-white border border-border shadow-sm rounded-xl px-5 py-3.5">
+              <div key={s.n} className="flex items-center gap-4 bg-card border border-border shadow-sm rounded-xl px-5 py-3.5">
                 <span className="text-pulso font-black text-sm">{s.n}</span>
                 <span className="text-gray text-sm">{s.label}</span>
               </div>
@@ -219,7 +219,7 @@ export default function LandingPage() {
           <div className="max-w-sm mx-auto relative">
             <div className="absolute inset-0 bg-pulso/10 rounded-[32px] blur-2xl scale-95 pointer-events-none" />
 
-            <div className="relative bg-white border border-pulso/25 shadow-xl shadow-black/5 rounded-[28px] p-8 md:p-10">
+            <div className="relative bg-card border border-pulso/25 shadow-xl shadow-black/5 rounded-[28px] p-8 md:p-10">
               <div className="flex items-center justify-between mb-8">
                 <span className="bg-pulso/10 text-pulso text-xs font-bold px-3 py-1.5 rounded-full border border-pulso/20">Plano Único</span>
                 <span className="text-gray/80 text-xs">por loja</span>
@@ -303,7 +303,7 @@ export default function LandingPage() {
             ].map((faq, i) => {
               const aberta = faqAberta === i;
               return (
-                <div key={i} className="bg-white border border-border shadow-sm rounded-2xl overflow-hidden">
+                <div key={i} className="bg-card border border-border shadow-sm rounded-2xl overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setFaqAberta(aberta ? null : i)}
